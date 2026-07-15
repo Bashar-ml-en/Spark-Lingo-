@@ -1,0 +1,33 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 1. Core Users collection rules
+    match /users/{userId} {
+      // Allow creation only if the user is authenticated, sets isPremium to false,
+      // and sets the signup checkpoint to the current server timestamp.
+      allow create: if request.auth != null 
+        && request.auth.uid == userId
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.isPremium == false;
+      
+      // Allow updates only if the user owns the profile and does NOT change the createdAt checkpoint.
+      allow update: if request.auth != null 
+        && request.auth.uid == userId
+        && request.resource.data.createdAt == resource.data.createdAt;
+      
+      // Users can only read their own user profiles.
+      allow read: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // 2. Syllabus and vocabulary collections are public read-only (syllabus updates happen server-side)
+    match /syllabus/{document=**} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+
+    match /vocabulary/{document=**} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+  }
+}
