@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 import 'core/theme/theme.dart';
 import 'core/router/router.dart';
 import 'core/constants/supabase_config.dart';
@@ -22,11 +23,11 @@ void main() async {
 
   // 3. Initialize Firebase (Mobile Operations & Analytics)
   try {
-    // Note: Once you run 'flutterfire configure', the options will load.
-    // We wrap this in a safe try-catch so it compiles and runs immediately.
-    await Firebase.initializeApp();
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
   } catch (e) {
-    debugPrint("Firebase initialization info (running local mock): $e");
+    debugPrint("Firebase initialization error: $e");
   }
 
   // 4. Launch App inside Riverpod's ProviderScope
