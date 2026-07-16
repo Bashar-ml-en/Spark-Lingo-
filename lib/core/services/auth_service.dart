@@ -26,7 +26,9 @@ class AuthNotifier extends StateNotifier<sb.User?> {
   void _syncUserIdentityToFirebase(String uid) {
     try {
       FirebaseAnalytics.instance.setUserId(id: uid);
-      FirebaseCrashlytics.instance.setUserIdentifier(uid);
+      if (!kIsWeb) {
+        FirebaseCrashlytics.instance.setUserIdentifier(uid);
+      }
       debugPrint("Hybrid Auth Sync: Unified User ID ($uid) synced to Firebase Ops.");
     } catch (e) {
       debugPrint("Hybrid Auth Sync Warning: Firebase ops ID sync failed: $e");
