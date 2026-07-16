@@ -608,7 +608,7 @@ class HomeScreen extends ConsumerWidget {
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
                     child: InkWell(
-                      onTap: () => _openVocabularySheet(context, lesson),
+                      onTap: () => _openVocabularySheet(context, lesson, langKey),
                       borderRadius: BorderRadius.circular(8),
                       child: Container(
                         padding: const EdgeInsets.all(12),
@@ -652,7 +652,7 @@ class HomeScreen extends ConsumerWidget {
   }
 
   // Sheet showing list of study flashcards
-  void _openVocabularySheet(BuildContext context, dynamic lesson) {
+  void _openVocabularySheet(BuildContext context, dynamic lesson, String langKey) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -705,7 +705,7 @@ class HomeScreen extends ConsumerWidget {
                       child: ListTile(
                         title: Text(card.front, style: theme.textTheme.titleMedium?.copyWith(color: theme.colorScheme.primary)),
                         subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(card.back, style: theme.textTheme.bodyMedium),
                             if (card.context != null) ...[
@@ -730,6 +730,7 @@ class HomeScreen extends ConsumerWidget {
                       builder: (context) => _FlashcardStudySession(
                         title: lesson.title,
                         flashcards: lesson.flashcards,
+                        languageKey: langKey,
                       ),
                     ),
                   );
@@ -791,20 +792,22 @@ class _LanguageSelectCard extends StatelessWidget {
   }
 }
 
-class _FlashcardStudySession extends StatefulWidget {
+class _FlashcardStudySession extends ConsumerStatefulWidget {
   final String title;
   final List<dynamic> flashcards;
+  final String languageKey;
 
   const _FlashcardStudySession({
     required this.title,
     required this.flashcards,
+    required this.languageKey,
   });
 
   @override
-  State<_FlashcardStudySession> createState() => _FlashcardStudySessionState();
+  ConsumerState<_FlashcardStudySession> createState() => _FlashcardStudySessionState();
 }
 
-class _FlashcardStudySessionState extends State<_FlashcardStudySession> {
+class _FlashcardStudySessionState extends ConsumerState<_FlashcardStudySession> {
   int _currentIndex = 0;
   bool _isFlipped = false;
   final Map<String, SRSState> _sessionProgress = {};
@@ -821,6 +824,22 @@ class _FlashcardStudySessionState extends State<_FlashcardStudySession> {
     );
     
     _sessionProgress[card.id] = nextState;
+
+    // Sync stats to Supabase database reactively
+    final user = ref.read(authProvider);
+    if (user != null) {
+      ref.read(databaseServiceProvider).upsertCardReview(
+        userId: user.id,
+        cardId: card.id,
+        languageKey: widget.languageKey,
+        interval: nextState.interval,
+        repetitions: nextState.repetitions,
+        efactor: nextState.efactor,
+        nextReview: nextState.nextReviewAt,
+      ).catchError((e) {
+        debugPrint("Failed to sync card review back to database: $e");
+      });
+    }
 
     setState(() {
       if (_currentIndex < widget.flashcards.length - 1) {

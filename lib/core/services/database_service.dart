@@ -62,6 +62,32 @@ class DatabaseService {
       rethrow;
     }
   }
+
+  // Persist spaced repetition stats inside public.card_reviews table
+  Future<void> upsertCardReview({
+    required String userId,
+    required String cardId,
+    required String languageKey,
+    required int interval,
+    required int repetitions,
+    required double efactor,
+    required DateTime nextReview,
+  }) async {
+    try {
+      await _client.from('card_reviews').upsert({
+        'user_id': userId,
+        'card_id': cardId,
+        'language_key': languageKey.toLowerCase(),
+        'interval': interval,
+        'repetitions': repetitions,
+        'efactor': efactor,
+        'next_review': nextReview.toIso8601String(),
+      });
+    } catch (e) {
+      debugPrint("Supabase DB Error (upsertCardReview): $e");
+      rethrow;
+    }
+  }
 }
 
 // Global Provider for the Database service instance
