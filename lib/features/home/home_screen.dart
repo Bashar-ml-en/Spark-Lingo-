@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/services/auth_service.dart';
+import '../../core/services/database_service.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -104,7 +105,6 @@ class HomeScreen extends ConsumerWidget {
           style: theme.textTheme.titleLarge?.copyWith(fontSize: 20),
         ),
         actions: [
-          // Sign Out Action Button
           if (user != null)
             IconButton(
               icon: const Icon(Icons.logout),
@@ -115,60 +115,331 @@ class HomeScreen extends ConsumerWidget {
             ),
         ],
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(24),
-              margin: const EdgeInsets.symmetric(horizontal: 24),
-              decoration: BoxDecoration(
-                color: theme.cardColor,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: theme.colorScheme.primary.withAlpha(25),
-                ),
+      body: user == null
+          ? const Center(child: CircularProgressIndicator())
+          : ref.watch(userProfileProvider(user.id)).when(
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (err, stack) => Center(child: Text("Error: $err")),
+                data: (profile) {
+                  if (profile == null) {
+                    return const Center(child: Text("Profile data not found."));
+                  }
+
+                  // 1. If user hasn't selected a target language, show selection UI
+                  if (profile.targetLanguages.isEmpty) {
+                    return _buildLanguageSelector(context, ref, profile.id);
+                  }
+
+                  // 2. Load active target language syllabus
+                  final activeLanguage = profile.targetLanguages.first;
+                  return ref.watch(languageSyllabusProvider(activeLanguage)).when(
+                        loading: () => const Center(child: CircularProgressIndicator()),
+                        error: (err, stack) => Center(child: Text("Syllabus Error: $err")),
+                        data: (syllabus) {
+                          if (syllabus == null) {
+                            return const Center(child: Text("Syllabus not found."));
+                          }
+                          return _buildCurriculumPath(context, ref, profile.id, syllabus);
+                        },
+                      );
+                },
               ),
-              child: Column(
-                children: [
-                  Icon(
-                    Icons.map,
-                    size: 48,
-                    color: theme.colorScheme.primary,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    "Ignition: Survival Kit",
-                    style: theme.textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    "14 Global Languages Ready to Practice",
-                    style: theme.textTheme.bodyMedium,
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 16),
-                  const Divider(),
-                  const SizedBox(height: 12),
-                  // Render active user details (anonymous profile ID)
-                  Text(
-                    user != null ? "Active ID: ${user.id.substring(0, 8)}..." : "Guest Mode",
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.secondary,
-                      letterSpacing: 1,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: theme.colorScheme.secondary,
         foregroundColor: Colors.white,
         child: const Icon(Icons.bolt),
         onPressed: () => _openAITutor(context),
+      ),
+    );
+  }
+
+  // Beautiful onboarding grid to select the target language
+  Widget _buildLanguageSelector(BuildContext context, WidgetRef ref, String userId) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.all(24.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            "What language would you like to learn today?",
+            style: theme.textTheme.displayLarge?.copyWith(fontSize: 24),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            "Select your primary learning goal. You can change this later.",
+            style: theme.textTheme.bodyMedium,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 32),
+          // Language selection cards list
+          _LanguageSelectCard(
+            label: "Spanish / Español",
+            flag: "🇪🇸",
+            description: "Study basic expressions, travel survival tools, and syntax.",
+            onTap: () => ref.read(databaseServiceProvider).updateTargetLanguages(userId, ['spanish']),
+          ),
+          const SizedBox(height: 16),
+          _LanguageSelectCard(
+            label: "English",
+            flag: "🇺🇸",
+            description: "Master workplace introductions and basic airport navigation.",
+            onTap: () => ref.read(databaseServiceProvider).updateTargetLanguages(userId, ['english']),
+          ),
+          const SizedBox(height: 16),
+          _LanguageSelectCard(
+            label: "French / Français",
+            flag: "🇫🇷",
+            description: "Practice greeting accents, ordering cafés, and basic dialogues.",
+            onTap: () => ref.read(databaseServiceProvider).updateTargetLanguages(userId, ['french']),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Renders the structured learning path
+  Widget _buildCurriculumPath(BuildContext context, WidgetRef ref, String userId, dynamic syllabus) {
+    final theme = Theme.of(context);
+    return ListView.builder(
+      padding: const EdgeInsets.all(24),
+      itemCount: syllabus.units.length + 1,
+      itemBuilder: (context, index) {
+        if (index == 0) {
+          // Display Active Target Language Header
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 24.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Goal: ${syllabus.languageName.toUpperCase()}",
+                  style: theme.textTheme.displayLarge?.copyWith(fontSize: 22),
+                ),
+                TextButton.icon(
+                  icon: const Icon(Icons.swap_horiz, size: 18),
+                  label: const Text("Change"),
+                  onPressed: () {
+                    // Reset selected language to return to picker
+                    ref.read(databaseServiceProvider).updateTargetLanguages(userId, []);
+                  },
+                ),
+              ],
+            ),
+          );
+        }
+
+        final unit = syllabus.units[index - 1];
+        return Card(
+          margin: const EdgeInsets.only(bottom: 20),
+          color: theme.cardColor,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: BorderSide(color: theme.colorScheme.primary.withAlpha(25)),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.assignment, color: theme.colorScheme.primary, size: 28),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(unit.title, style: theme.textTheme.titleLarge),
+                          const SizedBox(height: 4),
+                          Text(unit.description, style: theme.textTheme.bodySmall),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                const Divider(),
+                const SizedBox(height: 12),
+                // Render lessons list
+                ...unit.lessons.map<Widget>((lesson) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: InkWell(
+                      onTap: () => _openVocabularySheet(context, lesson),
+                      borderRadius: BorderRadius.circular(8),
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: theme.scaffoldBackgroundColor.withAlpha(127),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: theme.colorScheme.primary.withAlpha(15)),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    lesson.title,
+                                    style: theme.textTheme.titleMedium?.copyWith(fontSize: 14),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    lesson.description,
+                                    style: theme.textTheme.bodySmall?.copyWith(fontSize: 12),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Icon(Icons.arrow_forward_ios, size: 14, color: theme.colorScheme.secondary),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // Sheet showing list of study flashcards
+  void _openVocabularySheet(BuildContext context, dynamic lesson) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        final theme = Theme.of(context);
+        return Container(
+          height: MediaQuery.of(context).size.height * 0.7,
+          decoration: BoxDecoration(
+            color: theme.scaffoldBackgroundColor,
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(24),
+              topRight: Radius.circular(24),
+            ),
+            border: Border.all(color: theme.colorScheme.primary.withAlpha(51)),
+          ),
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.onSurface.withAlpha(51),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                lesson.title,
+                style: theme.textTheme.titleLarge,
+              ),
+              Text(
+                "Vocabulary review session (${lesson.flashcards.length} cards)",
+                style: theme.textTheme.bodySmall,
+              ),
+              const SizedBox(height: 16),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: lesson.flashcards.length,
+                  itemBuilder: (context, idx) {
+                    final card = lesson.flashcards[idx];
+                    return Card(
+                      color: theme.cardColor,
+                      margin: const EdgeInsets.symmetric(vertical: 8),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      child: ListTile(
+                        title: Text(card.front, style: theme.textTheme.titleMedium?.copyWith(color: theme.colorScheme.primary)),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(card.back, style: theme.textTheme.bodyMedium),
+                            if (card.context != null) ...[
+                              const SizedBox(height: 4),
+                              Text(card.context!, style: theme.textTheme.bodySmall?.copyWith(fontStyle: FontStyle.italic)),
+                            ]
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              ElevatedButton.icon(
+                icon: const Icon(Icons.school),
+                label: const Text("Study Spaced Repetition"),
+                onPressed: () {
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("SM-2 flashcard study mode starting...")),
+                  );
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _LanguageSelectCard extends StatelessWidget {
+  final String label;
+  final String flag;
+  final String description;
+  final VoidCallback onTap;
+
+  const _LanguageSelectCard({
+    required this.label,
+    required this.flag,
+    required this.description,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: theme.cardColor,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: theme.colorScheme.primary.withAlpha(38)),
+        ),
+        child: Row(
+          children: [
+            Text(flag, style: const TextStyle(fontSize: 32)),
+            const SizedBox(width: 20),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(label, style: theme.textTheme.titleMedium),
+                  const SizedBox(height: 4),
+                  Text(description, style: theme.textTheme.bodySmall),
+                ],
+              ),
+            ),
+            Icon(Icons.arrow_forward_ios, color: theme.colorScheme.primary, size: 16),
+          ],
+        ),
       ),
     );
   }
