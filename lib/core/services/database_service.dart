@@ -1,7 +1,10 @@
+import 'dart:convert';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../shared/models/user_profile.dart';
+import '../../shared/models/curriculum.dart';
 
 class DatabaseService {
   final SupabaseClient _client = Supabase.instance.client;
@@ -55,3 +58,18 @@ final userProfileProvider = StreamProvider.autoDispose.family<UserProfile?, Stri
   final dbService = ref.watch(databaseServiceProvider);
   return dbService.streamProfile(userId);
 });
+
+// Future Provider that parses the syllabus JSON database
+final masterSyllabusProvider = FutureProvider<Map<String, dynamic>>((ref) async {
+  final jsonString = await rootBundle.loadString('assets/curriculum/syllabus_master.json');
+  return json.decode(jsonString) as Map<String, dynamic>;
+});
+
+// Family Provider exposing specific language syllabus
+final languageSyllabusProvider = FutureProvider.autoDispose.family<LanguageSyllabus?, String>((ref, languageKey) async {
+  final masterSyllabus = await ref.watch(masterSyllabusProvider.future);
+  final languageData = masterSyllabus[languageKey.toLowerCase()];
+  if (languageData == null) return null;
+  return LanguageSyllabus.fromJson(languageKey, languageData as Map<String, dynamic>);
+});
+

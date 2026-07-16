@@ -1,0 +1,117 @@
+{
+  "spanish": {
+    "units": [
+      {
+        "id": "es_unit_1",
+        "title": "Basic Survival Kit",
+        "description": "Greetings, basic expressions, and essential interactions.",
+        "lessons": [
+          {
+            "id": "es_u1_l1",
+            "title": "Greetings & Welcomes",
+            "description": "Learn to say Hello, Goodbye, and check how someone is doing.",
+            "flashcards": [
+              {
+                "id": "es_card_1",
+                "front": "Hola",
+                "back": "Hello",
+                "context": "Hola, ¿cómo estás? (Hello, how are you?)"
+              },
+              {
+                "id": "es_card_2",
+                "front": "Buenos días",
+                "back": "Good morning",
+                "context": "Buenos días, mi amigo. (Good morning, my friend.)"
+              },
+              {
+                "id": "es_card_3",
+                "front": "Adiós",
+                "back": "Goodbye",
+                "context": "Adiós, nos vemos mañana. (Goodbye, see you tomorrow.)"
+              }
+            ]
+          },
+          {
+            "id": "es_u1_l2",
+            "title": "Essential Needs",
+            "description": "Learn to ask for water, food, and locate the bathroom.",
+            "flashcards": [
+              {
+                "id": "es_card_4",
+                "front": "¿Dónde está el baño?",
+                "back": "Where is the bathroom?",
+                "context": "Disculpe, ¿dónde está el baño? (Excuse me, where is the bathroom?)"
+              },
+              {
+                "id": "es_card_5",
+                "front": "Agua, por favor",
+                "back": "Water, please",
+                "context": "Tengo sed. Agua, por favor. (I am thirsty. Water, please.)"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "english": {
+    "units": [
+      {
+        "id": "en_unit_1",
+        "title": "Arrival & Welcome",
+        "description": "Navigate airport interactions and greetings.",
+        "lessons": [
+          {
+            "id": "en_u1_l1",
+            "title": "Airport Greetings",
+            "description": "Learn to state your destination and respond politely.",
+            "flashcards": [
+              {
+                "id": "en_card_1",
+                "front": "Pleased to meet you",
+                "back": "Encantado de conocerle",
+                "context": "Welcome to New York! Pleased to meet you."
+              },
+              {
+                "id": "en_card_2",
+                "front": "Where is passport control?",
+                "back": "¿Dónde está el control de pasaportes?",
+                "context": "Excuse me, where is passport control?"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "french": {
+    "units": [
+      {
+        "id": "fr_unit_1",
+        "title": "First Contact",
+        "description": "Polite greetings and introductions in French.",
+        "lessons": [
+          {
+            "id": "fr_u1_l1",
+            "title": "Basic Expressions",
+            "description": "Learn Bonjour, Merci, and basic politeness.",
+            "flashcards": [
+              {
+                "id": "fr_card_1",
+                "front": "Bonjour",
+                "back": "Hello / Good morning",
+                "context": "Bonjour, comment ça va ? (Hello, how is it going?)"
+              },
+              {
+                "id": "fr_card_2",
+                "front": "S'il vous plaît",
+                "back": "Please (polite)",
+                "context": "Un café, s'il vous plaît. (A coffee, please.)"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
