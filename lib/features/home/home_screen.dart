@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/services/auth_service.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   void _openAITutor(BuildContext context) {
@@ -90,8 +92,10 @@ class HomeScreen extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final user = ref.watch(authProvider);
+
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
@@ -99,6 +103,17 @@ class HomeScreen extends StatelessWidget {
           "Spark Lingo",
           style: theme.textTheme.titleLarge?.copyWith(fontSize: 20),
         ),
+        actions: [
+          // Sign Out Action Button
+          if (user != null)
+            IconButton(
+              icon: const Icon(Icons.logout),
+              tooltip: "Sign Out",
+              onPressed: () async {
+                await ref.read(authProvider.notifier).signOut();
+              },
+            ),
+        ],
       ),
       body: Center(
         child: Column(
@@ -131,6 +146,17 @@ class HomeScreen extends StatelessWidget {
                     "14 Global Languages Ready to Practice",
                     style: theme.textTheme.bodyMedium,
                     textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  const Divider(),
+                  const SizedBox(height: 12),
+                  // Render active user details (anonymous profile ID)
+                  Text(
+                    user != null ? "Active ID: ${user.id.substring(0, 8)}..." : "Guest Mode",
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.secondary,
+                      letterSpacing: 1,
+                    ),
                   ),
                 ],
               ),
