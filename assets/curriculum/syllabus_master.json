@@ -51,6 +51,77 @@
             ]
           }
         ]
+      },
+      {
+        "id": "es_unit_2",
+        "title": "Social & Eating Out",
+        "description": "Cafe interactions, introductions, and ordering foods.",
+        "lessons": [
+          {
+            "id": "es_u2_l1",
+            "title": "At the Café",
+            "description": "Order coffee, pastries, and request the check.",
+            "flashcards": [
+              {
+                "id": "es_card_6",
+                "front": "Un café, por favor",
+                "back": "A coffee, please",
+                "context": "Un café, por favor, con leche. (A coffee, please, with milk.)"
+              },
+              {
+                "id": "es_card_7",
+                "front": "La cuenta, por favor",
+                "back": "The bill/check, please",
+                "context": "Camarero, la cuenta, por favor. (Waiter, the check, please.)"
+              }
+            ]
+          },
+          {
+            "id": "es_u2_l2",
+            "title": "Introducing Yourself",
+            "description": "State your name, age, and where you are from.",
+            "flashcards": [
+              {
+                "id": "es_card_8",
+                "front": "Me llamo...",
+                "back": "My name is...",
+                "context": "Hola, me llamo Carlos. (Hello, my name is Carlos.)"
+              },
+              {
+                "id": "es_card_9",
+                "front": "Mucho gusto",
+                "back": "Nice to meet you",
+                "context": "Mucho gusto, encantado de conocerle. (Nice to meet you, pleased to meet you.)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "es_unit_3",
+        "title": "Navigation & Travel",
+        "description": "Asking directions, taking transit, and navigating the city.",
+        "lessons": [
+          {
+            "id": "es_u3_l1",
+            "title": "Directions",
+            "description": "Understand straight, left, right, and locate key sites.",
+            "flashcards": [
+              {
+                "id": "es_card_10",
+                "front": "¿Dónde está la estación?",
+                "back": "Where is the station?",
+                "context": "¿Dónde está la estación de tren? (Where is the train station?)"
+              },
+              {
+                "id": "es_card_11",
+                "front": "Todo recto, a la izquierda",
+                "back": "Straight ahead, to the left",
+                "context": "Camina todo recto, y luego a la izquierda. (Walk straight ahead, then to the left.)"
+              }
+            ]
+          }
+        ]
       }
     ]
   },
@@ -59,7 +130,7 @@
       {
         "id": "en_unit_1",
         "title": "Arrival & Welcome",
-        "description": "Navigate airport interactions and greetings.",
+        "description": "Navigate airport interactions and basic politeness.",
         "lessons": [
           {
             "id": "en_u1_l1",
@@ -69,14 +140,104 @@
               {
                 "id": "en_card_1",
                 "front": "Pleased to meet you",
-                "back": "Encantado de conocerle",
+                "back": "Nice to meet you",
                 "context": "Welcome to New York! Pleased to meet you."
               },
               {
                 "id": "en_card_2",
                 "front": "Where is passport control?",
-                "back": "¿Dónde está el control de pasaportes?",
+                "back": "Where is passport control?",
                 "context": "Excuse me, where is passport control?"
+              }
+            ]
+          },
+          {
+            "id": "en_u1_l2",
+            "title": "Basic Politeness",
+            "description": "Use Thank you, Please, and Excuse me.",
+            "flashcards": [
+              {
+                "id": "en_card_3",
+                "front": "Thank you very much",
+                "back": "Thank you very much",
+                "context": "Thank you very much for your help!"
+              },
+              {
+                "id": "en_card_4",
+                "front": "Excuse me, please",
+                "back": "Excuse me, please",
+                "context": "Excuse me, please, I need to pass."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "en_unit_2",
+        "title": "Everyday Social",
+        "description": "Restaurant orders, personal details, and small talk.",
+        "lessons": [
+          {
+            "id": "en_u2_l1",
+            "title": "Restaurant Order",
+            "description": "Order meals and pay the check.",
+            "flashcards": [
+              {
+                "id": "en_card_5",
+                "front": "I would like to order",
+                "back": "I would like to order",
+                "context": "Excuse me, I would like to order dinner."
+              },
+              {
+                "id": "en_card_6",
+                "front": "The check, please",
+                "back": "The check, please",
+                "context": "We are done eating. The check, please."
+              }
+            ]
+          },
+          {
+            "id": "en_card_7",
+            "title": "Personal Details",
+            "description": "Tell others your name and origin country.",
+            "flashcards": [
+              {
+                "id": "en_card_7_f",
+                "front": "My name is...",
+                "back": "My name is...",
+                "context": "Hello, my name is John."
+              },
+              {
+                "id": "en_card_8",
+                "front": "Where are you from?",
+                "back": "Where are you from?",
+                "context": "Nice to meet you. Where are you from?"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "en_unit_3",
+        "title": "Exploring the City",
+        "description": "Locate sights, ask directions, and call a taxi.",
+        "lessons": [
+          {
+            "id": "en_u3_l1",
+            "title": "Getting Around",
+            "description": "Ask how to get to key city landmarks.",
+            "flashcards": [
+              {
+                "id": "en_card_9",
+                "front": "How do I get to...",
+                "back": "How do I get to...",
+                "context": "How do I get to the central station?"
+              },
+              {
+                "id": "en_card_10",
+                "front": "Turn left, then right",
+                "back": "Turn left, then right",
+                "context": "Go straight, turn left, then right."
               }
             ]
           }
@@ -107,6 +268,102 @@
                 "front": "S'il vous plaît",
                 "back": "Please (polite)",
                 "context": "Un café, s'il vous plaît. (A coffee, please.)"
+              },
+              {
+                "id": "fr_card_3",
+                "front": "Merci beaucoup",
+                "back": "Thank you very much",
+                "context": "Merci beaucoup pour l'aide. (Thank you very much for the help.)"
+              }
+            ]
+          },
+          {
+            "id": "fr_u1_l2",
+            "title": "Emergency Needs",
+            "description": "Locate restrooms and request basic hydration.",
+            "flashcards": [
+              {
+                "id": "fr_card_4",
+                "front": "Où sont les toilettes ?",
+                "back": "Where is the bathroom?",
+                "context": "Excusez-moi, où sont les toilettes ? (Excuse me, where is the bathroom?)"
+              },
+              {
+                "id": "fr_card_5",
+                "front": "De l'eau, s'il vous plaît",
+                "back": "Water, please",
+                "context": "Un verre d'eau, s'il vous plaît. (A glass of water, please.)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "fr_unit_2",
+        "title": "Café Culture",
+        "description": "Interact at bistros, order food, and meet locals.",
+        "lessons": [
+          {
+            "id": "fr_u2_l1",
+            "title": "Ordering Drinks",
+            "description": "Order classic croissants, coffees, and ask for the bill.",
+            "flashcards": [
+              {
+                "id": "fr_card_6",
+                "front": "Un croissant, s'il vous plaît",
+                "back": "A croissant, please",
+                "context": "Un croissant et un café, s'il vous plaît. (A croissant and coffee, please.)"
+              },
+              {
+                "id": "fr_card_7",
+                "front": "L'addition, s'il vous plaît",
+                "back": "The check, please",
+                "context": "Garçon, l'addition, s'il vous plaît. (Waiter, the check, please.)"
+              }
+            ]
+          },
+          {
+            "id": "fr_u2_l2",
+            "title": "Introductions",
+            "description": "State your name and tell others you are pleased to meet them.",
+            "flashcards": [
+              {
+                "id": "fr_card_8",
+                "front": "Je m'appelle...",
+                "back": "My name is...",
+                "context": "Je m'appelle Marie, et vous ? (My name is Marie, and you?)"
+              },
+              {
+                "id": "fr_card_9",
+                "front": "Enchanté",
+                "back": "Nice to meet you",
+                "context": "Enchanté de faire votre connaissance. (Pleased to meet you.)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "fr_unit_3",
+        "title": "City Directions",
+        "description": "Ask for landmarks and navigate the Parisian metro.",
+        "lessons": [
+          {
+            "id": "fr_u3_l1",
+            "title": "Getting Around",
+            "description": "Locate metro stations and ask if landmarks are nearby.",
+            "flashcards": [
+              {
+                "id": "fr_card_10",
+                "front": "Où est le métro ?",
+                "back": "Where is the subway/metro?",
+                "context": "Où est la station de métro la plus proche ? (Where is the nearest metro station?)"
+              },
+              {
+                "id": "fr_card_11",
+                "front": "Tout droit, à gauche",
+                "back": "Straight ahead, to the left",
+                "context": "Allez tout droit, puis tournez à gauche. (Go straight ahead, then turn left.)"
               }
             ]
           }
@@ -119,12 +376,12 @@
       {
         "id": "zh_unit_1",
         "title": "Essential Expressions",
-        "description": "Greeting people and basic counting in Mandarin.",
+        "description": "Greeting people and basic survival essentials in Mandarin.",
         "lessons": [
           {
             "id": "zh_u1_l1",
             "title": "First Encounters",
-            "description": "Learn to say Hello and Thank you.",
+            "description": "Learn to say Hello, Thank you, and Goodbye.",
             "flashcards": [
               {
                 "id": "zh_card_1",
@@ -137,6 +394,102 @@
                 "front": "谢谢 (Xièxie)",
                 "back": "Thank you",
                 "context": "谢谢你的帮助。 (Thank you for your help.)"
+              },
+              {
+                "id": "zh_card_3",
+                "front": "再见 (Zàijiàn)",
+                "back": "Goodbye",
+                "context": "再见，明天见。 (Goodbye, see you tomorrow.)"
+              }
+            ]
+          },
+          {
+            "id": "zh_u1_l2",
+            "title": "Essential Survival",
+            "description": "Learn to locate the restroom and ask for water.",
+            "flashcards": [
+              {
+                "id": "zh_card_4",
+                "front": "厕所在哪里？ (Cèsuǒ zài nǎlǐ?)",
+                "back": "Where is the restroom?",
+                "context": "请问，厕所在哪里？ (Excuse me, where is the restroom?)"
+              },
+              {
+                "id": "zh_card_5",
+                "front": "水，谢谢 (Shuǐ, xièxie)",
+                "back": "Water, thank you",
+                "context": "我要一杯水，谢谢。 (I want a glass of water, thank you.)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "zh_unit_2",
+        "title": "Social Dining",
+        "description": "Order food, introduce yourself, and handle bistro bills.",
+        "lessons": [
+          {
+            "id": "zh_u2_l1",
+            "title": "In the Restaurant",
+            "description": "Order dinner and ask the waiter to bring the check.",
+            "flashcards": [
+              {
+                "id": "zh_card_6",
+                "front": "我想点菜 (Wǒ xiǎng diǎncài)",
+                "back": "I would like to order",
+                "context": "服务员，我想点菜。 (Waiter, I would like to order.)"
+              },
+              {
+                "id": "zh_card_7",
+                "front": "买单 (Mǎidān)",
+                "back": "Check / Pay the bill",
+                "context": "吃饱了，买单，谢谢。 (Finished eating, the bill please, thank you.)"
+              }
+            ]
+          },
+          {
+            "id": "zh_u2_l2",
+            "title": "Personal Introductions",
+            "description": "State your name and declare pleasure in meeting others.",
+            "flashcards": [
+              {
+                "id": "zh_card_8",
+                "front": "我叫... (Wǒ jiào...)",
+                "back": "My name is...",
+                "context": "你好，我叫王明。 (Hello, my name is Wang Ming.)"
+              },
+              {
+                "id": "zh_card_9",
+                "front": "很高兴认识你 (Hěn gāoxìng rènshi nǐ)",
+                "back": "Nice to meet you",
+                "context": "很高兴认识你，李华。 (Nice to meet you, Li Hua.)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "zh_unit_3",
+        "title": "Navigation & Directions",
+        "description": "Locate metro stations and ask for walking directions.",
+        "lessons": [
+          {
+            "id": "zh_u3_l1",
+            "title": "Finding Places",
+            "description": "Locate the nearest subway and understand basic paths.",
+            "flashcards": [
+              {
+                "id": "zh_card_10",
+                "front": "地铁站在哪里？ (Dìtiězhàn zài nǎlǐ?)",
+                "back": "Where is the subway station?",
+                "context": "请问，地铁站在哪里？ (Excuse me, where is the subway station?)"
+              },
+              {
+                "id": "zh_card_11",
+                "front": "直走，左转 (Zhí zǒu, zuǒ zhuǎn)",
+                "back": "Go straight, turn left",
+                "context": "一直往前走，然后向左转。 (Go straight ahead, then turn left.)"
               }
             ]
           }
@@ -148,13 +501,13 @@
     "units": [
       {
         "id": "hi_unit_1",
-        "title": "Welcome Greetings",
-        "description": "Polite greetings and introductions in Hindi.",
+        "title": "Welcome & Common Words",
+        "description": "Greetings, politeness, and survival essentials in Hindi.",
         "lessons": [
           {
             "id": "hi_u1_l1",
             "title": "Daily Welcomes",
-            "description": "Learn Namaste and basic responses.",
+            "description": "Learn Namaste, Dhanyavaad, and Alvida.",
             "flashcards": [
               {
                 "id": "hi_card_1",
@@ -167,6 +520,102 @@
                 "front": "धन्यवाद (Dhanyavaad)",
                 "back": "Thank you",
                 "context": "मदद के लिए धन्यवाद। (Thank you for the help.)"
+              },
+              {
+                "id": "hi_card_3",
+                "front": "अलविदा (Alvida)",
+                "back": "Goodbye",
+                "context": "अलविदा, कल मिलेंगे। (Goodbye, we will meet tomorrow.)"
+              }
+            ]
+          },
+          {
+            "id": "hi_u1_l2",
+            "title": "Survival Essentials",
+            "description": "Learn to ask for restrooms and drinking water.",
+            "flashcards": [
+              {
+                "id": "hi_card_4",
+                "front": "शौचालय कहाँ है? (Shauchalay kahaan hai?)",
+                "back": "Where is the restroom?",
+                "context": "सुनिए, शौचालय कहाँ है? (Excuse me, where is the restroom?)"
+              },
+              {
+                "id": "hi_card_5",
+                "front": "पानी, कृपया (Paani, kripya)",
+                "back": "Water, please",
+                "context": "मुझे प्यास लगी है। पानी, कृपया। (I am thirsty. Water, please.)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "hi_unit_2",
+        "title": "Social Interactions",
+        "description": "Self-introductions and ordering food or drinks.",
+        "lessons": [
+          {
+            "id": "hi_u2_l1",
+            "title": "Self Introductions",
+            "description": "State your name and declare pleasure in meeting others.",
+            "flashcards": [
+              {
+                "id": "hi_card_6",
+                "front": "मेरा नाम... है (Mera naam... hai)",
+                "back": "My name is...",
+                "context": "मेरा नाम अमित है। (My name is Amit.)"
+              },
+              {
+                "id": "hi_card_7",
+                "front": "आपसे मिलकर खुशी हुई (Aap-se milkar khushi hui)",
+                "back": "Nice to meet you",
+                "context": "नमस्ते, आपसे मिलकर खुशी हुई। (Hello, nice to meet you.)"
+              }
+            ]
+          },
+          {
+            "id": "hi_u2_l2",
+            "title": "Ordering Food",
+            "description": "Order traditional tea and request bills.",
+            "flashcards": [
+              {
+                "id": "hi_card_8",
+                "front": "चाय, कृपया (Chaay, kripya)",
+                "back": "Tea, please",
+                "context": "एक कप गरम चाय, कृपया। (A cup of hot tea, please.)"
+              },
+              {
+                "id": "hi_card_9",
+                "front": "बिल लाइए (Bill laiye)",
+                "back": "Bring the bill/check",
+                "context": "भैया, बिल लाइए। (Brother, bring the check please.)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "hi_unit_3",
+        "title": "In the City",
+        "description": "Locate transit hubs and ask walking directions.",
+        "lessons": [
+          {
+            "id": "hi_u3_l1",
+            "title": "Directions",
+            "description": "Ask for stations and understand straight or turns.",
+            "flashcards": [
+              {
+                "id": "hi_card_10",
+                "front": "स्टेशन कहाँ है? (Station kahaan hai?)",
+                "back": "Where is the station?",
+                "context": "रेलवे स्टेशन कहाँ है? (Where is the railway station?)"
+              },
+              {
+                "id": "hi_card_11",
+                "front": "सीधे जाइए, फिर बाएँ (Seedhe jaiye, phir baaye)",
+                "back": "Go straight, then left",
+                "context": "यहाँ से सीधे जाइए, फिर बाएँ मुड़िए। (Go straight from here, then turn left.)"
               }
             ]
           }
@@ -179,17 +628,17 @@
       {
         "id": "ru_unit_1",
         "title": "Introduction Basics",
-        "description": "Greetings and polite phrases in Russian.",
+        "description": "Greetings, common responses, and survival needs in Russian.",
         "lessons": [
           {
             "id": "ru_u1_l1",
             "title": "Basic Greeting Forms",
-            "description": "Learn Privet and Spasibo.",
+            "description": "Learn Privet, Spasibo, and Do svidaniya.",
             "flashcards": [
               {
                 "id": "ru_card_1",
                 "front": "Привет (Privet)",
-                "back": "Hi / Hello",
+                "back": "Hi / Hello (informal)",
                 "context": "Привет! Как дела? (Hi! How are you?)"
               },
               {
@@ -197,6 +646,102 @@
                 "front": "Спасибо (Spasibo)",
                 "back": "Thank you",
                 "context": "Спасибо за совет. (Thank you for the advice.)"
+              },
+              {
+                "id": "ru_card_3",
+                "front": "До свидания (Do svidaniya)",
+                "back": "Goodbye (formal)",
+                "context": "До свидания, всего хорошего. (Goodbye, all the best.)"
+              }
+            ]
+          },
+          {
+            "id": "ru_u1_l2",
+            "title": "Essential Needs",
+            "description": "Ask for restrooms and plain water.",
+            "flashcards": [
+              {
+                "id": "ru_card_4",
+                "front": "Где туалет? (Gde tualet?)",
+                "back": "Where is the restroom?",
+                "context": "Скажите, пожалуйста, где туалет? (Tell me please, where is the restroom?)"
+              },
+              {
+                "id": "ru_card_5",
+                "front": "Воды, пожалуйста (Vody, pozhaluysta)",
+                "back": "Water, please",
+                "context": "Стакан воды, пожалуйста. (A glass of water, please.)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ru_unit_2",
+        "title": "Cafe & Personal Details",
+        "description": "Order cafe food, introduce your name, and make small talk.",
+        "lessons": [
+          {
+            "id": "ru_u2_l1",
+            "title": "Café Conversations",
+            "description": "Ask for menus and request payments.",
+            "flashcards": [
+              {
+                "id": "ru_card_6",
+                "front": "Меню, пожалуйста (Menyu, pozhaluysta)",
+                "back": "Menu, please",
+                "context": "Официант, меню, пожалуйста. (Waiter, menu, please.)"
+              },
+              {
+                "id": "ru_card_7",
+                "front": "Счет, пожалуйста (Schet, pozhaluysta)",
+                "back": "The bill/check, please",
+                "context": "Мы закончили. Счет, пожалуйста. (We are done. The check, please.)"
+              }
+            ]
+          },
+          {
+            "id": "ru_u2_l2",
+            "title": "Saying your Name",
+            "description": "Tell others your name and state nice to meet you.",
+            "flashcards": [
+              {
+                "id": "ru_card_8",
+                "front": "Меня зовут... (Menya zovut...)",
+                "back": "My name is...",
+                "context": "Здравствуйте, меня зовут Иван. (Hello, my name is Ivan.)"
+              },
+              {
+                "id": "ru_card_9",
+                "front": "Рад встрече (Rad vstreche)",
+                "back": "Glad to meet you",
+                "context": "Очень рад встрече с вами. (Very glad to meet you.)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ru_unit_3",
+        "title": "Finding Your Way",
+        "description": "Locate metro routes and ask walking paths.",
+        "lessons": [
+          {
+            "id": "ru_u3_l1",
+            "title": "Travel Directions",
+            "description": "Ask where the metro is and understand left or right.",
+            "flashcards": [
+              {
+                "id": "ru_card_10",
+                "front": "Где метро? (Gde metro?)",
+                "back": "Where is the subway/metro?",
+                "context": "Извините, где здесь метро? (Excuse me, where is the metro here?)"
+              },
+              {
+                "id": "ru_card_11",
+                "front": "Прямо, потом налево (Pryamo, potom nalevo)",
+                "back": "Straight, then to the left",
+                "context": "Идите прямо, потом поверните налево. (Go straight, then turn left.)"
               }
             ]
           }
@@ -208,13 +753,13 @@
     "units": [
       {
         "id": "ms_unit_1",
-        "title": "Sapaan Asas",
-        "description": "Greetings and courtesy phrases in Malay.",
+        "title": "Sapaan Asas & Keperluan",
+        "description": "Polite greetings, basic phrases, and core needs in Malay.",
         "lessons": [
           {
             "id": "ms_u1_l1",
             "title": "First Contacts",
-            "description": "Learn Selamat Pagi and Terima Kasih.",
+            "description": "Learn Selamat Pagi, Terima Kasih, and Selamat Tinggal.",
             "flashcards": [
               {
                 "id": "ms_card_1",
@@ -227,6 +772,102 @@
                 "front": "Terima Kasih",
                 "back": "Thank you",
                 "context": "Terima kasih atas bantuan anda. (Thank you for your help.)"
+              },
+              {
+                "id": "ms_card_3",
+                "front": "Selamat Tinggal",
+                "back": "Goodbye",
+                "context": "Jumpa lagi, selamat tinggal! (See you again, goodbye!)"
+              }
+            ]
+          },
+          {
+            "id": "ms_u1_l2",
+            "title": "Core Needs",
+            "description": "Learn to locate washrooms and ask for drinking water.",
+            "flashcards": [
+              {
+                "id": "ms_card_4",
+                "front": "Di mana tandas?",
+                "back": "Where is the restroom?",
+                "context": "Tumpang tanya, di mana tandas? (Excuse me, where is the restroom?)"
+              },
+              {
+                "id": "ms_card_5",
+                "front": "Air, tolong",
+                "back": "Water, please",
+                "context": "Bagi saya segelas air, tolong. (Give me a glass of water, please.)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ms_unit_2",
+        "title": "Kedai Kopi & Berkenalan",
+        "description": "Ordering Malaysian café dishes, sharing names, and socializing.",
+        "lessons": [
+          {
+            "id": "ms_u2_l1",
+            "title": "Café Order",
+            "description": "Order classic Nasi Lemak and request the check.",
+            "flashcards": [
+              {
+                "id": "ms_card_6",
+                "front": "Nasi lemak satu, tolong",
+                "back": "One Nasi Lemak, please",
+                "context": "Saya hendak nasi lemak satu, tolong. (I would like one Nasi Lemak, please.)"
+              },
+              {
+                "id": "ms_card_7",
+                "front": "Kira bil, tolong",
+                "back": "Calculate the bill/check, please",
+                "context": "Mamak, kira bil, tolong. (Waiter, check please.)"
+              }
+            ]
+          },
+          {
+            "id": "ms_u2_l2",
+            "title": "Introductions",
+            "description": "Tell others your name and express pleasure in meeting.",
+            "flashcards": [
+              {
+                "id": "ms_card_8",
+                "front": "Nama saya...",
+                "back": "My name is...",
+                "context": "Nama saya Ahmad, berasal dari Johor. (My name is Ahmad, coming from Johor.)"
+              },
+              {
+                "id": "ms_card_9",
+                "front": "Selamat berkenalan",
+                "back": "Nice to meet you",
+                "context": "Sama-sama, selamat berkenalan! (Nice to meet you too!)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ms_unit_3",
+        "title": "Perjalanan & Arah",
+        "description": "Finding railway stations and asking walking turns.",
+        "lessons": [
+          {
+            "id": "ms_u3_l1",
+            "title": "Finding Places",
+            "description": "Ask where the train station is and understand directions.",
+            "flashcards": [
+              {
+                "id": "ms_card_10",
+                "front": "Di mana stesen kereta api?",
+                "back": "Where is the train station?",
+                "context": "Di mana stesen kereta api paling dekat? (Where is the nearest train station?)"
+              },
+              {
+                "id": "ms_card_11",
+                "front": "Jalan terus, belok kiri",
+                "back": "Walk straight, turn left",
+                "context": "Kamu jalan terus, kemudian belok kiri. (You walk straight, then turn left.)"
               }
             ]
           }
@@ -238,13 +879,13 @@
     "units": [
       {
         "id": "ar_unit_1",
-        "title": "Basic Welcomes",
-        "description": "Greetings and polite expressions in Arabic.",
+        "title": "Basic Welcomes & Needs",
+        "description": "Greetings, common expressions, and survival needs in Arabic.",
         "lessons": [
           {
             "id": "ar_u1_l1",
             "title": "First Interaction",
-            "description": "Learn Marhaban and Shukran.",
+            "description": "Learn Marhaban, Shukran, and Ma'a salama.",
             "flashcards": [
               {
                 "id": "ar_card_1",
@@ -257,6 +898,102 @@
                 "front": "شكراً (Shukran)",
                 "back": "Thank you",
                 "context": "شكراً جزيلاً لك. (Thank you very much.)"
+              },
+              {
+                "id": "ar_card_3",
+                "front": "مع السلامة (Ma'a salama)",
+                "back": "Goodbye",
+                "context": "مع السلامة، أراك قريباً. (Goodbye, see you soon.)"
+              }
+            ]
+          },
+          {
+            "id": "ar_u1_l2",
+            "title": "Critical Needs",
+            "description": "Ask for washrooms and request plain drinking water.",
+            "flashcards": [
+              {
+                "id": "ar_card_4",
+                "front": "أين المرحاض؟ (Ayna al-mirhad?)",
+                "back": "Where is the restroom?",
+                "context": "من فضلك، أين المرحاض؟ (Please, where is the restroom?)"
+              },
+              {
+                "id": "ar_card_5",
+                "front": "ماء، من فضلك (Maa', min fadlik)",
+                "back": "Water, please",
+                "context": "أنا عطشان. ماء، من فضلك. (I am thirsty. Water, please.)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ar_unit_2",
+        "title": "Eating Out & Greetings",
+        "description": "Café orders, sharing names, and greeting new acquaintances.",
+        "lessons": [
+          {
+            "id": "ar_u2_l1",
+            "title": "Café / Dining",
+            "description": "Order coffee and request the restaurant check.",
+            "flashcards": [
+              {
+                "id": "ar_card_6",
+                "front": "قهوة، من فضلك (Qahwah, min fadlik)",
+                "back": "Coffee, please",
+                "context": "أريد فنجان قهوة، من فضلك. (I want a cup of coffee, please.)"
+              },
+              {
+                "id": "ar_card_7",
+                "front": "الحساب، من فضلك (Al-hisab, min fadlik)",
+                "back": "The bill/check, please",
+                "context": "يا نادل، الحساب، من فضلك. (Waiter, the check, please.)"
+              }
+            ]
+          },
+          {
+            "id": "ar_u2_l2",
+            "title": "Telling Your Name",
+            "description": "State your name and declare pleasure in meeting.",
+            "flashcards": [
+              {
+                "id": "ar_card_8",
+                "front": "اسمي... (Ismee...)",
+                "back": "My name is...",
+                "context": "أهلاً، اسمي يوسف. (Hello, my name is Youssef.)"
+              },
+              {
+                "id": "ar_card_9",
+                "front": "تشرفت بمعرفتك (Tasharraftu bi-ma'rifatik)",
+                "back": "Nice to meet you",
+                "context": "أهلاً يوسف، تشرفت بمعرفتك. (Hello Youssef, nice to meet you.)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ar_unit_3",
+        "title": "Asking the Way",
+        "description": "Locate city stations and ask directions.",
+        "lessons": [
+          {
+            "id": "ar_u3_l1",
+            "title": "Directions",
+            "description": "Ask where the station is and understand straight or turn instructions.",
+            "flashcards": [
+              {
+                "id": "ar_card_10",
+                "front": "أين المحطة؟ (Ayna al-mahatta?)",
+                "back": "Where is the station?",
+                "context": "لو سمحت، أين محطة الحافلات؟ (Excuse me, where is the bus station?)"
+              },
+              {
+                "id": "ar_card_11",
+                "front": "على طول، ثم يسار (Ala tool, thumma yasaar)",
+                "back": "Straight ahead, then left",
+                "context": "امشِ على طول، ثم انعطف يساراً. (Walk straight ahead, then turn left.)"
               }
             ]
           }
