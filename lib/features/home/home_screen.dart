@@ -179,21 +179,30 @@ class HomeScreen extends ConsumerWidget {
             label: "Spanish / Español",
             flag: "🇪🇸",
             description: "Study basic expressions, travel survival tools, and syntax.",
-            onTap: () => ref.read(databaseServiceProvider).updateTargetLanguages(userId, ['spanish']),
+            onTap: () async {
+              await ref.read(databaseServiceProvider).updateTargetLanguages(userId, ['spanish']);
+              ref.invalidate(userProfileProvider(userId));
+            },
           ),
           const SizedBox(height: 16),
           _LanguageSelectCard(
             label: "English",
             flag: "🇺🇸",
             description: "Master workplace introductions and basic airport navigation.",
-            onTap: () => ref.read(databaseServiceProvider).updateTargetLanguages(userId, ['english']),
+            onTap: () async {
+              await ref.read(databaseServiceProvider).updateTargetLanguages(userId, ['english']);
+              ref.invalidate(userProfileProvider(userId));
+            },
           ),
           const SizedBox(height: 16),
           _LanguageSelectCard(
             label: "French / Français",
             flag: "🇫🇷",
             description: "Practice greeting accents, ordering cafés, and basic dialogues.",
-            onTap: () => ref.read(databaseServiceProvider).updateTargetLanguages(userId, ['french']),
+            onTap: () async {
+              await ref.read(databaseServiceProvider).updateTargetLanguages(userId, ['french']);
+              ref.invalidate(userProfileProvider(userId));
+            },
           ),
         ],
       ),
@@ -221,9 +230,10 @@ class HomeScreen extends ConsumerWidget {
                 TextButton.icon(
                   icon: const Icon(Icons.swap_horiz, size: 18),
                   label: const Text("Change"),
-                  onPressed: () {
+                  onPressed: () async {
                     // Reset selected language to return to picker
-                    ref.read(databaseServiceProvider).updateTargetLanguages(userId, []);
+                    await ref.read(databaseServiceProvider).updateTargetLanguages(userId, []);
+                    ref.invalidate(userProfileProvider(userId));
                   },
                 ),
               ],

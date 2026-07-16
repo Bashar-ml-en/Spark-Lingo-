@@ -21,6 +21,22 @@ class DatabaseService {
         });
   }
 
+  // Fetch user profile from public.profiles table safely without realtime requirements
+  Future<UserProfile?> getProfile(String userId) async {
+    try {
+      final res = await _client
+          .from('profiles')
+          .select()
+          .eq('id', userId)
+          .maybeSingle();
+      if (res == null) return null;
+      return UserProfile.fromMap(res);
+    } catch (e) {
+      debugPrint("Supabase DB Error (getProfile): $e");
+      rethrow;
+    }
+  }
+
   // Update User Display Name
   Future<void> updateDisplayName(String userId, String name) async {
     try {
@@ -53,10 +69,10 @@ final databaseServiceProvider = Provider<DatabaseService>((ref) {
   return DatabaseService();
 });
 
-// Auto-dispose Stream Provider that exposes the profile model
-final userProfileProvider = StreamProvider.autoDispose.family<UserProfile?, String>((ref, userId) {
+// Auto-dispose Future Provider that exposes the profile model
+final userProfileProvider = FutureProvider.autoDispose.family<UserProfile?, String>((ref, userId) {
   final dbService = ref.watch(databaseServiceProvider);
-  return dbService.streamProfile(userId);
+  return dbService.getProfile(userId);
 });
 
 // Future Provider that parses the syllabus JSON database
