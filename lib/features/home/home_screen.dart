@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/services/auth_service.dart';
 import '../../core/services/database_service.dart';
+import '../../shared/widgets/landmark_painter.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -115,6 +116,73 @@ class HomeScreen extends ConsumerWidget {
             ),
         ],
       ),
+      drawer: user == null ? null : Drawer(
+        child: Container(
+          color: theme.scaffoldBackgroundColor,
+          child: Column(
+            children: [
+              DrawerHeader(
+                decoration: BoxDecoration(
+                  color: theme.cardColor,
+                  border: Border(bottom: BorderSide(color: theme.colorScheme.primary.withAlpha(25))),
+                ),
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.language, size: 40, color: theme.colorScheme.secondary),
+                      const SizedBox(height: 12),
+                      Text(
+                        "Spark Lingo Goals",
+                        style: theme.textTheme.titleMedium,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              ListTile(
+                leading: const Text("🇪🇸", style: TextStyle(fontSize: 24)),
+                title: const Text("Spanish / Español"),
+                onTap: () async {
+                  Navigator.pop(context);
+                  await ref.read(databaseServiceProvider).updateTargetLanguages(user.id, ['spanish']);
+                  ref.invalidate(userProfileProvider(user.id));
+                },
+              ),
+              ListTile(
+                leading: const Text("🇺🇸", style: TextStyle(fontSize: 24)),
+                title: const Text("English"),
+                onTap: () async {
+                  Navigator.pop(context);
+                  await ref.read(databaseServiceProvider).updateTargetLanguages(user.id, ['english']);
+                  ref.invalidate(userProfileProvider(user.id));
+                },
+              ),
+              ListTile(
+                leading: const Text("🇫🇷", style: TextStyle(fontSize: 24)),
+                title: const Text("French / Français"),
+                onTap: () async {
+                  Navigator.pop(context);
+                  await ref.read(databaseServiceProvider).updateTargetLanguages(user.id, ['french']);
+                  ref.invalidate(userProfileProvider(user.id));
+                },
+              ),
+              const Spacer(),
+              const Divider(),
+              ListTile(
+                leading: const Icon(Icons.refresh),
+                title: const Text("Reset Goal"),
+                onTap: () async {
+                  Navigator.pop(context);
+                  await ref.read(databaseServiceProvider).updateTargetLanguages(user.id, []);
+                  ref.invalidate(userProfileProvider(user.id));
+                },
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        ),
+      ),
       body: user == null
           ? const Center(child: CircularProgressIndicator())
           : ref.watch(userProfileProvider(user.id)).when(
@@ -209,32 +277,141 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
+  // Get active country accent gradient
+  LinearGradient _getCountryGradient(String langName) {
+    switch (langName.toLowerCase()) {
+      case 'spanish':
+        return const LinearGradient(
+          colors: [Color(0xFF8B0000), Color(0xFFFF8C00)], // Spanish crimson to gold
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        );
+      case 'french':
+        return const LinearGradient(
+          colors: [Color(0xFF0D47A1), Color(0xFF1565C0), Color(0xFFB71C1C)], // French tricolour gradient
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        );
+      case 'english':
+      default:
+        return const LinearGradient(
+          colors: [Color(0xFF1A237E), Color(0xFF0D47A1)], // Deep royal navy gradients
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        );
+    }
+  }
+
+  // Get active CustomPainter for target country landmark
+  CustomPainter _getLandmarkPainter(String langName, Color color) {
+    switch (langName.toLowerCase()) {
+      case 'spanish':
+        return SagradaFamiliaPainter(color: color);
+      case 'french':
+        return EiffelTowerPainter(color: color);
+      case 'english':
+      default:
+        return BigBenPainter(color: color);
+    }
+  }
+
   // Renders the structured learning path
   Widget _buildCurriculumPath(BuildContext context, WidgetRef ref, String userId, dynamic syllabus) {
     final theme = Theme.of(context);
+    final langKey = syllabus.languageName.toLowerCase();
+
     return ListView.builder(
       padding: const EdgeInsets.all(24),
       itemCount: syllabus.units.length + 1,
       itemBuilder: (context, index) {
         if (index == 0) {
-          // Display Active Target Language Header
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 24.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "Goal: ${syllabus.languageName.toUpperCase()}",
-                  style: theme.textTheme.displayLarge?.copyWith(fontSize: 22),
+          // Display Active Target Language Header with dynamic landmark in left corner
+          return Container(
+            margin: const EdgeInsets.only(bottom: 24.0),
+            decoration: BoxDecoration(
+              gradient: _getCountryGradient(langKey),
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withAlpha(51),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
                 ),
-                TextButton.icon(
-                  icon: const Icon(Icons.swap_horiz, size: 18),
-                  label: const Text("Change"),
-                  onPressed: () async {
-                    // Reset selected language to return to picker
-                    await ref.read(databaseServiceProvider).updateTargetLanguages(userId, []);
-                    ref.invalidate(userProfileProvider(userId));
-                  },
+              ],
+            ),
+            child: Stack(
+              children: [
+                // Top-right Change Goal button
+                Positioned(
+                  top: 12,
+                  right: 12,
+                  child: TextButton.icon(
+                    style: TextButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      backgroundColor: Colors.white.withAlpha(38),
+                    ),
+                    icon: const Icon(Icons.swap_horiz, size: 16),
+                    label: const Text("Change"),
+                    onPressed: () async {
+                      await ref.read(databaseServiceProvider).updateTargetLanguages(userId, []);
+                      ref.invalidate(userProfileProvider(userId));
+                    },
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Row(
+                    children: [
+                      // Landmark in Left Corner
+                      SizedBox(
+                        width: 90,
+                        height: 120,
+                        child: CustomPaint(
+                          painter: _getLandmarkPainter(langKey, Colors.white.withAlpha(204)),
+                        ),
+                      ),
+                      const SizedBox(width: 20),
+                      // Core Course Info
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "GOAL: ${syllabus.languageName.toUpperCase()}",
+                              style: theme.textTheme.displayLarge?.copyWith(
+                                fontSize: 24,
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withAlpha(51),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                "Level A1 Breakthrough",
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              "Explore units, lessons, and Spaced Repetition cards below.",
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: Colors.white.withAlpha(204),
+                                fontSize: 13,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),

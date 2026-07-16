@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as sb;
 import 'package:firebase_analytics/firebase_analytics.dart';
@@ -81,6 +82,19 @@ class AuthNotifier extends StateNotifier<sb.User?> {
       await _client.auth.signOut();
     } catch (e) {
       debugPrint("Supabase Auth Error (Signout): $e");
+      rethrow;
+    }
+  }
+
+  // Sign in with Google Account (OAuth redirect)
+  Future<void> signInWithGoogle() async {
+    try {
+      await _client.auth.signInWithOAuth(
+        sb.OAuthProvider.google,
+        redirectTo: kIsWeb ? null : 'io.supabase.sparklingo://login-callback',
+      );
+    } catch (e) {
+      debugPrint("Supabase Auth Error (Google OAuth): $e");
       rethrow;
     }
   }

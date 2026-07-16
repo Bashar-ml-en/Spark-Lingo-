@@ -36,6 +36,30 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     }
   }
 
+  Future<void> _handleGoogleSignIn() async {
+    setState(() {
+      _isLoading = true;
+    });
+    try {
+      await ref.read(authProvider.notifier).signInWithGoogle();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Google authentication failed: $e. Please try again."),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -92,18 +116,47 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                 ],
               ),
               const Spacer(),
-              ElevatedButton(
+              // Google Login button
+              ElevatedButton.icon(
+                onPressed: _isLoading ? null : _handleGoogleSignIn,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: Colors.black87,
+                  elevation: 2,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                icon: Image.network(
+                  'https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg',
+                  height: 18,
+                  errorBuilder: (context, error, stackTrace) => const Icon(
+                    Icons.login_outlined,
+                    color: Colors.blueAccent,
+                    size: 18,
+                  ),
+                ),
+                label: const Text("Continue with Google"),
+              ),
+              const SizedBox(height: 12),
+              // Secondary Anonymous Button
+              OutlinedButton(
                 onPressed: _isLoading ? null : _handleGetStarted,
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(color: theme.colorScheme.primary.withAlpha(100)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
                 child: _isLoading
                     ? const SizedBox(
                         width: 20,
                         height: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
                         ),
                       )
-                    : const Text("Get Started"),
+                    : const Text("Explore as Guest"),
               ),
               const SizedBox(height: 24),
             ],
