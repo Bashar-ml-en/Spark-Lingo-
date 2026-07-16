@@ -113,5 +113,155 @@
         ]
       }
     ]
+  },
+  "mandarin": {
+    "units": [
+      {
+        "id": "zh_unit_1",
+        "title": "Essential Expressions",
+        "description": "Greeting people and basic counting in Mandarin.",
+        "lessons": [
+          {
+            "id": "zh_u1_l1",
+            "title": "First Encounters",
+            "description": "Learn to say Hello and Thank you.",
+            "flashcards": [
+              {
+                "id": "zh_card_1",
+                "front": "你好 (Nǐ hǎo)",
+                "back": "Hello",
+                "context": "你好，我的朋友。 (Hello, my friend.)"
+              },
+              {
+                "id": "zh_card_2",
+                "front": "谢谢 (Xièxie)",
+                "back": "Thank you",
+                "context": "谢谢你的帮助。 (Thank you for your help.)"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "hindi": {
+    "units": [
+      {
+        "id": "hi_unit_1",
+        "title": "Welcome Greetings",
+        "description": "Polite greetings and introductions in Hindi.",
+        "lessons": [
+          {
+            "id": "hi_u1_l1",
+            "title": "Daily Welcomes",
+            "description": "Learn Namaste and basic responses.",
+            "flashcards": [
+              {
+                "id": "hi_card_1",
+                "front": "नमस्ते (Namaste)",
+                "back": "Hello / Respectful Greeting",
+                "context": "नमस्ते, आप कैसे हैं? (Namaste, how are you?)"
+              },
+              {
+                "id": "hi_card_2",
+                "front": "धन्यवाद (Dhanyavaad)",
+                "back": "Thank you",
+                "context": "मदद के लिए धन्यवाद। (Thank you for the help.)"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "russian": {
+    "units": [
+      {
+        "id": "ru_unit_1",
+        "title": "Introduction Basics",
+        "description": "Greetings and polite phrases in Russian.",
+        "lessons": [
+          {
+            "id": "ru_u1_l1",
+            "title": "Basic Greeting Forms",
+            "description": "Learn Privet and Spasibo.",
+            "flashcards": [
+              {
+                "id": "ru_card_1",
+                "front": "Привет (Privet)",
+                "back": "Hi / Hello",
+                "context": "Привет! Как дела? (Hi! How are you?)"
+              },
+              {
+                "id": "ru_card_2",
+                "front": "Спасибо (Spasibo)",
+                "back": "Thank you",
+                "context": "Спасибо за совет. (Thank you for the advice.)"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "bahasa melayu": {
+    "units": [
+      {
+        "id": "ms_unit_1",
+        "title": "Sapaan Asas",
+        "description": "Greetings and courtesy phrases in Malay.",
+        "lessons": [
+          {
+            "id": "ms_u1_l1",
+            "title": "First Contacts",
+            "description": "Learn Selamat Pagi and Terima Kasih.",
+            "flashcards": [
+              {
+                "id": "ms_card_1",
+                "front": "Selamat Pagi",
+                "back": "Good morning",
+                "context": "Selamat pagi, kawan-kawan. (Good morning, friends.)"
+              },
+              {
+                "id": "ms_card_2",
+                "front": "Terima Kasih",
+                "back": "Thank you",
+                "context": "Terima kasih atas bantuan anda. (Thank you for your help.)"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "arabic": {
+    "units": [
+      {
+        "id": "ar_unit_1",
+        "title": "Basic Welcomes",
+        "description": "Greetings and polite expressions in Arabic.",
+        "lessons": [
+          {
+            "id": "ar_u1_l1",
+            "title": "First Interaction",
+            "description": "Learn Marhaban and Shukran.",
+            "flashcards": [
+              {
+                "id": "ar_card_1",
+                "front": "مرحباً (Marhaban)",
+                "back": "Hello / Welcome",
+                "context": "مرحباً بك في المدينة. (Welcome to the city.)"
+              },
+              {
+                "id": "ar_card_2",
+                "front": "شكراً (Shukran)",
+                "back": "Thank you",
+                "context": "شكراً جزيلاً لك. (Thank you very much.)"
+              }
+            ]
+          }
+        ]
+      }
+    ]
   }
 }
