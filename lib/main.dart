@@ -50,8 +50,8 @@ class SparkLingoApp extends ConsumerWidget {
       // Inject our custom Obsidian/Cyan/Orange theme
       theme: SparkTheme.darkTheme,
       
-      // Inject GoRouter pathways
-      routerConfig: SparkRouter.router,
+      // Inject GoRouter pathways reactively
+      routerConfig: ref.watch(routerProvider),
     );
   }
 }
