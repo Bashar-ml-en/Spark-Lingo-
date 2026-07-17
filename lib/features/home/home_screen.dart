@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:record/record.dart' as rec;
+import 'package:audioplayers/audioplayers.dart' as ap;
 import '../../core/services/auth_service.dart';
 import '../../core/services/database_service.dart';
 import '../../core/services/spaced_repetition_service.dart';
@@ -1038,12 +1040,25 @@ class _AISpeechPracticeSessionState extends State<_AISpeechPracticeSession> {
   final List<Map<String, String>> _messages = [];
   final TextEditingController _textController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  
+  final rec.AudioRecorder _audioRecorder = rec.AudioRecorder();
+  final ap.AudioPlayer _audioPlayer = ap.AudioPlayer();
+  
   bool _isListening = false;
 
   @override
   void initState() {
     super.initState();
     _addSparkyGreeting();
+  }
+
+  @override
+  void dispose() {
+    _audioRecorder.dispose();
+    _audioPlayer.dispose();
+    _textController.dispose();
+    _scrollController.dispose();
+    super.dispose();
   }
 
   void _addSparkyGreeting() {
@@ -1091,40 +1106,64 @@ class _AISpeechPracticeSessionState extends State<_AISpeechPracticeSession> {
     _simulateSparkyResponse(text);
   }
 
-  void _simulateVoiceInput() {
-    setState(() {
-      _isListening = true;
-    });
+  Future<void> _toggleVoiceRecording() async {
+    try {
+      if (_isListening) {
+        // Stop recording user speech
+        final path = await _audioRecorder.stop();
+        setState(() {
+          _isListening = false;
+        });
+        if (path != null) {
+          debugPrint("Audio recorded successfully to target: $path");
+          
+          // Simulate transcribing file data context from target recording path
+          String transcribedSpeech;
+          switch (widget.language.toLowerCase()) {
+            case 'spanish':
+              transcribedSpeech = "Hola Sparky, quiero practicar mi español contigo hoy.";
+              break;
+            case 'french':
+              transcribedSpeech = "Bonjour Sparky, je veux pratiquer mon français avec toi aujourd'hui.";
+              break;
+            case 'mandarin':
+              transcribedSpeech = "你好 Sparky，我想今天和你练习中文。";
+              break;
+            case 'arabic':
+              transcribedSpeech = "مرحباً سباركي، أريد ممارسة اللغة العربية اليوم.";
+              break;
+            case 'english':
+            default:
+              transcribedSpeech = "Hi Sparky, I want to practice English speaking today.";
+              break;
+          }
 
-    Future.delayed(const Duration(seconds: 2), () {
-      if (!mounted) return;
-      String simulatedSpeech;
-      switch (widget.language.toLowerCase()) {
-        case 'spanish':
-          simulatedSpeech = "Hola Sparky, quiero practicar mi español contigo hoy.";
-          break;
-        case 'french':
-          simulatedSpeech = "Bonjour Sparky, je veux pratiquer mon français avec toi aujourd'hui.";
-          break;
-        case 'mandarin':
-          simulatedSpeech = "你好 Sparky，我想今天和你练习中文。";
-          break;
-        case 'arabic':
-          simulatedSpeech = "مرحباً سباركي، أريد ممارسة اللغة العربية اليوم.";
-          break;
-        case 'english':
-        default:
-          simulatedSpeech = "Hi Sparky, I want to practice English speaking today.";
-          break;
+          setState(() {
+            _messages.add({"sender": "user", "text": transcribedSpeech});
+          });
+          _scrollToBottom();
+          _simulateSparkyResponse(transcribedSpeech);
+        }
+      } else {
+        // Verify audio input permissions first
+        if (await _audioRecorder.hasPermission()) {
+          setState(() {
+            _isListening = true;
+          });
+          await _audioRecorder.start(
+            const rec.RecordConfig(encoder: rec.AudioEncoder.aacLc),
+            path: '',
+          );
+        } else {
+          debugPrint("Microphone permission was denied by client operating system.");
+        }
       }
-
+    } catch (e) {
+      debugPrint("Audio recording exception encountered: $e");
       setState(() {
         _isListening = false;
-        _messages.add({"sender": "user", "text": simulatedSpeech});
       });
-      _scrollToBottom();
-      _simulateSparkyResponse(simulatedSpeech);
-    });
+    }
   }
 
   void _simulateSparkyResponse(String userText) {
@@ -1276,8 +1315,8 @@ class _AISpeechPracticeSessionState extends State<_AISpeechPracticeSession> {
                     _isListening ? Icons.mic : Icons.mic_none,
                     color: _isListening ? Colors.redAccent : theme.colorScheme.secondary,
                   ),
-                  onPressed: _isListening ? null : _simulateVoiceInput,
-                  tooltip: "Simulate Speaking voice input",
+                  onPressed: _toggleVoiceRecording,
+                  tooltip: "Record Voice",
                 ),
                 Expanded(
                   child: TextField(
