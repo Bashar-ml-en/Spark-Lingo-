@@ -244,7 +244,7 @@ async function verifyRequest(
   );
   const signedPayload = concatenate(encoder.encode(`${timestamp}.`), rawBody);
   const expectedSignature = new Uint8Array(
-    await crypto.subtle.sign("HMAC", hmacKey, signedPayload),
+    await crypto.subtle.sign("HMAC", hmacKey, signedPayload as any),
   );
   if (!constantTimeEqual(signature, expectedSignature)) {
     throw new HttpError(401, "invalid_signature", "Unauthorized billing webhook.");
@@ -387,7 +387,7 @@ function parseEvent(rawBody: Uint8Array, config: BillingWebhookConfig): ParsedEv
 }
 
 async function sha256Hex(value: Uint8Array): Promise<string> {
-  const hash = new Uint8Array(await crypto.subtle.digest("SHA-256", value) as ArrayBuffer);
+  const hash = new Uint8Array(await crypto.subtle.digest("SHA-256", value as any) as ArrayBuffer);
   return [...hash].map((byte) => byte.toString(16).padStart(2, "0")).join("");
 }
 

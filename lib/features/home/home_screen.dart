@@ -765,9 +765,10 @@ class HomeScreen extends ConsumerWidget {
                 final previous = ref.read(localActiveLanguageProvider);
                 ref.read(localActiveLanguageProvider.notifier).state = code;
                 try {
-                  await ref
-                      .read(databaseServiceProvider)
-                      .updateTargetLanguages(userId, [code]);
+                  await ref.read(databaseServiceProvider).updateTargetLanguages(
+                    userId,
+                    [code],
+                  );
                   ref.invalidate(userProfileProvider(userId));
                   if (context.mounted) context.go('/home/$code');
                 } catch (_) {
@@ -1096,9 +1097,8 @@ class HomeScreen extends ConsumerWidget {
                           ),
                           IconButton(
                             tooltip: 'Retry',
-                            onPressed: () => ref.invalidate(
-                              lessonsProvider(unit.id),
-                            ),
+                            onPressed: () =>
+                                ref.invalidate(lessonsProvider(unit.id)),
                             icon: const Icon(Icons.refresh),
                           ),
                         ],
@@ -1283,10 +1283,7 @@ class HomeScreen extends ConsumerWidget {
                             : ref
                                       .watch(
                                         cardReviewsProvider(
-                                          CardReviewsParam(
-                                            user.id,
-                                            langKey,
-                                          ),
+                                          CardReviewsParam(user.id, langKey),
                                         ),
                                       )
                                       .value ??
@@ -1366,7 +1363,8 @@ class HomeScreen extends ConsumerWidget {
                                     MaterialPageRoute(
                                       builder: (context) =>
                                           _FlashcardStudySession(
-                                            title: '${lesson.title} · due review',
+                                            title:
+                                                '${lesson.title} · due review',
                                             flashcards: dueCards,
                                             languageKey: langKey,
                                           ),
