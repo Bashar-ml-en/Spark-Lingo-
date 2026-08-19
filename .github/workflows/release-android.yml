@@ -48,7 +48,17 @@ jobs:
         run: flutter pub get
 
       - name: Build Signed APK
-        run: flutter build apk --release --dart-define=SPARK_LINGO_ENV=production --dart-define=SUPABASE_DEPLOYMENT=production
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          flutter build apk --release \
+            --dart-define=SPARK_LINGO_ENV=production \
+            --dart-define=SUPABASE_DEPLOYMENT=hosted \
+            --dart-define=SUPABASE_URL="${SUPABASE_URL:-https://dioisitgohusggmwowft.supabase.co}" \
+            --dart-define=SUPABASE_PUBLISHABLE_KEY="${SUPABASE_PUBLISHABLE_KEY:-sb_publishable_XqDkETO6pkYyUohtsR2sow_QLMYA-t7}" \
+            --dart-define=SUPABASE_PROJECT_REF=dioisitgohusggmwowft \
+            --dart-define=SPARK_LINGO_PRODUCTION_PROJECT_REF=dioisitgohusggmwowft
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
