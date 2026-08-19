@@ -1,0 +1,107 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-08-19T16:43:01.113Z",
+  "git": {
+    "annotated_tag": "v1.0.0-rc.6",
+    "commit_sha": "f0b626d13b39c4a470e7babb055585fbfec2c179"
+  },
+  "application": {
+    "name": "1.0.0",
+    "build": "1"
+  },
+  "database": {
+    "latest_migration": "011_server_only_ai_quota_lifecycle.sql",
+    "migrations": [
+      {
+        "name": "001_core_schema.sql",
+        "sha256": "98ea1b434a77e231b5b4c2b1cf3bc1122cff6f4877ddf3fe39e6795afc0aa44c"
+      },
+      {
+        "name": "002_exam_module.sql",
+        "sha256": "6acea5cf1618c49f8c466c2ed015157b2193d4dd2fefe98b1f50e389d580c0a8"
+      },
+      {
+        "name": "003_add_active_language.sql",
+        "sha256": "2f68349c8cfb4d79a0f426cf2fe24785f76d626a54067b15eebdb09e6a244c0a"
+      },
+      {
+        "name": "004_add_reviewed_and_attribution.sql",
+        "sha256": "255189a09396c70a521e7f47fd2bfe8f02d4251d37dfcfe7c8e7c4d6e2fd79b3"
+      },
+      {
+        "name": "005_security_and_ai_quotas.sql",
+        "sha256": "f0eb9267a3e1ffc2dc87c7220c812f69a35c9df9d417ecd2328697ac9eb2f953"
+      },
+      {
+        "name": "006_finalize_ai_quota_and_retention.sql",
+        "sha256": "24a1639a424a4d9b2aa2a9c3e3809abfdda4a854bd518e9f934b430c7a8a1f40"
+      },
+      {
+        "name": "007_ai_runtime_controls.sql",
+        "sha256": "c8c504faa7699f2c604c9d5a382f4c3c6b1b4709dce4a4e76f3d755dd91ef9a7"
+      },
+      {
+        "name": "008_legal_consents.sql",
+        "sha256": "59ca8d6e5599b92e28e843af0c0c12a4af087a810216692d9b227f7cead17d1d"
+      },
+      {
+        "name": "009_server_billing_entitlements.sql",
+        "sha256": "c02106a93b5661512c60b60f9e60696d3eca15bf40ef09f2586b4d6d2245aada"
+      },
+      {
+        "name": "010_ai_global_request_ceiling.sql",
+        "sha256": "5cc51b1d3a7191363132c215ecd23d622298fc670871202765c4093328d8ff5e"
+      },
+      {
+        "name": "011_server_only_ai_quota_lifecycle.sql",
+        "sha256": "9fc808480b2e7f1893e53a70aed66e3de8569dea2fa477b8dd5d3bf81d95dc98"
+      }
+    ]
+  },
+  "edge_functions": [
+    {
+      "name": "delete-account",
+      "sha256": "78f812963d565f99bc98c403dcc02dad08ce30df1527d3f7042ce7e86a626252",
+      "fileCount": 1
+    },
+    {
+      "name": "revenuecat-webhook",
+      "sha256": "68cf9cfc56a7242d48ccb457e207e8fd8c5922248dbfb88b677159cb4d5a8b50",
+      "fileCount": 1
+    },
+    {
+      "name": "sparky-ai",
+      "sha256": "fe0e569f5a355756e1b382242b1055864c6a00a23857628663a5e7e431a1ca3d",
+      "fileCount": 1
+    }
+  ],
+  "artifacts": [],
+  "configuration_names": [
+    "ACCOUNT_DELETION_URL",
+    "AI_AND_VOICE_NOTICE_URL",
+    "AI_AND_VOICE_NOTICE_VERSION",
+    "AI_ENABLED",
+    "ALLOWED_ORIGINS",
+    "ALLOW_ANONYMOUS_AI",
+    "ANALYTICS_NOTICE_URL",
+    "ANALYTICS_NOTICE_VERSION",
+    "BILLING_WEBHOOK_ENABLED",
+    "DATA_EXPORT_URL",
+    "PRIVACY_POLICY_URL",
+    "REVENUECAT_APPLE_KEY",
+    "REVENUECAT_GOOGLE_KEY",
+    "SPARK_LINGO_ENV",
+    "SPARK_LINGO_PRODUCTION_PROJECT_REF",
+    "SUBSCRIPTION_MANAGEMENT_URL",
+    "SUPABASE_DEPLOYMENT",
+    "SUPABASE_PROJECT_REF",
+    "SUPABASE_PUBLISHABLE_KEY",
+    "SUPABASE_URL",
+    "SUPPORT_URL",
+    "TERMS_OF_SERVICE_URL"
+  ],
+  "notes": [
+    "This manifest intentionally contains configuration names but never configuration values.",
+    "Hosted deployment IDs, policy approvals, SBOMs, and dashboard evidence are separate release evidence."
+  ]
+}
