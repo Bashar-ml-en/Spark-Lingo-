@@ -34,7 +34,7 @@ class LanguageSelectionScreen extends ConsumerWidget {
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 24, vertical: 8),
               child: Text(
-                'Select a language with lessons and guided practice available in this release.',
+                'Select a language with lessons and guided practice available in this release',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 15,

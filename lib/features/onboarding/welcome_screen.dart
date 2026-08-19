@@ -121,14 +121,14 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
               ),
               const SizedBox(height: 16),
               Text(
-                'Build a foundation with guided conversation practice and reviewed beginner lessons.',
+                'Build a foundation with guided conversation practice and reviewed beginner lessons',
                 style: theme.textTheme.bodyMedium,
                 textAlign: TextAlign.center,
               ),
               const Spacer(),
               // Language badges list layout
               Text(
-                "Supported Languages:",
+                "Supported Languages",
                 style: theme.textTheme.titleLarge?.copyWith(fontSize: 16),
                 textAlign: TextAlign.center,
               ),

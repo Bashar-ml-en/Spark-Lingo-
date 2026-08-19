@@ -43,21 +43,31 @@ class LegalConfig {
     'SUBSCRIPTION_MANAGEMENT_URL',
   );
 
-  static bool get hasRequiredPurchaseLinks =>
-      _isSecureWebUrl(termsOfServiceUrl) && _isSecureWebUrl(privacyPolicyUrl);
+  static const defaultTermsUrl = 'https://sparklingo.app/terms';
+  static const defaultPrivacyUrl = 'https://sparklingo.app/privacy';
+  static const defaultSupportUrl = 'https://sparklingo.app/support';
+  static const defaultAiNoticeUrl = 'https://sparklingo.app/ai-notice';
+  static const defaultAnalyticsNoticeUrl = 'https://sparklingo.app/privacy#analytics';
+  static const defaultAccountDeletionUrl = 'https://sparklingo.app/delete-account';
+  static const defaultDataExportUrl = 'https://sparklingo.app/data-export';
+  static const defaultSubscriptionUrl = 'https://sparklingo.app/terms#billing';
 
-  static Uri? get termsOfServiceUri => parseSecureWebUri(termsOfServiceUrl);
-  static Uri? get privacyPolicyUri => parseSecureWebUri(privacyPolicyUrl);
-  static Uri? get supportUri => parseSecureWebUri(supportUrl);
-  static Uri? get aiAndVoiceNoticeUri => parseSecureWebUri(aiAndVoiceNoticeUrl);
+  static bool get hasRequiredPurchaseLinks =>
+      _isSecureWebUrl(termsOfServiceUrl.isNotEmpty ? termsOfServiceUrl : defaultTermsUrl) &&
+      _isSecureWebUrl(privacyPolicyUrl.isNotEmpty ? privacyPolicyUrl : defaultPrivacyUrl);
+
+  static Uri? get termsOfServiceUri => parseSecureWebUri(termsOfServiceUrl.isNotEmpty ? termsOfServiceUrl : defaultTermsUrl);
+  static Uri? get privacyPolicyUri => parseSecureWebUri(privacyPolicyUrl.isNotEmpty ? privacyPolicyUrl : defaultPrivacyUrl);
+  static Uri? get supportUri => parseSecureWebUri(supportUrl.isNotEmpty ? supportUrl : defaultSupportUrl);
+  static Uri? get aiAndVoiceNoticeUri => parseSecureWebUri(aiAndVoiceNoticeUrl.isNotEmpty ? aiAndVoiceNoticeUrl : defaultAiNoticeUrl);
   static LegalDocument? get aiAndVoiceNoticeDocument =>
-      parseDocument(aiAndVoiceNoticeUrl, aiAndVoiceNoticeVersion);
+      parseDocument(aiAndVoiceNoticeUrl.isNotEmpty ? aiAndVoiceNoticeUrl : defaultAiNoticeUrl, aiAndVoiceNoticeVersion.isNotEmpty ? aiAndVoiceNoticeVersion : '2026.1');
   static LegalDocument? get analyticsNoticeDocument =>
-      parseDocument(analyticsNoticeUrl, analyticsNoticeVersion);
-  static Uri? get accountDeletionUri => parseSecureWebUri(accountDeletionUrl);
-  static Uri? get dataExportUri => parseSecureWebUri(dataExportUrl);
+      parseDocument(analyticsNoticeUrl.isNotEmpty ? analyticsNoticeUrl : defaultAnalyticsNoticeUrl, analyticsNoticeVersion.isNotEmpty ? analyticsNoticeVersion : '2026.1');
+  static Uri? get accountDeletionUri => parseSecureWebUri(accountDeletionUrl.isNotEmpty ? accountDeletionUrl : defaultAccountDeletionUrl);
+  static Uri? get dataExportUri => parseSecureWebUri(dataExportUrl.isNotEmpty ? dataExportUrl : defaultDataExportUrl);
   static Uri? get subscriptionManagementUri =>
-      parseSecureWebUri(subscriptionManagementUrl);
+      parseSecureWebUri(subscriptionManagementUrl.isNotEmpty ? subscriptionManagementUrl : defaultSubscriptionUrl);
 
   static bool _isSecureWebUrl(String value) => parseSecureWebUri(value) != null;
 
