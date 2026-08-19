@@ -89,8 +89,8 @@ async function selectProfiles(token?: string, id?: string): Promise<Record<strin
     token,
   );
   
-  // The anon role is not granted SELECT on profiles, so PostgREST returns 404.
-  if (!token && response.status === 404) {
+  // The anon role is not granted SELECT on profiles, so PostgREST returns 401/403/404.
+  if (!token && (response.status === 401 || response.status === 403 || response.status === 404)) {
     return [];
   }
   
