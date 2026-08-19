@@ -533,7 +533,7 @@ async function withQuotaReservation<T>(
 
   try {
     const result = await work(markProviderSubmission);
-    if (submissionState !== "submitted") {
+    if ((submissionState as string) !== "submitted") {
       // Every upstream call must flow through providerFetch(), which marks the
       // reservation immediately before fetch. A result without that marker is
       // a local programming fault and must not look successful to the learner.
@@ -870,7 +870,7 @@ serve(async (req) => {
           requestId,
           (markProviderSubmission) => openAIChat(
             requestId,
-            action,
+            action as Action,
             [{ role: "system", content: tutorSystemPrompt(language) }, ...history],
             500,
             markProviderSubmission,
@@ -887,7 +887,7 @@ serve(async (req) => {
           requestId,
           async (markProviderSubmission) => normalizedScore(await openAIChat(
             requestId,
-            action,
+            action as Action,
             messages,
             600,
             markProviderSubmission,

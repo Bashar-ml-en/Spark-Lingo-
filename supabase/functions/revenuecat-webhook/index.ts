@@ -387,7 +387,7 @@ function parseEvent(rawBody: Uint8Array, config: BillingWebhookConfig): ParsedEv
 }
 
 async function sha256Hex(value: Uint8Array): Promise<string> {
-  const hash = new Uint8Array(await crypto.subtle.digest("SHA-256", value));
+  const hash = new Uint8Array(await crypto.subtle.digest("SHA-256", value) as ArrayBuffer);
   return [...hash].map((byte) => byte.toString(16).padStart(2, "0")).join("");
 }
 
