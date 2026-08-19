@@ -1,0 +1,6 @@
+[allowlist]
+description = "Whitelist historical credentials that have been revoked or rotated"
+regexes = [
+    '''AIzaSyCzaL1X4DXUp2jHVF7q7P8CcDilFiojrZ4''',
+    '''sb_publishable_vbNyj5TF4r0ueJfj7w3tvg_JBYbmCU6'''
+]
