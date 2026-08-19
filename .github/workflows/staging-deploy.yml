@@ -1,0 +1,111 @@
+name: Controlled staging deployment
+
+# This workflow is intentionally manual and must be run from a protected tag.
+# It is never a production deployment path. Configure the GitHub `staging`
+# Environment with required reviewers, staging-only variables, and staging-only
+# secrets before enabling it.
+on:
+  workflow_dispatch:
+    inputs:
+      staging_target_confirmation:
+        description: "Type staging:<protected staging project ref> after reviewing the change."
+        required: true
+        type: string
+      staging_change_reference:
+        description: "Approved staging change reference (for example, CHG-123)."
+        required: true
+        type: string
+      apply_after_dry_run_review:
+        description: "Apply migrations/functions only after a reviewer has approved a prior dry-run record."
+        required: true
+        default: false
+        type: boolean
+      deploy_billing_webhook:
+        description: "Deploy revenuecat-webhook only after separate billing approval."
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: spark-lingo-staging-deployment
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    # A mutable branch cannot receive staging deployment credentials.
+    if: ${{ github.ref_type == 'tag' }}
+    environment: staging
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      SPARK_LINGO_TEST_ENV: staging
+      STAGING_ENVIRONMENT_GUARD: ${{ vars.STAGING_ENVIRONMENT_GUARD }}
+      SMOKE_TARGET_CONFIRMATION: ${{ inputs.staging_target_confirmation }}
+      STAGING_CHANGE_REFERENCE: ${{ inputs.staging_change_reference }}
+      SUPABASE_TEST_URL: ${{ vars.SUPABASE_STAGING_URL }}
+      SUPABASE_TEST_PROJECT_REF: ${{ vars.SUPABASE_STAGING_PROJECT_REF }}
+      SUPABASE_PRODUCTION_URL: ${{ vars.SUPABASE_PRODUCTION_URL }}
+      SUPABASE_PRODUCTION_PROJECT_REF: ${{ vars.SUPABASE_PRODUCTION_PROJECT_REF }}
+      SOURCE_REF_TYPE: ${{ github.ref_type }}
+      SOURCE_REF_NAME: ${{ github.ref_name }}
+      SOURCE_REF_PROTECTED: ${{ github.ref_protected }}
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: 2.8.1
+      - uses: supabase/setup-cli@3c2f5e2ae34c34e428e8e206e2c4d21fa2d20fbf # v2.1.1
+        with:
+          version: 2.101.0
+      - name: Verify immutable protected source tag
+        env:
+          EXPECTED_SOURCE_REF_NAME: ${{ github.ref_name }}
+          EXPECTED_SOURCE_REF_PROTECTED: ${{ github.ref_protected }}
+        run: |-
+          test "$EXPECTED_SOURCE_REF_PROTECTED" = "true"
+          test "$(git describe --exact-match --tags HEAD)" = "$EXPECTED_SOURCE_REF_NAME"
+      - name: Run non-network staging target preflight
+        run: >-
+          deno run --no-prompt
+          --allow-env=SPARK_LINGO_TEST_ENV,STAGING_ENVIRONMENT_GUARD,SMOKE_TARGET_CONFIRMATION,STAGING_CHANGE_REFERENCE,SUPABASE_TEST_URL,SUPABASE_TEST_PROJECT_REF,SUPABASE_PRODUCTION_URL,SUPABASE_PRODUCTION_PROJECT_REF,SOURCE_REF_TYPE,SOURCE_REF_NAME,SOURCE_REF_PROTECTED
+          scripts/validate_staging_target.ts
+      # Credentials exist only after the non-network guard succeeds. The link
+      # binds migration commands to the already-validated staging project.
+      - name: Link and preview staging migrations
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_STAGING_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_STAGING_DB_PASSWORD }}
+        run: |-
+          supabase link --project-ref "$SUPABASE_TEST_PROJECT_REF"
+          supabase db push --linked --dry-run
+      # First dispatch this workflow with the default `false`, attach the dry
+      # run to the change record, and obtain reviewer approval. A second manual
+      # dispatch with this input true is required to mutate staging.
+      - name: Apply forward-only staging migrations
+        if: ${{ inputs.apply_after_dry_run_review }}
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_STAGING_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_STAGING_DB_PASSWORD }}
+        run: supabase db push --linked
+      - name: Deploy user-facing staging functions
+        if: ${{ inputs.apply_after_dry_run_review }}
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_STAGING_ACCESS_TOKEN }}
+        run: |-
+          supabase functions deploy sparky-ai --project-ref "$SUPABASE_TEST_PROJECT_REF"
+          supabase functions deploy delete-account --project-ref "$SUPABASE_TEST_PROJECT_REF"
+      # `revenuecat-webhook` accepts a third-party signed webhook and therefore
+      # has gateway JWT verification disabled. Deploy it only for a separately
+      # approved billing sandbox test.
+      - name: Deploy approved billing webhook
+        if: ${{ inputs.apply_after_dry_run_review && inputs.deploy_billing_webhook }}
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_STAGING_ACCESS_TOKEN }}
+        run: supabase functions deploy revenuecat-webhook --project-ref "$SUPABASE_TEST_PROJECT_REF"

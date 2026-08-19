@@ -1,0 +1,131 @@
+name: Quality gates
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  # Versioned toolchains make a green release-candidate run reproducible. Any
+  # upgrade is a reviewed source change and is tracked by Dependabot.
+  FLUTTER_VERSION: 3.44.4
+  DENO_VERSION: 2.8.1
+  SUPABASE_CLI_VERSION: 2.101.0
+
+jobs:
+  secrets:
+    name: Secret scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  flutter:
+    name: Flutter quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+      - run: flutter pub get
+      - run: dart format --output=none --set-exit-if-changed lib test
+      - run: flutter analyze
+      # These are synthetic local-only values, not a deployed project. They
+      # make each CI build exercise the explicit configuration path while
+      # preventing this untrusted quality job from compiling production access.
+      - run: >-
+          flutter test --reporter expanded
+          --dart-define=SPARK_LINGO_ENV=development
+          --dart-define=SUPABASE_DEPLOYMENT=local
+          --dart-define=SUPABASE_URL=http://127.0.0.1:54321
+          --dart-define=SUPABASE_PUBLISHABLE_KEY=ci-local-public-key
+      - run: >-
+          flutter build web --release
+          --dart-define=SPARK_LINGO_ENV=development
+          --dart-define=SUPABASE_DEPLOYMENT=local
+          --dart-define=SUPABASE_URL=http://127.0.0.1:54321
+          --dart-define=SUPABASE_PUBLISHABLE_KEY=ci-local-public-key
+      # A debug build catches native compilation/configuration regressions
+      # without making a signing key available to CI.
+      - run: >-
+          flutter build apk --debug
+          --dart-define=SPARK_LINGO_ENV=development
+          --dart-define=SUPABASE_DEPLOYMENT=local
+          --dart-define=SUPABASE_URL=http://127.0.0.1:54321
+          --dart-define=SUPABASE_PUBLISHABLE_KEY=ci-local-public-key
+
+  edge-functions:
+    name: Edge function quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: ${{ env.DENO_VERSION }}
+          cache: true
+      - run: find supabase/functions -type f -name '*.ts' -print0 | xargs -0 -r -n1 deno check
+      - run: deno check scripts/staging_security_smoke.ts
+      - run: deno check scripts/validate_staging_target.ts
+      - run: deno test scripts/staging_target_guard_test.ts
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --check scripts/generate_seed.js
+      - run: node --check scripts/upload_seed.js
+      - run: node --check scripts/generate_release_manifest.js
+      - run: node --check scripts/generate_sbom.js
+      - run: node --check scripts/validate_ai_quota_boundary.js
+      - run: node --check scripts/validate_staging_deploy_workflow.js
+      - run: node scripts/validate_ai_quota_boundary.js
+      - run: node scripts/validate_staging_deploy_workflow.js
+
+  database:
+    name: Database migration smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: ${{ env.SUPABASE_CLI_VERSION }}
+      # Runs only against the disposable Docker services on the GitHub runner.
+      # It verifies the complete migration and seed chain without touching a
+      # linked/shared Supabase project.
+      - run: supabase start
+      - run: supabase db reset --local
+      - run: supabase db lint --local
+
+  release-metadata:
+    name: Tagged release metadata
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [secrets, flutter, edge-functions, database]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: >-
+          node scripts/generate_release_manifest.js
+          --tag "${GITHUB_REF_NAME}"
+          --output release-manifest.json
+      - run: node scripts/generate_sbom.js --output release-sbom.cdx.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-metadata-${{ github.ref_name }}
+          path: |
+            release-sbom.cdx.json
+            release-manifest.json
+          if-no-files-found: error

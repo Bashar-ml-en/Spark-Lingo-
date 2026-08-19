@@ -1,0 +1,85 @@
+name: Staging security smoke
+
+on:
+  workflow_dispatch:
+    inputs:
+      staging_target_confirmation:
+        description: "Type staging:<protected staging project ref> after checking the change record."
+        required: true
+        type: string
+      staging_change_reference:
+        description: "Approved staging change reference (for example, CHG-123)."
+        required: true
+        type: string
+      ai_runtime_expectation:
+        description: "Expected staging AI state; enabled runs a no-consent boundary drill."
+        required: true
+        default: disabled
+        type: choice
+        options:
+          - disabled
+          - enabled
+
+permissions:
+  contents: read
+
+concurrency:
+  group: spark-lingo-staging-security-smoke
+  cancel-in-progress: false
+
+jobs:
+  smoke:
+    # This is deliberately not a branch workflow. A mutable branch cannot be
+    # used for a security-release gate with protected staging credentials.
+    if: ${{ github.ref_type == 'tag' }}
+    # Configure this GitHub Environment with required reviewers and staging-only
+    # secrets/variables. Never add production values to this workflow.
+    environment: staging
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SPARK_LINGO_TEST_ENV: staging
+      STAGING_ENVIRONMENT_GUARD: ${{ vars.STAGING_ENVIRONMENT_GUARD }}
+      SMOKE_TARGET_CONFIRMATION: ${{ inputs.staging_target_confirmation }}
+      STAGING_CHANGE_REFERENCE: ${{ inputs.staging_change_reference }}
+      SUPABASE_TEST_URL: ${{ vars.SUPABASE_STAGING_URL }}
+      SUPABASE_TEST_PROJECT_REF: ${{ vars.SUPABASE_STAGING_PROJECT_REF }}
+      SUPABASE_PRODUCTION_URL: ${{ vars.SUPABASE_PRODUCTION_URL }}
+      SUPABASE_PRODUCTION_PROJECT_REF: ${{ vars.SUPABASE_PRODUCTION_PROJECT_REF }}
+      SOURCE_REF_TYPE: ${{ github.ref_type }}
+      SOURCE_REF_NAME: ${{ github.ref_name }}
+      SOURCE_REF_PROTECTED: ${{ github.ref_protected }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: 2.8.1
+      - name: Verify immutable protected source tag
+        env:
+          EXPECTED_SOURCE_REF_NAME: ${{ github.ref_name }}
+          EXPECTED_SOURCE_REF_PROTECTED: ${{ github.ref_protected }}
+        run: |-
+          test "$EXPECTED_SOURCE_REF_PROTECTED" = "true"
+          test "$(git describe --exact-match --tags HEAD)" = "$EXPECTED_SOURCE_REF_NAME"
+      - name: Run non-network staging target preflight
+        run: >-
+          deno run --no-prompt
+          --allow-env=SPARK_LINGO_TEST_ENV,STAGING_ENVIRONMENT_GUARD,SMOKE_TARGET_CONFIRMATION,STAGING_CHANGE_REFERENCE,SUPABASE_TEST_URL,SUPABASE_TEST_PROJECT_REF,SUPABASE_PRODUCTION_URL,SUPABASE_PRODUCTION_PROJECT_REF,SOURCE_REF_TYPE,SOURCE_REF_NAME,SOURCE_REF_PROTECTED
+          scripts/validate_staging_target.ts
+      - name: Run staging-only security smoke tests
+        env:
+          SUPABASE_TEST_ANON_KEY: ${{ secrets.SUPABASE_STAGING_ANON_KEY }}
+          SMOKE_USER_A_ID: ${{ vars.STAGING_SMOKE_USER_A_ID }}
+          SMOKE_USER_B_ID: ${{ vars.STAGING_SMOKE_USER_B_ID }}
+          SMOKE_USER_A_ACCESS_TOKEN: ${{ secrets.STAGING_SMOKE_USER_A_ACCESS_TOKEN }}
+          SMOKE_USER_B_ACCESS_TOKEN: ${{ secrets.STAGING_SMOKE_USER_B_ACCESS_TOKEN }}
+          SMOKE_ANONYMOUS_ACCESS_TOKEN: ${{ secrets.STAGING_SMOKE_ANONYMOUS_ACCESS_TOKEN }}
+          SMOKE_NO_CONSENT_ACCESS_TOKEN: ${{ secrets.STAGING_SMOKE_NO_CONSENT_ACCESS_TOKEN }}
+          SMOKE_EXPECT_AI_RUNTIME: ${{ inputs.ai_runtime_expectation }}
+        run: >-
+          deno run --no-prompt
+          --allow-env=SPARK_LINGO_TEST_ENV,STAGING_ENVIRONMENT_GUARD,SMOKE_TARGET_CONFIRMATION,STAGING_CHANGE_REFERENCE,SUPABASE_TEST_URL,SUPABASE_TEST_PROJECT_REF,SUPABASE_PRODUCTION_URL,SUPABASE_PRODUCTION_PROJECT_REF,SOURCE_REF_TYPE,SOURCE_REF_NAME,SOURCE_REF_PROTECTED,SUPABASE_TEST_ANON_KEY,SMOKE_USER_A_ID,SMOKE_USER_B_ID,SMOKE_USER_A_ACCESS_TOKEN,SMOKE_USER_B_ACCESS_TOKEN,SMOKE_ANONYMOUS_ACCESS_TOKEN,SMOKE_NO_CONSENT_ACCESS_TOKEN,SMOKE_EXPECT_AI_RUNTIME
+          --allow-net
+          scripts/staging_security_smoke.ts

@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart'
+    show TargetPlatform, defaultTargetPlatform, kIsWeb;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import '../../core/constants/auth_config.dart';
+import '../../core/router/router.dart';
 import '../../core/services/auth_service.dart';
 
 class WelcomeScreen extends ConsumerStatefulWidget {
@@ -21,8 +26,8 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Connection failed: $e. Please try again."),
+          const SnackBar(
+            content: Text('We could not sign you in. Please try again.'),
             backgroundColor: Colors.redAccent,
           ),
         );
@@ -45,8 +50,8 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Google authentication failed: $e. Please try again."),
+          const SnackBar(
+            content: Text('Google sign-in failed. Please try again.'),
             backgroundColor: Colors.redAccent,
           ),
         );
@@ -57,6 +62,26 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
           _isLoading = false;
         });
       }
+    }
+  }
+
+  Future<void> _handleAppleSignIn() async {
+    setState(() => _isLoading = true);
+    try {
+      await ref.read(authProvider.notifier).signInWithApple();
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Apple sign-in is not available for this build. Please try another sign-in method.',
+            ),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -71,6 +96,14 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              Align(
+                alignment: AlignmentDirectional.centerEnd,
+                child: TextButton.icon(
+                  onPressed: () => context.push(SparkRouter.settings),
+                  icon: const Icon(Icons.settings_outlined, size: 18),
+                  label: const Text('Settings & help'),
+                ),
+              ),
               const Spacer(),
               // Icon representation
               Center(
@@ -88,7 +121,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
               ),
               const SizedBox(height: 16),
               Text(
-                "Ignite your fluency with AI-driven real-time conversational mentors and professional human accents.",
+                'Build a foundation with guided conversation practice and reviewed beginner lessons.',
                 style: theme.textTheme.bodyMedium,
                 textAlign: TextAlign.center,
               ),
@@ -110,40 +143,56 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                   _LanguageBadge(label: "Spanish"),
                   _LanguageBadge(label: "Hindi"),
                   _LanguageBadge(label: "Russian"),
-                  _LanguageBadge(label: "Bahasa Melayu"),
                   _LanguageBadge(label: "French"),
                   _LanguageBadge(label: "Arabic"),
                 ],
               ),
               const Spacer(),
-              // Google Login button
-              ElevatedButton.icon(
-                onPressed: _isLoading ? null : _handleGoogleSignIn,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: Colors.black87,
-                  elevation: 2,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+              if (AuthConfig.googleOAuthEnabled) ...[
+                ElevatedButton.icon(
+                  onPressed: _isLoading ? null : _handleGoogleSignIn,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: Colors.black87,
+                    elevation: 2,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
-                ),
-                icon: Image.network(
-                  'https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg',
-                  height: 18,
-                  errorBuilder: (context, error, stackTrace) => const Icon(
+                  icon: const Icon(
                     Icons.login_outlined,
                     color: Colors.blueAccent,
                     size: 18,
                   ),
+                  label: const Text("Continue with Google"),
                 ),
-                label: const Text("Continue with Google"),
-              ),
+                const SizedBox(height: 12),
+              ],
+              if (AuthConfig.appleOAuthEnabled &&
+                  !kIsWeb &&
+                  defaultTargetPlatform == TargetPlatform.iOS) ...[
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  onPressed: _isLoading ? null : _handleAppleSignIn,
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.black87,
+                    side: const BorderSide(color: Color(0xFF1F2937)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  icon: const Icon(Icons.apple),
+                  label: const Text('Continue with Apple'),
+                ),
+              ],
               const SizedBox(height: 12),
               // Secondary Anonymous Button
               OutlinedButton(
                 onPressed: _isLoading ? null : _handleGetStarted,
                 style: OutlinedButton.styleFrom(
-                  side: BorderSide(color: theme.colorScheme.primary.withAlpha(100)),
+                  side: BorderSide(
+                    color: theme.colorScheme.primary.withAlpha(100),
+                  ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -152,9 +201,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                     ? const SizedBox(
                         width: 20,
                         height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                        ),
+                        child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : const Text("Explore as Guest"),
               ),
@@ -179,9 +226,7 @@ class _LanguageBadge extends StatelessWidget {
       decoration: BoxDecoration(
         color: theme.cardColor,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: theme.colorScheme.primary.withAlpha(51),
-        ),
+        border: Border.all(color: theme.colorScheme.primary.withAlpha(51)),
       ),
       child: Text(
         label,

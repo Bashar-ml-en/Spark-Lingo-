@@ -42,7 +42,7 @@ class _SplashScreenState extends State<SplashScreen> {
                     color: theme.colorScheme.primary.withAlpha(76),
                     blurRadius: 30,
                     spreadRadius: 5,
-                  )
+                  ),
                 ],
               ),
               child: Icon(

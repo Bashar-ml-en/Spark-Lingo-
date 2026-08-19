@@ -43,3 +43,37 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Secrets
+.env
+.env.*
+!.env.example
+supabase/.env
+supabase/.env.*
+!supabase/.env.example
+android/key.properties
+
+# Local tooling and generated verification artifacts. These are not application
+# source and must not become part of a reproducible mobile release.
+/jdk/
+/jdk.zip
+/android/build/
+/temp_buildkit/
+/release-manifest.json
+/release-sbom.cdx.json
+
+# Local packaging output and signing material. Release artifacts are published
+# by protected CI or store tooling and retained outside Git.
+/android/app/build/
+*.apk
+*.aab
+*.ipa
+*.jks
+*.keystore
+*.p12
+*.p8
+*.mobileprovision
+
+# Local archive copies are review inputs, never repository release source.
+/spark_lingo_buildkit.zip
+/spark_lingo_pipeline.zip

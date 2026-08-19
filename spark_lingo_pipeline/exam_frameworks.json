@@ -1,0 +1,179 @@
+{
+  "_notes": "Real, verifiable exam bodies mapped to CEFR (or nearest national equivalent). Levels use CEFR A1-C2 where the language has an official CEFR-aligned exam; ILR/ACTFL-style ladders are noted where CEFR doesn't apply. Populate 'skills_tested' and 'level_thresholds' per exam from the official handbook before shipping — these are structurally correct but exact passing scores/dates should be pulled from the exam body's current syllabus at content-build time, since they do change.",
+  "languages": {
+    "en": {
+      "name": "English",
+      "framework": "CEFR",
+      "exams": [
+        {
+          "id": "ielts_academic",
+          "name": "IELTS Academic",
+          "body": "British Council / IDP / Cambridge",
+          "skills_tested": ["listening", "reading", "writing", "speaking"],
+          "format": "Listening 30min, Reading 60min, Writing 60min (2 tasks), Speaking 11-14min (face-to-face or AI-proctored)",
+          "scoring": "Band 1-9 in 0.5 increments per section, averaged for overall band",
+          "cefr_mapping": {"5.5": "B2", "6.5": "C1 (low)", "7.5": "C1", "8.5": "C2"}
+        },
+        {
+          "id": "toefl_ibt",
+          "name": "TOEFL iBT",
+          "body": "ETS",
+          "skills_tested": ["reading", "listening", "speaking", "writing"],
+          "format": "Reading ~35min, Listening ~36min, Speaking 16min, Writing 29min, all on computer",
+          "scoring": "0-30 per section, 0-120 total"
+        },
+        {
+          "id": "cambridge_english",
+          "name": "Cambridge English Qualifications (B1 Preliminary / B2 First / C1 Advanced / C2 Proficiency)",
+          "body": "Cambridge Assessment English",
+          "skills_tested": ["reading_and_use_of_english", "writing", "listening", "speaking"],
+          "format": "Varies by level; fixed CEFR-level exam rather than adaptive score like IELTS/TOEFL",
+          "scoring": "Cambridge English Scale 80-230, pass/fail per fixed level"
+        }
+      ]
+    },
+    "fr": {
+      "name": "French",
+      "framework": "CEFR",
+      "exams": [
+        {
+          "id": "delf",
+          "name": "DELF (A1-B2)",
+          "body": "France Education International / French Ministry of Education",
+          "skills_tested": ["listening", "reading", "writing", "speaking"],
+          "format": "Four independent diplomas, one per CEFR level A1-B2, each with 4 sections",
+          "scoring": "Pass at 50/100 with no section below 5/25"
+        },
+        {
+          "id": "dalf",
+          "name": "DALF (C1-C2)",
+          "body": "France Education International",
+          "skills_tested": ["listening", "reading", "writing", "speaking"],
+          "format": "Advanced diplomas, C1 and C2, includes document synthesis task",
+          "scoring": "Pass at 50/100 with no section below 5/25"
+        },
+        {
+          "id": "tcf",
+          "name": "TCF (Test de Connaissance du Français)",
+          "body": "France Education International",
+          "skills_tested": ["listening", "reading", "grammar", "speaking", "writing"],
+          "format": "Modular; mandatory sections + optional speaking/writing, often required for immigration/university",
+          "scoring": "Scaled score 100-699 mapped to CEFR A1-C2"
+        }
+      ]
+    },
+    "de": {
+      "name": "German",
+      "framework": "CEFR",
+      "exams": [
+        {
+          "id": "goethe_zertifikat",
+          "name": "Goethe-Zertifikat (A1-C2)",
+          "body": "Goethe-Institut",
+          "skills_tested": ["listening", "reading", "writing", "speaking"],
+          "format": "Level-specific fixed exams, widely required for German visas/citizenship",
+          "scoring": "Pass at 60/100, per-level"
+        },
+        {
+          "id": "testdaf",
+          "name": "TestDaF",
+          "body": "TestDaF-Institut",
+          "skills_tested": ["reading", "listening", "writing", "speaking"],
+          "format": "University-entrance oriented, computer or paper based",
+          "scoring": "TDN 3-5 per section (roughly B2.1-C1.2)"
+        }
+      ]
+    },
+    "es": {
+      "name": "Spanish",
+      "framework": "CEFR",
+      "exams": [
+        {
+          "id": "dele",
+          "name": "DELE (A1-C2)",
+          "body": "Instituto Cervantes",
+          "skills_tested": ["reading", "listening", "writing", "speaking"],
+          "format": "Fixed level diplomas, official for Spanish citizenship/residency",
+          "scoring": "Pass at 60% combined, no group below 50%"
+        },
+        {
+          "id": "siele",
+          "name": "SIELE",
+          "body": "Instituto Cervantes / Universidad de Salamanca / UNAM / Universidad de Buenos Aires",
+          "skills_tested": ["reading", "listening", "writing", "speaking"],
+          "format": "Computer-based, modular, results in days rather than weeks",
+          "scoring": "0-1000 scaled score mapped to CEFR A1-C1"
+        }
+      ]
+    },
+    "it": {
+      "name": "Italian",
+      "framework": "CEFR",
+      "exams": [
+        {"id": "cils", "name": "CILS", "body": "Università per Stranieri di Siena", "skills_tested": ["listening", "reading", "writing", "speaking"], "format": "Fixed CEFR-level exams", "scoring": "Pass per level, section minimums apply"},
+        {"id": "celi", "name": "CELI", "body": "Università per Stranieri di Perugia", "skills_tested": ["listening", "reading", "writing", "speaking"], "format": "Fixed CEFR-level exams", "scoring": "Pass per level"},
+        {"id": "plida", "name": "PLIDA", "body": "Società Dante Alighieri", "skills_tested": ["listening", "reading", "writing", "speaking"], "format": "Fixed CEFR-level exams, used for citizenship", "scoring": "Pass per level"}
+      ]
+    },
+    "pt": {
+      "name": "Portuguese",
+      "framework": "CEFR (Portugal) / own scale (Brazil)",
+      "exams": [
+        {"id": "caple", "name": "CAPLE", "body": "Universidade de Lisboa", "skills_tested": ["listening", "reading", "writing", "speaking"], "format": "Fixed CEFR-level exams (Portugal)", "scoring": "Pass per level"},
+        {"id": "celpe_bras", "name": "Celpe-Bras", "body": "Brazilian Ministry of Education (INEP)", "skills_tested": ["writing", "oral_interview", "integrated reading/listening tasks"], "format": "Task-based, no separate discrete-skill sections", "scoring": "Intermediate to Advanced Superior certificate levels"}
+      ]
+    },
+    "zh": {
+      "name": "Mandarin Chinese",
+      "framework": "own scale, mapped to CEFR informally",
+      "exams": [
+        {"id": "hsk", "name": "HSK (Levels 1-9, 2021 standard)", "body": "Center for Language Education and Cooperation (China)", "skills_tested": ["listening", "reading", "writing"], "format": "Level-specific fixed exams", "scoring": "Pass threshold ~60%, per level"},
+        {"id": "hskk", "name": "HSKK (Speaking)", "body": "Center for Language Education and Cooperation (China)", "skills_tested": ["speaking"], "format": "Beginner/Intermediate/Advanced oral exam, separate from HSK", "scoring": "0-100 scaled score"}
+      ]
+    },
+    "ja": {
+      "name": "Japanese",
+      "framework": "own scale (N5-N1), roughly CEFR A1-C1",
+      "exams": [
+        {"id": "jlpt", "name": "JLPT (N5-N1)", "body": "Japan Foundation / Japan Educational Exchanges and Services", "skills_tested": ["vocabulary_grammar", "reading", "listening"], "format": "No speaking or writing production section — this is a real gap you can fill", "scoring": "Pass thresholds vary by level, section minimums apply"}
+      ]
+    },
+    "ko": {
+      "name": "Korean",
+      "framework": "own scale (Level 1-6), roughly CEFR A1-C2",
+      "exams": [
+        {"id": "topik", "name": "TOPIK I (1-2) / TOPIK II (3-6)", "body": "National Institute for International Education, South Korea", "skills_tested": ["listening", "reading", "writing"], "format": "No speaking section in the standard TOPIK; separate speaking test (TOPIK Speaking) launched more recently", "scoring": "Pass thresholds by level, TOPIK II scored 0-300 combined"}
+      ]
+    },
+    "ru": {
+      "name": "Russian",
+      "framework": "own scale, roughly CEFR-aligned",
+      "exams": [
+        {"id": "torfl", "name": "TORFL / TRKI", "body": "Russian Ministry of Education certified centers", "skills_tested": ["lexis_grammar", "reading", "listening", "writing", "speaking"], "format": "Level-specific (Elementary through IV), used for study/work visas", "scoring": "Pass per subtest"}
+      ]
+    },
+    "ar": {
+      "name": "Arabic",
+      "framework": "no single dominant global exam; fragmented by institution",
+      "exams": [
+        {"id": "almi", "name": "Arabic Language Proficiency Test (varies by university, e.g. King Saud University, Qatar's Arabic-CEFR project)", "body": "Institution-dependent — no single global Arabic exam has the market position IELTS/HSK/DELF have", "skills_tested": ["reading", "listening", "writing", "speaking"], "format": "Not standardized across institutions", "scoring": "Not standardized — flag for manual research per target market"}
+      ]
+    },
+    "hi": {
+      "name": "Hindi",
+      "framework": "no single globally dominant standardized exam",
+      "exams": [
+        {"id": "cief_hindi", "name": "Central Institute of Hindi various proficiency diplomas", "body": "Central Institute of Hindi, India (under Ministry of Education)", "skills_tested": ["reading", "writing", "speaking"], "format": "Regional/institutional, not globally standardized like DELF/HSK", "scoring": "Not standardized — flag for manual research"}
+      ]
+    }
+  },
+  "unsupported_by_duolingo_worth_prioritizing": [
+    "Thai", "Cantonese", "Tagalog", "Khmer", "Bengali", "Punjabi", "Urdu",
+    "Tamil", "Serbian", "Georgian", "Armenian", "Amharic"
+  ],
+  "content_build_instructions": [
+    "For each exam, pull the CURRENT official specimen paper / handbook from the exam body's own site before writing mock-test content — formats and scoring change over exam cycles.",
+    "Languages without a standardized global exam (Arabic, Hindi, and most under-resourced languages) should ship with a strong CEFR-style proficiency ladder + institution-specific prep modules added opportunistically, rather than waiting for a single 'IELTS equivalent' that doesn't exist.",
+    "JLPT and the standard TOPIK have no (or limited) speaking/writing production sections — this is a genuine product opportunity: Sparky can offer speaking/writing practice that these official exams don't test but that real fluency requires, marketed honestly as 'beyond the exam' rather than 'exam-identical'."
+  ]
+}

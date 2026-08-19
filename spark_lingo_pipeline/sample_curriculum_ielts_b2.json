@@ -1,0 +1,50 @@
+{
+  "unit_id": "en-ielts-b2-unit-04",
+  "language": "en",
+  "exam_id": "ielts_academic",
+  "target_band": "6.0-6.5",
+  "cefr_level": "B2",
+  "unit_title": "Opinion Essays & Trend Description (Writing Task 1 + Task 2 prep)",
+  "can_do_statements": [
+    "Can describe and compare data trends in a line graph or bar chart using accurate comparative language",
+    "Can write a structured opinion essay with a clear position, supporting paragraphs, and a conclusion",
+    "Can use a range of cohesive devices (however, furthermore, in contrast) without overusing them"
+  ],
+  "lessons": [
+    {
+      "lesson_id": "l1",
+      "type": "input",
+      "skill": "reading",
+      "content_source": "tatoeba+curated",
+      "objective": "Recognize comparative/trend vocabulary in context"
+    },
+    {
+      "lesson_id": "l2",
+      "type": "srs_flashcards",
+      "skill": "vocabulary",
+      "flashcard_count": 25,
+      "sample_items": [
+        {"front": "a steady increase", "back": "a gradual, consistent rise over time"},
+        {"front": "to plateau", "back": "to level off after a period of change"},
+        {"front": "in contrast to", "back": "used to highlight a difference between two things"}
+      ]
+    },
+    {
+      "lesson_id": "l3",
+      "type": "ai_tutor_session",
+      "skill": "speaking",
+      "sparky_prompt_template": "Show the learner a simple bar chart description task. Ask them to describe it verbally in under 2 minutes. Score fluency, coherence, lexical range, and grammatical range against IELTS Speaking band descriptors 5-7. Give one specific, actionable correction, not a wall of feedback.",
+      "rubric_ref": "ielts_speaking_band_descriptors_5_7"
+    },
+    {
+      "lesson_id": "l4",
+      "type": "mock_exam_section",
+      "skill": "writing",
+      "mock_exam_section_id": "ielts_writing_task1_practice_04",
+      "time_limit_minutes": 20,
+      "scoring": "ai_rubric_scored",
+      "rubric_ref": "ielts_writing_task1_band_descriptors",
+      "honesty_disclaimer": "AI-scored practice estimate — not an official IELTS result. Useful for tracking trend, not for visa/university submission."
+    }
+  ]
+}

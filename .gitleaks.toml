@@ -1,0 +1,32 @@
+title = "Spark Lingo secret scanning"
+
+# Retain Gitleaks' maintained built-in rules in addition to the app-specific
+# providers below.  Do not add a rule for `sb_publishable_`: it is designed to
+# be shipped in a client application and is protected by RLS, whereas
+# `sb_secret_` bypasses RLS and must never be committed.
+[extend]
+useDefault = true
+
+[[rules]]
+id = "openai-api-key"
+description = "OpenAI API key"
+regex = '''sk-(?:proj-)?[A-Za-z0-9_-]{20,}'''
+secretGroup = 0
+
+[[rules]]
+id = "supabase-personal-access-token"
+description = "Supabase personal access token"
+regex = '''sbp_[A-Za-z0-9_-]{20,}'''
+secretGroup = 0
+
+[[rules]]
+id = "supabase-secret-api-key"
+description = "Supabase secret API key"
+regex = '''sb_secret_[A-Za-z0-9_-]{20,}'''
+secretGroup = 0
+
+[[rules]]
+id = "revenuecat-secret-key"
+description = "RevenueCat secret API key"
+regex = '''sk_[A-Za-z0-9_-]{20,}'''
+secretGroup = 0

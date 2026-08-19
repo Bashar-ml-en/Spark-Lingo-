@@ -26,12 +26,15 @@ class SRSState {
 
   // Parse from Supabase database map
   factory SRSState.fromMap(Map<String, dynamic> map) {
+    // `next_review` was written by an earlier client build. Read it only as a
+    // compatibility fallback while all new writes use `next_review_at`.
+    final storedNextReview = map['next_review_at'] ?? map['next_review'];
     return SRSState(
       repetitions: map['repetitions'] as int? ?? 0,
       efactor: (map['efactor'] as num? ?? 2.5).toDouble(),
       interval: map['interval'] as int? ?? 0,
-      nextReviewAt: map['next_review_at'] != null
-          ? DateTime.parse(map['next_review_at'] as String)
+      nextReviewAt: storedNextReview != null
+          ? DateTime.parse(storedNextReview as String)
           : DateTime.now(),
     );
   }
@@ -51,6 +54,7 @@ class SpacedRepetitionService {
     required int prevRepetitions,
     required double prevEfactor,
     required int prevInterval,
+    DateTime? now,
   }) {
     // Quality parameter validation constraints [0, 5]
     final q = quality.clamp(0, 5);
@@ -84,7 +88,9 @@ class SpacedRepetitionService {
     }
 
     // 3. Schedule next review date
-    final nextReviewDate = DateTime.now().add(Duration(days: interval));
+    final nextReviewDate = (now ?? DateTime.now()).add(
+      Duration(days: interval),
+    );
 
     return SRSState(
       repetitions: repetitions,

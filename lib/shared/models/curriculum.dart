@@ -6,30 +6,27 @@ class Flashcard {
   final String front;
   final String back;
   final String? context;
+  final String? source;
+  final String? sourceAttribution;
 
   const Flashcard({
     required this.id,
     required this.front,
     required this.back,
     this.context,
+    this.source,
+    this.sourceAttribution,
   });
 
-  factory Flashcard.fromJson(Map<String, dynamic> json) {
+  factory Flashcard.fromMap(Map<String, dynamic> map) {
     return Flashcard(
-      id: json['id'] as String,
-      front: json['front'] as String,
-      back: json['back'] as String,
-      context: json['context'] as String?,
+      id: map['id'] as String,
+      front: map['front_text'] as String,
+      back: map['back_text'] as String,
+      context: map['context_sentence'] as String?,
+      source: map['source'] as String?,
+      sourceAttribution: map['source_attribution'] as String?,
     );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'front': front,
-      'back': back,
-      'context': context,
-    };
   }
 }
 
@@ -38,32 +35,37 @@ class Lesson {
   final String id;
   final String title;
   final String description;
-  final List<Flashcard> flashcards;
+  final String? sourceAttribution;
+  final String? type;
+  final String? skill;
+  final String? rubricRef;
+  final String? honestyDisclaimer;
+  final String? sparkyPromptTemplate;
 
   const Lesson({
     required this.id,
     required this.title,
     required this.description,
-    required this.flashcards,
+    this.sourceAttribution,
+    this.type,
+    this.skill,
+    this.rubricRef,
+    this.honestyDisclaimer,
+    this.sparkyPromptTemplate,
   });
 
-  factory Lesson.fromJson(Map<String, dynamic> json) {
-    final cardList = json['flashcards'] as List<dynamic>? ?? [];
+  factory Lesson.fromMap(Map<String, dynamic> map) {
     return Lesson(
-      id: json['id'] as String,
-      title: json['title'] as String,
-      description: json['description'] as String,
-      flashcards: cardList.map((c) => Flashcard.fromJson(c as Map<String, dynamic>)).toList(),
+      id: map['id'] as String,
+      title: map['title'] as String,
+      description: map['description'] ?? '',
+      sourceAttribution: map['source_attribution'] as String?,
+      type: map['type'] as String?,
+      skill: map['skill'] as String?,
+      rubricRef: map['rubric_ref'] as String?,
+      honestyDisclaimer: map['honesty_disclaimer'] as String?,
+      sparkyPromptTemplate: map['sparky_prompt_template'] as String?,
     );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'title': title,
-      'description': description,
-      'flashcards': flashcards.map((c) => c.toJson()).toList(),
-    };
   }
 }
 
@@ -72,57 +74,24 @@ class Unit {
   final String id;
   final String title;
   final String description;
-  final List<Lesson> lessons;
+  final String? sourceAttribution;
+  final bool isReviewed;
 
   const Unit({
     required this.id,
     required this.title,
     required this.description,
-    required this.lessons,
+    this.sourceAttribution,
+    this.isReviewed = false,
   });
 
-  factory Unit.fromJson(Map<String, dynamic> json) {
-    final lessonList = json['lessons'] as List<dynamic>? ?? [];
+  factory Unit.fromMap(Map<String, dynamic> map) {
     return Unit(
-      id: json['id'] as String,
-      title: json['title'] as String,
-      description: json['description'] as String,
-      lessons: lessonList.map((l) => Lesson.fromJson(l as Map<String, dynamic>)).toList(),
+      id: map['id'] as String,
+      title: map['title'] as String,
+      description: map['description'] ?? '',
+      sourceAttribution: map['source_attribution'] as String?,
+      isReviewed: map['is_reviewed'] as bool? ?? false,
     );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'title': title,
-      'description': description,
-      'lessons': lessons.map((l) => l.toJson()).toList(),
-    };
-  }
-}
-
-@immutable
-class LanguageSyllabus {
-  final String languageName;
-  final List<Unit> units;
-
-  const LanguageSyllabus({
-    required this.languageName,
-    required this.units,
-  });
-
-  factory LanguageSyllabus.fromJson(String language, Map<String, dynamic> json) {
-    final unitList = json['units'] as List<dynamic>? ?? [];
-    return LanguageSyllabus(
-      languageName: language,
-      units: unitList.map((u) => Unit.fromJson(u as Map<String, dynamic>)).toList(),
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'languageName': languageName,
-      'units': units.map((u) => u.toJson()).toList(),
-    };
   }
 }

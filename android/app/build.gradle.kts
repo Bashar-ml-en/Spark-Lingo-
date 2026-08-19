@@ -10,7 +10,35 @@ plugins {
 val keystorePropertiesFile = rootProject.file("key.properties")
 val keystoreProperties = Properties().apply {
     if (keystorePropertiesFile.exists()) {
-        load(FileInputStream(keystorePropertiesFile))
+        FileInputStream(keystorePropertiesFile).use { input -> load(input) }
+    }
+}
+val releaseStoreFile = keystoreProperties.getProperty("storeFile")
+    ?.takeIf { it.isNotBlank() }
+    ?.let(::file)
+
+val releaseBuildRequested = gradle.startParameter.taskNames.any {
+    it.contains("release", ignoreCase = true)
+}
+
+if (releaseBuildRequested) {
+    val requiredSigningProperties = listOf(
+        "keyAlias",
+        "keyPassword",
+        "storeFile",
+        "storePassword",
+    )
+    val missingSigningProperties = requiredSigningProperties.filter {
+        keystoreProperties.getProperty(it).isNullOrBlank()
+    }
+
+    check(
+        keystorePropertiesFile.exists() &&
+            missingSigningProperties.isEmpty() &&
+            releaseStoreFile?.isFile == true,
+    ) {
+        "Release signing requires a complete android/key.properties file and keystore. " +
+            "Refusing to fall back to the debug signing key."
     }
 }
 
@@ -39,18 +67,16 @@ android {
         create("release") {
             keyAlias = keystoreProperties["keyAlias"] as String?
             keyPassword = keystoreProperties["keyPassword"] as String?
-            storeFile = keystoreProperties["storeFile"]?.let { file(it) }
+            storeFile = releaseStoreFile
             storePassword = keystoreProperties["storePassword"] as String?
         }
     }
 
     buildTypes {
         release {
-            signingConfig = if (keystorePropertiesFile.exists()) {
-                signingConfigs.getByName("release")
-            } else {
-                signingConfigs.getByName("debug")
-            }
+            // A missing or incomplete release key now fails the release build
+            // above instead of silently producing a debug-signed artifact.
+            signingConfig = signingConfigs.getByName("release")
         }
     }
 }

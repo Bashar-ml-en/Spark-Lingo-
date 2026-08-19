@@ -249,7 +249,7 @@ class PagodaPainter extends CustomPainter {
     path.quadraticBezierTo(w * 0.1, h * 0.68, w * 0.15, h * 0.64);
     path.moveTo(w * 0.8, h * 0.7);
     path.quadraticBezierTo(w * 0.9, h * 0.68, w * 0.85, h * 0.64);
-    
+
     path.moveTo(w * 0.25, h * 0.7);
     path.lineTo(w * 0.75, h * 0.7);
     path.lineTo(w * 0.68, h * 0.45);
@@ -508,7 +508,9 @@ class PalmAndOasisPainter extends CustomPainter {
     // Spire Crescent
     path.moveTo(w * 0.72, h * 0.3);
     path.lineTo(w * 0.72, h * 0.2);
-    path.addOval(Rect.fromCircle(center: Offset(w * 0.72, h * 0.16), radius: 6));
+    path.addOval(
+      Rect.fromCircle(center: Offset(w * 0.72, h * 0.16), radius: 6),
+    );
 
     canvas.drawPath(path, paint);
   }

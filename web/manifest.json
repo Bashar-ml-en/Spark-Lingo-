@@ -1,11 +1,11 @@
 {
-    "name": "spark_lingo",
-    "short_name": "spark_lingo",
+    "name": "Spark Lingo",
+    "short_name": "Spark Lingo",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Guided language learning and practice with Spark Lingo.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
