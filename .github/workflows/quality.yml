@@ -78,6 +78,7 @@ jobs:
       - run: deno check scripts/staging_security_smoke.ts
       - run: deno check scripts/validate_staging_target.ts
       - run: deno check scripts/verify_retention_purge.ts
+      - run: deno check scripts/simulate_1k_beta_load.ts
       - run: deno test scripts/staging_target_guard_test.ts
       - uses: actions/setup-node@v4
         with:
