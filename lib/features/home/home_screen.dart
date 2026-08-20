@@ -1984,13 +1984,12 @@ class _AISpeechPracticeSessionState
 
   Future<bool> _ensureProcessingConsent(ConsentPurpose purpose) async {
     final user = ref.read(authProvider);
-    if (purpose != ConsentPurpose.analytics &&
-        (user == null || user.isAnonymous)) {
+    if (user == null) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text(
-              'Create or sign in to a recoverable account before using AI practice.',
+              'Please sign in before using AI practice.',
             ),
           ),
         );
