@@ -151,15 +151,11 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                 alignment: WrapAlignment.center,
                 spacing: 8,
                 runSpacing: 8,
-                children: const [
-                  _LanguageBadge(label: "English"),
-                  _LanguageBadge(label: "Mandarin"),
-                  _LanguageBadge(label: "Spanish"),
-                  _LanguageBadge(label: "Hindi"),
-                  _LanguageBadge(label: "Russian"),
-                  _LanguageBadge(label: "French"),
-                  _LanguageBadge(label: "Arabic"),
-                ],
+                children: LanguageCatalog.supportedLanguages
+                    .map((code) => _LanguageBadge(
+                          label: LanguageCatalog.displayName(code),
+                        ))
+                    .toList(),
               ),
               const Spacer(),
               if (AuthConfig.googleOAuthEnabled) ...[

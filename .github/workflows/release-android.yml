@@ -47,6 +47,11 @@ jobs:
       - name: Get Dependencies
         run: flutter pub get
 
+      - name: Generate Native Icons & Splash
+        run: |
+          flutter pub run flutter_launcher_icons
+          flutter pub run flutter_native_splash:create
+
       - name: Build Signed APK
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -58,7 +63,8 @@ jobs:
             --dart-define=SUPABASE_URL="${SUPABASE_URL:-https://dioisitgohusggmwowft.supabase.co}" \
             --dart-define=SUPABASE_PUBLISHABLE_KEY="${SUPABASE_PUBLISHABLE_KEY:-sb_publishable_XqDkETO6pkYyUohtsR2sow_QLMYA-t7}" \
             --dart-define=SUPABASE_PROJECT_REF=dioisitgohusggmwowft \
-            --dart-define=SPARK_LINGO_PRODUCTION_PROJECT_REF=dioisitgohusggmwowft
+            --dart-define=SPARK_LINGO_PRODUCTION_PROJECT_REF=dioisitgohusggmwowft \
+            --dart-define=ENABLE_GOOGLE_OAUTH=true
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4

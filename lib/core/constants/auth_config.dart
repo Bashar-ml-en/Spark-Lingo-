@@ -9,7 +9,7 @@ class AuthConfig {
 
   static const googleOAuthEnabled = bool.fromEnvironment(
     'ENABLE_GOOGLE_OAUTH',
-    defaultValue: false,
+    defaultValue: true,
   );
   static const appleOAuthEnabled = bool.fromEnvironment(
     'ENABLE_APPLE_OAUTH',
