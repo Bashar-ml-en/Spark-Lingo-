@@ -143,6 +143,8 @@ class LanguageCatalog {
   static String canonicalCode(String? value, {String fallback = 'en'}) =>
       tryCanonicalCode(value) ?? fallback;
 
+  static List<String> get supportedLanguages => _languages.keys.toList();
+
   static bool isSupported(String? value) => tryCanonicalCode(value) != null;
 
   static List<String> canonicalizeAll(Iterable<String> values) {
