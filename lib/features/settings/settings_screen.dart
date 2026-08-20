@@ -29,15 +29,136 @@ class SettingsScreen extends ConsumerWidget {
       return;
     }
 
+    // If using default hypothetical URL, show in-app legal viewer
+    if (uri.host == 'sparklingo.app') {
+      _showInAppLegalViewer(context, label);
+      return;
+    }
+
     try {
       final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
       if (!opened && context.mounted) {
-        _showMessage(context, 'We could not open $label.');
+        _showInAppLegalViewer(context, label);
       }
     } catch (_) {
       if (context.mounted) {
-        _showMessage(context, 'We could not open $label.');
+        _showInAppLegalViewer(context, label);
       }
+    }
+  }
+
+  void _showInAppLegalViewer(BuildContext context, String label) {
+    final theme = Theme.of(context);
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (dialogContext) => Container(
+        height: MediaQuery.of(dialogContext).size.height * 0.75,
+        decoration: BoxDecoration(
+          color: theme.scaffoldBackgroundColor,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          border: Border.all(color: theme.colorScheme.primary.withAlpha(51)),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.onSurface.withAlpha(51),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    label,
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                ),
+              ],
+            ),
+            const Divider(),
+            Expanded(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Text(
+                    _getLegalDocumentContent(label),
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      height: 1.6,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _getLegalDocumentContent(String label) {
+    switch (label) {
+      case 'Terms of Service':
+        return 'SPARK LINGO TERMS OF SERVICE\n\n'
+            '1. Acceptance of Terms\n'
+            'By using Spark Lingo, you agree to these terms. Spark Lingo provides interactive language learning, SRS flashcards, and AI conversational practice.\n\n'
+            '2. Account & Usage\n'
+            'You may use Spark Lingo as a guest or with a registered account. You agree not to misuse AI practice or attempt automated extraction of curriculum assets.\n\n'
+            '3. Subscriptions & Payments\n'
+            'In-app purchases and subscriptions are managed securely via RevenueCat and your app store account.\n\n'
+            '4. Support Contact\n'
+            'For questions or support, contact support@sparklingo.com.';
+      case 'Privacy Policy':
+        return 'SPARK LINGO PRIVACY POLICY\n\n'
+            '1. Information We Collect\n'
+            'We collect learning progress, active language selections, and optional diagnostic telemetry when authorized by you.\n\n'
+            '2. Data Security\n'
+            'Your profile and progression data are securely stored in Supabase with strict Row Level Security (RLS) policies.\n\n'
+            '3. AI & Voice Privacy\n'
+            'Voice audio sent for AI Tutor practice is processed strictly for transcription and conversation, and is never sold to third parties.\n\n'
+            '4. Data Control\n'
+            'You may request account deletion or data export at any time from Settings.';
+      case 'AI & voice processing notice':
+        return 'AI & VOICE PROCESSING NOTICE\n\n'
+            'Spark Lingo uses AI language models to generate contextual conversation practice and real-time voice feedback.\n\n'
+            '• Audio recordings are converted to text strictly for practice feedback.\n'
+            '• Transcripts are processed transiently and kept private to your account.\n'
+            '• You may pause or disable AI features at any time.';
+      case 'Analytics notice':
+        return 'ANALYTICS & DIAGNOSTICS NOTICE\n\n'
+            'Spark Lingo includes privacy-safe telemetry to monitor performance and app stability.\n\n'
+            '• No personal identifiers, voice audio, or transcripts are included in telemetry.\n'
+            '• You can toggle Analytics & Diagnostics consent on or off anytime in Settings.';
+      case 'Help & support':
+        return 'SPARK LINGO HELP & SUPPORT\n\n'
+            'Need help with Spark Lingo?\n\n'
+            '• Email Support: support@sparklingo.com\n'
+            '• Response Time: Within 24 hours\n'
+            '• Topics: Account recovery, subscription issues, audio practice, or reporting content typos.';
+      case 'Account deletion request':
+        return 'ACCOUNT DELETION INSTRUCTIONS\n\n'
+            'If you wish to delete your Spark Lingo account:\n\n'
+            '1. In-App: Go to Settings -> Delete Account -> Type DELETE to confirm.\n'
+            '2. External Request: Email privacy@sparklingo.com with your registered account details.\n'
+            '3. Processing: All profile data and learning history will be permanently purged within 30 days.';
+      default:
+        return 'Spark Lingo official documentation for $label.\n\nFor further inquiries, contact support@sparklingo.com.';
     }
   }
 
