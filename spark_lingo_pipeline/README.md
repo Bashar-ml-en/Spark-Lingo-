@@ -11,9 +11,33 @@ being hand-built one course at a time.
 |---|---|
 | `exam_frameworks.json` | Verified exam bodies + CEFR/native-scale mapping for 12 languages. This is your single source of truth for "what does passing actually mean" per language — feed it into `exam_definitions` in Supabase. |
 | `supabase_schema_additions.sql` | New tables (`exam_definitions`, `mock_exams`, `mock_exam_sections`, `user_mock_exam_attempts`, `user_exam_readiness`) that sit alongside your existing `units`/`lessons`/`flashcards`/`card_reviews` tables without touching them. |
-| `content_pipeline/fetch_tatoeba.py` | Pulls real sentence/translation pairs from the Tatoeba public API (CC-BY 2.0) and shapes them into `flashcards` rows for the SM-2 engine. |
-| `content_pipeline/process_common_voice.py` | Matches native-speaker audio from Mozilla Common Voice (CC0) to those flashcards, so vocabulary isn't just text — it's pronounced by real speakers. |
+| `content_pipeline/download_exports.py` | Volume path: downloads Tatoeba's official weekly dataset exports (CC-BY 2.0) for the five priority languages. Resumable, deterministic, no rate limits. |
+| `content_pipeline/build_dataset_seed.py` | Joins the downloaded exports into `flashcards`-schema rows (verified 2026-08-23: 8,000 rows across ms/es/ar/zh in `../output/`). Handles the Malay language-code trap correctly. |
+| `content_pipeline/fetch_tatoeba.py` | Live per-pair pulls from the Tatoeba search API for small curated batches. Rate-limited — use exports for volume. |
+| `content_pipeline/process_common_voice.py` | Matches native-speaker audio from Mozilla Common Voice (CC0) to flashcards. Requires a dataset tarball you download manually (Mozilla gates it behind an email signup). |
 | `sample_curriculum_ielts_b2.json` | One fully worked unit showing the pattern: CEFR level → can-do statements → SRS vocab → AI speaking practice → AI-scored mock section. Replicate this shape per exam/level. |
+
+## Language-code correctness (verified against Tatoeba exports, 2026-08-23)
+
+- **Bahasa Melayu is NOT `mal`.** On Tatoeba, ISO 639-2 `mal` is **Malayalam**
+  (a Dravidian language of Kerala, India). Standard Malay is `zsm` and the
+  broader Malay individual-language code is `zlm`. The pipeline merges both
+  into Spark Lingo's `ms` catalog entry. Verified: 2,000 generated `ms` rows
+  are 100% Latin-script Malay (0 Malayalam-script rows).
+- Mandarin is `cmn` (not `zh`), Arabic is `ara`, Spanish is `spa`.
+
+## Audio licensing reality (verified 2026-08-23, do not skip)
+
+- Tatoeba's per-clip audio is overwhelmingly **CC BY-NC-\*** (non-commercial):
+  for Spanish, 108,240 clips are CC BY-NC-ND 3.0, 3,062 are CC BY-NC 4.0,
+  and only 11 are CC BY 4.0. NC licences are incompatible with a freemium
+  product, so `build_dataset_seed.py` deliberately sets `audio_url = NULL`.
+- Native-speaker audio must come from **Mozilla Common Voice (CC0)** via
+  `process_common_voice.py`. Its download page is email-gated, so fetching a
+  corpus tarball is a manual (human) step — by design, the pipeline never
+  stores Common Voice credentials.
+- Malay (`zsm`/`zlm`) has **no** `sentences_with_audio` export on Tatoeba
+  (404 as of 2026-08-23) — Common Voice is the only path for Malay audio.
 
 ## Why these two data sources specifically
 
