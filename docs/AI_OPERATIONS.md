@@ -131,6 +131,61 @@ An operator must also confirm real runtime propagation after changing Edge
 Function environment values. The database switch is the primary immediate
 control; the environment override is a second containment path.
 
+## Provider selection (provider-agnostic gateway)
+
+The `sparky-ai` function resolves its AI provider from environment only;
+the client can never influence the choice. All provider configuration is
+fail-closed: any missing or malformed value returns `503
+configuration_error` before a quota reservation or provider call.
+
+| `AI_PROVIDER` | Endpoint | Required secrets | Use case |
+| --- | --- | --- | --- |
+| unset / `openai` | `https://api.openai.com/v1` | `OPENAI_API_KEY`, `OPENAI_CHAT_MODEL`, `OPENAI_TRANSCRIPTION_MODEL` | Default; historical behaviour |
+| `dashscope` | `https://dashscope-intl.aliyuncs.com/compatible-mode/v1` (override with `AI_PROVIDER_BASE_URL`) | `DASHSCOPE_API_KEY`, `DASHSCOPE_CHAT_MODEL`, `DASHSCOPE_TRANSCRIPTION_MODEL` | Qwen models via DashScope OpenAI-compatible mode |
+| `openai_compatible` | `AI_PROVIDER_BASE_URL` (required) | `AI_PROVIDER_API_KEY`, `AI_PROVIDER_CHAT_MODEL`, `AI_PROVIDER_TRANSCRIPTION_MODEL` | Self-hosted vLLM / Ollama / Speaches |
+
+Optional STT override: `AI_STT_PROVIDER=openai_compatible` +
+`AI_STT_BASE_URL` + `AI_STT_MODEL` routes only transcription to a
+dedicated self-hosted faster-whisper/Speaches server (MIT-licensed;
+verified alternatives at SYSTRAN/faster-whisper and fedirz/speaches).
+Chat stays on the primary provider. Cleartext `http` endpoints are
+rejected unless the host is loopback, so a bearer key can never be sent
+unencrypted to a remote host.
+
+### Deployment commands (HUMAN-ONLY — hosted secrets)
+
+Run from a machine with the Supabase CLI authenticated
+(`supabase login`), project ref `dioisitgohusggmwowft` (or the approved
+staging/production ref):
+
+```bash
+# Switch the gateway to Qwen via DashScope (example):
+supabase secrets set AI_PROVIDER=dashscope --project-ref <ref>
+supabase secrets set DASHSCOPE_API_KEY=<server-only key> --project-ref <ref>
+supabase secrets set DASHSCOPE_CHAT_MODEL=<approved pinned model> --project-ref <ref>
+supabase secrets set DASHSCOPE_TRANSCRIPTION_MODEL=<approved pinned model> --project-ref <ref>
+
+# Self-hosted STT override (optional, example):
+supabase secrets set AI_STT_PROVIDER=openai_compatible --project-ref <ref>
+supabase secrets set AI_STT_BASE_URL=https://<approved speaches host>/v1 --project-ref <ref>
+supabase secrets set AI_STT_MODEL=Systran/faster-whisper-large-v3 --project-ref <ref>
+```
+
+Then redeploy the function and verify the fail-closed contract:
+
+```bash
+supabase functions deploy sparky-ai --project-ref <ref>
+# With the database runtime control enabled, a normal authenticated chat
+# request must succeed; with AI_PROVIDER set to an unknown value it must
+# return 503 configuration_error with no provider traffic (check the
+# ai_provider_failure log stream is silent).
+```
+
+Never place provider keys in source, client builds, or `--dart-define`
+values. Migration `012` (learner error patterns) must be applied before
+deploying the matching function version; deploying the function first
+degrades gracefully (focus list empty) but the ledger will be absent.
+
 ## Privacy-safe telemetry schema
 
 The Edge Function emits newline-delimited JSON to its platform log sink using
