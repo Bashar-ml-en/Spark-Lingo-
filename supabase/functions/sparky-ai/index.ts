@@ -7,6 +7,11 @@ import {
   resolveProviderForAction,
   type ProviderConfig,
 } from "./providers.ts";
+import {
+  focusPromptSentence,
+  persistErrorPatterns,
+  topErrorPatterns,
+} from "./error_patterns.ts";
 
 const JSON_CONTENT_TYPE = "application/json; charset=utf-8";
 const MAX_JSON_BODY_BYTES = 64 * 1024;
@@ -39,7 +44,8 @@ type OperationalEvent = {
     | "ai_control_blocked"
     | "ai_control_unavailable"
     | "ai_consent_blocked"
-    | "ai_consent_unavailable";
+    | "ai_consent_unavailable"
+    | "ai_feedback_persistence_failure";
   request_id: string;
   action?: Action;
   status?: number;
@@ -47,7 +53,7 @@ type OperationalEvent = {
   latency_ms?: number;
   outcome?: "success" | "error";
   control?: "database" | "environment";
-  operation?: "reserve" | "mark" | "finalize" | "release";
+  operation?: "reserve" | "mark" | "finalize" | "release" | "read" | "write";
   upstream_status?: number;
 };
 
@@ -855,6 +861,19 @@ serve(async (req) => {
         const history = chatHistory(body);
         const provider = assertAiConfiguration(action);
         const quotaClient = createServerQuotaClient();
+        // Best-effort adaptive focus: the ledger read is service-role-only and
+        // degrades to an empty list on any failure, so chat never blocks on it.
+        const focusPatterns = await topErrorPatterns(
+          quotaClient,
+          authenticated.userId,
+          language,
+          requestId,
+          emitOperationalEvent,
+        );
+        const focusSentence = focusPromptSentence(focusPatterns);
+        const systemPrompt = focusSentence
+          ? `${tutorSystemPrompt(language)} ${focusSentence}`
+          : tutorSystemPrompt(language);
         responseContent = await withQuotaReservation(
           quotaClient,
           authenticated.userId,
@@ -864,7 +883,7 @@ serve(async (req) => {
             requestId,
             action as Action,
             provider,
-            [{ role: "system", content: tutorSystemPrompt(language) }, ...history],
+            [{ role: "system", content: systemPrompt }, ...history],
             500,
             markProviderSubmission,
           ),
@@ -873,7 +892,7 @@ serve(async (req) => {
         const messages = scoringMessages(body);
         const provider = assertAiConfiguration(action);
         const quotaClient = createServerQuotaClient();
-        responseContent = JSON.stringify(await withQuotaReservation(
+        const scored = await withQuotaReservation(
           quotaClient,
           authenticated.userId,
           action,
@@ -886,7 +905,20 @@ serve(async (req) => {
             600,
             markProviderSubmission,
           )),
-        ));
+        );
+        // Adaptive feedback loop: map criteria onto allow-listed pedagogical
+        // classes and upsert them into the server-only ledger. Degrades to a
+        // clean response on any persistence failure (never throws).
+        await persistErrorPatterns(
+          quotaClient,
+          authenticated.userId,
+          targetLanguage(body),
+          requiredText(body.rubricRef, "rubricRef", 120),
+          scored,
+          requestId,
+          emitOperationalEvent,
+        );
+        responseContent = JSON.stringify(scored);
       }
 
       // Preserve the prior client response envelope while preventing callers
