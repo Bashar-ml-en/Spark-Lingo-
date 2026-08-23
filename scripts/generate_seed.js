@@ -8,11 +8,18 @@ const langMap = {
   spanish: { id: 'es', name: 'Spanish', code: 'es' },
   english: { id: 'en', name: 'English', code: 'en' },
   french: { id: 'fr', name: 'French', code: 'fr' },
+  german: { id: 'de', name: 'German', code: 'de' },
+  italian: { id: 'it', name: 'Italian', code: 'it' },
+  portuguese: { id: 'pt', name: 'Portuguese', code: 'pt' },
   mandarin: { id: 'zh', name: 'Mandarin', code: 'zh' },
-  hindi: { id: 'hi', name: 'Hindi', code: 'hi' },
+  japanese: { id: 'ja', name: 'Japanese', code: 'ja' },
+  korean: { id: 'ko', name: 'Korean', code: 'ko' },
   russian: { id: 'ru', name: 'Russian', code: 'ru' },
-  'bahasa melayu': { id: 'ms', name: 'Malay', code: 'ms' },
-  arabic: { id: 'ar', name: 'Arabic', code: 'ar' }
+  arabic: { id: 'ar', name: 'Arabic', code: 'ar' },
+  hindi: { id: 'hi', name: 'Hindi', code: 'hi' },
+  thai: { id: 'th', name: 'Thai', code: 'th' },
+  tagalog: { id: 'tl', name: 'Tagalog', code: 'tl' },
+  'bahasa melayu': { id: 'ms', name: 'Malay', code: 'ms' }
 };
 
 const missingLanguageMappings = Object.keys(data).filter((language) => !langMap[language]);
