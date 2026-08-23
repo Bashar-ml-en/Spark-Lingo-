@@ -32,9 +32,15 @@ or audit evidence for each completed cell.
 
 | Scope | Secret/configuration name | Notes |
 | --- | --- | --- |
-| Edge AI | `OPENAI_API_KEY` | Server-only; rotate immediately if exposure is suspected |
+| Edge AI | `AI_PROVIDER` | Optional. Unset/`openai` (default), `dashscope`, or `openai_compatible`. Unknown values fail closed |
+| Edge AI | `OPENAI_API_KEY` | Server-only; rotate immediately if exposure is suspected. Used when `AI_PROVIDER` is unset/`openai` |
 | Edge AI | `OPENAI_CHAT_MODEL` | Approved pinned model name |
 | Edge AI | `OPENAI_TRANSCRIPTION_MODEL` | Approved pinned transcription model name |
+| Edge AI | `DASHSCOPE_API_KEY` / `DASHSCOPE_CHAT_MODEL` / `DASHSCOPE_TRANSCRIPTION_MODEL` | Server-only key + approved pinned models for Qwen via DashScope OpenAI-compatible mode (`AI_PROVIDER=dashscope`) |
+| Edge AI | `AI_PROVIDER_BASE_URL` | Optional override of the provider API root (e.g. DashScope China region, or the required root for `openai_compatible`). HTTPS only except loopback http |
+| Edge AI | `AI_PROVIDER_API_KEY` / `AI_PROVIDER_CHAT_MODEL` / `AI_PROVIDER_TRANSCRIPTION_MODEL` | Server-only key + pinned models for a self-hosted OpenAI-compatible server (vLLM/Ollama/Speaches) when `AI_PROVIDER=openai_compatible` |
+| Edge AI | `AI_STT_PROVIDER` | Optional. `openai_compatible` routes only transcription to a dedicated self-hosted STT server (e.g. faster-whisper/Speaches); chat stays on the primary provider. Unknown values fail closed |
+| Edge AI | `AI_STT_BASE_URL` / `AI_STT_MODEL` / `AI_STT_API_KEY` | Required base URL + pinned faster-whisper model name for the STT override; key optional for unauthenticated local servers |
 | Edge/Web | `ALLOWED_ORIGINS` | Exact deployed HTTPS origins only |
 | Edge AI | `AI_ENABLED` | Emergency environment override; use `false` to block AI |
 | Edge AI | `ALLOW_ANONYMOUS_AI` | Keep false unless a security-reviewed CAPTCHA/WAF exception exists |

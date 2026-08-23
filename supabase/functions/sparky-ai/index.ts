@@ -1,5 +1,12 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { HttpError } from "./errors.ts";
+import {
+  configuredValue,
+  providerHeaders,
+  resolveProviderForAction,
+  type ProviderConfig,
+} from "./providers.ts";
 
 const JSON_CONTENT_TYPE = "application/json; charset=utf-8";
 const MAX_JSON_BODY_BYTES = 64 * 1024;
@@ -44,32 +51,13 @@ type OperationalEvent = {
   upstream_status?: number;
 };
 
-class HttpError extends Error {
-  constructor(
-    readonly status: number,
-    readonly code: string,
-    readonly publicMessage: string,
-    readonly extraHeaders: Record<string, string> = {},
-  ) {
-    super(publicMessage);
-  }
-}
-
-function configuredValue(name: string): string {
-  const value = Deno.env.get(name)?.trim();
-  if (!value) {
-    throw new HttpError(503, "configuration_error", "AI service is temporarily unavailable.");
-  }
-  return value;
-}
-
-function assertAiConfiguration(action: Action): void {
-  configuredValue("OPENAI_API_KEY");
-  if (action === "transcribe") {
-    configuredValue("OPENAI_TRANSCRIPTION_MODEL");
-  } else {
-    configuredValue("OPENAI_CHAT_MODEL");
-  }
+function assertAiConfiguration(action: Action): ProviderConfig {
+  // Resolving the provider is itself the configuration assertion: a missing
+  // or malformed key/model/base-URL throws 503 configuration_error before
+  // any quota reservation or provider call. OpenAI remains the historical
+  // default when AI_PROVIDER is unset. The score action uses the chat
+  // completions wire endpoint, so it resolves as "chat".
+  return resolveProviderForAction(action === "transcribe" ? "transcribe" : "chat");
 }
 
 /**
@@ -623,6 +611,7 @@ function scoringMessages(body: JsonRecord): OpenAIMessage[] {
 async function openAIChat(
   requestId: string,
   action: Action,
+  provider: ProviderConfig,
   messages: OpenAIMessage[],
   maxTokens: number,
   markProviderSubmission: () => Promise<void>,
@@ -631,16 +620,17 @@ async function openAIChat(
   const timeout = setTimeout(() => controller.abort(), 25_000);
 
   try {
-    const response = await providerFetch(markProviderSubmission, "https://api.openai.com/v1/chat/completions", {
+    const chatEndpoint = `${provider.baseUrl}/chat/completions`;
+    const response = await providerFetch(markProviderSubmission, chatEndpoint, {
       method: "POST",
       signal: controller.signal,
       headers: {
-        Authorization: `Bearer ${configuredValue("OPENAI_API_KEY")}`,
+        ...providerHeaders(provider),
         "Content-Type": "application/json",
         "X-Client-Request-Id": requestId,
       },
       body: JSON.stringify({
-        model: configuredValue("OPENAI_CHAT_MODEL"),
+        model: provider.model,
         messages,
         temperature: 0.4,
         max_tokens: maxTokens,
@@ -757,20 +747,22 @@ async function parseAudioUpload(req: Request): Promise<File> {
 async function transcribe(
   requestId: string,
   file: File,
+  provider: ProviderConfig,
   markProviderSubmission: () => Promise<void>,
 ): Promise<JsonRecord> {
   const openAIForm = new FormData();
   openAIForm.append("file", file, file.name || "recording.webm");
-  openAIForm.append("model", configuredValue("OPENAI_TRANSCRIPTION_MODEL"));
+  openAIForm.append("model", provider.model);
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 45_000);
   try {
-    const response = await providerFetch(markProviderSubmission, "https://api.openai.com/v1/audio/transcriptions", {
+    const transcriptionEndpoint = `${provider.baseUrl}/audio/transcriptions`;
+    const response = await providerFetch(markProviderSubmission, transcriptionEndpoint, {
       method: "POST",
       signal: controller.signal,
       headers: {
-        Authorization: `Bearer ${configuredValue("OPENAI_API_KEY")}`,
+        ...providerHeaders(provider),
         "X-Client-Request-Id": requestId,
       },
       body: openAIForm,
@@ -846,14 +838,14 @@ serve(async (req) => {
     let payload: JsonRecord;
     if (action === "transcribe") {
       const file = await parseAudioUpload(request);
-      assertAiConfiguration(action);
+      const provider = assertAiConfiguration(action);
       const quotaClient = createServerQuotaClient();
       payload = await withQuotaReservation(
         quotaClient,
         authenticated.userId,
         action,
         requestId,
-        (markProviderSubmission) => transcribe(requestId, file, markProviderSubmission),
+        (markProviderSubmission) => transcribe(requestId, file, provider, markProviderSubmission),
       );
     } else {
       const body = await parseJsonBody(request);
@@ -861,7 +853,7 @@ serve(async (req) => {
       if (action === "chat") {
         const language = targetLanguage(body);
         const history = chatHistory(body);
-        assertAiConfiguration(action);
+        const provider = assertAiConfiguration(action);
         const quotaClient = createServerQuotaClient();
         responseContent = await withQuotaReservation(
           quotaClient,
@@ -871,6 +863,7 @@ serve(async (req) => {
           (markProviderSubmission) => openAIChat(
             requestId,
             action as Action,
+            provider,
             [{ role: "system", content: tutorSystemPrompt(language) }, ...history],
             500,
             markProviderSubmission,
@@ -878,7 +871,7 @@ serve(async (req) => {
         );
       } else {
         const messages = scoringMessages(body);
-        assertAiConfiguration(action);
+        const provider = assertAiConfiguration(action);
         const quotaClient = createServerQuotaClient();
         responseContent = JSON.stringify(await withQuotaReservation(
           quotaClient,
@@ -888,6 +881,7 @@ serve(async (req) => {
           async (markProviderSubmission) => normalizedScore(await openAIChat(
             requestId,
             action as Action,
+            provider,
             messages,
             600,
             markProviderSubmission,
