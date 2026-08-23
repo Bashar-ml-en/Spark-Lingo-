@@ -4260,18 +4260,6 @@
     "tatoeba_link_id": "450072"
   },
   {
-    "id": "tat_ms_451893_972058",
-    "lesson_id": "REPLACE_WITH_LESSON_ID",
-    "front_text": "Tatoeba: dimana ayat-ayat sentiasa ayat, kecuali apabila ia tidak!",
-    "back_text": "Tatoeba: Where sentences are always sentences, except when they aren't.",
-    "context_sentence": null,
-    "audio_url": null,
-    "source": "tatoeba",
-    "source_attribution": "Sentences © Tatoeba.org contributors (CC-BY 2.0)",
-    "tatoeba_source_id": "972058",
-    "tatoeba_link_id": "451893"
-  },
-  {
     "id": "tat_ms_453481_1929762",
     "lesson_id": "REPLACE_WITH_LESSON_ID",
     "front_text": "Satu jam dalam keadaan tidak berfikir boleh menyebabkan tangisan bertahun-tahun.",
@@ -5062,18 +5050,6 @@
     "source_attribution": "Sentences © Tatoeba.org contributors (CC-BY 2.0)",
     "tatoeba_source_id": "971919",
     "tatoeba_link_id": "758922"
-  },
-  {
-    "id": "tat_ms_761916_2285984",
-    "lesson_id": "REPLACE_WITH_LESSON_ID",
-    "front_text": "kerana bahasa bukan hanya sekadar daripada himpunan perkataan",
-    "back_text": "Tatoeba: Because a language is more than the sum of its words.",
-    "context_sentence": null,
-    "audio_url": null,
-    "source": "tatoeba",
-    "source_attribution": "Sentences © Tatoeba.org contributors (CC-BY 2.0)",
-    "tatoeba_source_id": "2285984",
-    "tatoeba_link_id": "761916"
   },
   {
     "id": "tat_ms_775442_979806",
@@ -14662,18 +14638,6 @@
     "source_attribution": "Sentences © Tatoeba.org contributors (CC-BY 2.0)",
     "tatoeba_source_id": "8102712",
     "tatoeba_link_id": "7697543"
-  },
-  {
-    "id": "tat_ms_6551792_8216884",
-    "lesson_id": "REPLACE_WITH_LESSON_ID",
-    "front_text": "Apa saja pun yang mereka katakan kepada Tatoeba boleh memberi impak.",
-    "back_text": "Anything they say to Tatoeba can have an impact.",
-    "context_sentence": null,
-    "audio_url": null,
-    "source": "tatoeba",
-    "source_attribution": "Sentences © Tatoeba.org contributors (CC-BY 2.0)",
-    "tatoeba_source_id": "8216884",
-    "tatoeba_link_id": "6551792"
   },
   {
     "id": "tat_ms_8223041_1476488",
