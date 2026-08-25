@@ -21,11 +21,76 @@ import '../../shared/widgets/flag_grid.dart';
 import '../../shared/widgets/language_symbol_badge.dart';
 import '../../shared/widgets/ai_score_disclaimer.dart';
 import '../../shared/widgets/consent_request_dialog.dart';
+import '../../shared/widgets/phase_sidebar.dart';
 import '../exam_prep/exam_picker_screen.dart';
 import '../monetization/paywall_screen.dart';
 
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  final ScrollController _curriculumScrollController = ScrollController();
+  final List<GlobalKey> _unitKeys = [];
+  int _selectedUnitIndex = 0;
+
+  @override
+  void dispose() {
+    _curriculumScrollController.dispose();
+    super.dispose();
+  }
+
+  /// Jumps the curriculum list to a phase chosen from the sidebar.
+  void _scrollToUnit(int index) {
+    setState(() => _selectedUnitIndex = index);
+    final target = index < _unitKeys.length
+        ? _unitKeys[index].currentContext
+        : null;
+    if (target != null) {
+      Scrollable.ensureVisible(
+        target,
+        duration: const Duration(milliseconds: 350),
+        curve: Curves.easeOutCubic,
+        alignment: 0.02,
+      );
+    }
+  }
+
+  /// End drawer carrying the learning-path sidebar for compact layouts.
+  /// Returns null when there is nothing to show, so no empty panel renders.
+  Widget? _buildPhaseEndDrawer(BuildContext context) {
+    final user = ref.watch(authProvider);
+    if (user == null) return null;
+    final profileState = ref.watch(userProfileProvider(user.id));
+    final profile = profileState.maybeWhen(
+      data: (value) => value,
+      orElse: () => null,
+    );
+    if (profile == null || profile.targetLanguages.isEmpty) return null;
+    final routeCode = LanguageCatalog.tryCanonicalCode(
+      GoRouterState.of(context).pathParameters['langCode'],
+    );
+    final lang = profile.targetLanguages.contains(routeCode)
+        ? routeCode!
+        : (profile.activeLanguage ?? profile.targetLanguages.first);
+    final units = ref.watch(unitsProvider(lang)).maybeWhen(
+      data: (value) => value,
+      orElse: () => <Unit>[],
+    );
+    if (units.isEmpty) return null;
+    return Drawer(
+      child: PhaseSidebar.drawerBody(
+        scaffoldContext: context,
+        langCode: lang,
+        units: [for (final u in units) (u.id, u.title)],
+        selectedUnitIndex: _selectedUnitIndex,
+        onUnitSelected: _scrollToUnit,
+      ),
+    );
+  }
 
   void _openAITutor(BuildContext context, String activeLanguage) {
     showModalBottomSheet(
@@ -217,7 +282,7 @@ class HomeScreen extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final user = ref.watch(authProvider);
 
@@ -503,6 +568,7 @@ class HomeScreen extends ConsumerWidget {
                   },
                   orElse: () => null,
                 ),
+      endDrawer: user == null ? null : _buildPhaseEndDrawer(context),
       body: user == null
           ? const Center(child: CircularProgressIndicator())
           : Column(
@@ -613,6 +679,31 @@ class HomeScreen extends ConsumerWidget {
                                     .read(authProvider.notifier)
                                     .signOut(),
                               ),
+                              // Learning-path sidebar drawer (compact layouts;
+                              // wide layouts pin the sidebar permanently).
+                              if (profileAsync != null &&
+                                  MediaQuery.of(context).size.width < 900)
+                                profileAsync.maybeWhen(
+                                  data: (profile) {
+                                    if (profile == null ||
+                                        profile.targetLanguages.isEmpty) {
+                                      return const SizedBox.shrink();
+                                    }
+                                    return Builder(
+                                      builder: (scaffoldContext) => IconButton(
+                                        tooltip: 'Learning path',
+                                        icon: const Icon(
+                                          Icons.format_list_numbered,
+                                          color: Colors.black87,
+                                        ),
+                                        onPressed: () => Scaffold.of(
+                                          scaffoldContext,
+                                        ).openEndDrawer(),
+                                      ),
+                                    );
+                                  },
+                                  orElse: () => const SizedBox.shrink(),
+                                ),
                             ],
                           ),
                         ),
@@ -693,12 +784,37 @@ class HomeScreen extends ConsumerWidget {
                                       activeLanguage,
                                     );
                                   }
-                                  return _buildCurriculumPath(
+                                  final wide =
+                                      MediaQuery.of(context).size.width >= 900;
+                                  final curriculum = _buildCurriculumPath(
                                     context,
                                     ref,
                                     profile.id,
                                     units,
                                     activeLanguage,
+                                  );
+                                  if (!wide) return curriculum;
+                                  // Wide layouts pin the learning-path sidebar
+                                  // beside the curriculum content.
+                                  return Row(
+                                    children: [
+                                      PhaseSidebar(
+                                        langCode: activeLanguage,
+                                        units: [
+                                          for (final u in units) (u.id, u.title),
+                                        ],
+                                        selectedUnitIndex: _selectedUnitIndex,
+                                        onUnitSelected: _scrollToUnit,
+                                      ),
+                                      VerticalDivider(
+                                        width: 1,
+                                        thickness: 1,
+                                        color: activeTheme?.primaryColor
+                                                .withValues(alpha: 0.12) ??
+                                            const Color(0xFFE5E7EB),
+                                      ),
+                                      Expanded(child: curriculum),
+                                    ],
                                   );
                                 },
                               );
@@ -912,10 +1028,34 @@ class HomeScreen extends ConsumerWidget {
     final billingReady =
         ref.watch(billingAccessProvider).value == BillingAccessState.ready;
 
-    return ListView.builder(
-      padding: const EdgeInsets.all(24),
-      itemCount: units.length + 1,
-      itemBuilder: (context, index) {
+    // Keep one stable key per unit so the sidebar can scroll to each phase.
+    while (_unitKeys.length < units.length) {
+      _unitKeys.add(GlobalKey());
+    }
+
+    final curriculumTheme = LanguageThemeRegistry.themeFor(langKey);
+    return Stack(
+      children: [
+        // National-symbol watermark behind the learning path.
+        Positioned.fill(
+          child: Center(
+            child: SvgPicture.asset(
+              curriculumTheme.motifAsset,
+              width: 460,
+              height: 460,
+              colorFilter: ColorFilter.mode(
+                curriculumTheme.primaryColor.withValues(alpha: 0.06),
+                BlendMode.srcIn,
+              ),
+              placeholderBuilder: (_) => const SizedBox.shrink(),
+            ),
+          ),
+        ),
+        ListView.builder(
+          controller: _curriculumScrollController,
+          padding: const EdgeInsets.all(24),
+          itemCount: units.length + 1,
+          itemBuilder: (context, index) {
         if (index == 0) {
           // Display Active Target Language Header with dynamic landmark in left corner
           return Container(
@@ -1046,6 +1186,7 @@ class HomeScreen extends ConsumerWidget {
 
         final unit = units[index - 1];
         return Card(
+          key: _unitKeys[index - 1],
           margin: const EdgeInsets.only(bottom: 20),
           color: theme.cardColor,
           shape: RoundedRectangleBorder(
@@ -1190,6 +1331,8 @@ class HomeScreen extends ConsumerWidget {
           ),
         );
       },
+        ),
+      ],
     );
   }
 
