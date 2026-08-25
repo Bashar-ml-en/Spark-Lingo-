@@ -2001,26 +2001,56 @@ class _AISpeechPracticeSessionState
     if (purpose.document == null) {
       // Test-deployment fallback: web test builds compiled with
       // ENABLE_TEST_CONSENT=true show a clearly-labelled draft notice and
-      // record the choice on-device so QA can exercise Sparky AI before
-      // approved policy URLs exist (LEG-001). Store builds never compile the
-      // flag, so this path stays off for them.
+      // record the choice so QA can exercise Sparky AI before approved
+      // policy URLs exist (LEG-001). The server ledger is tried first: once
+      // an operator registers an active consent document row, consent is
+      // recorded server-side exactly like the launch flow. Store builds
+      // never compile the flag, so this whole path stays off for them.
       if (TestConsentService.active) {
-        if (await TestConsentService.hasCurrentConsent(purpose.documentKey)) {
-          return true;
+        final consentService = ref.read(consentServiceProvider);
+        var serverLedgerUsable = true;
+        try {
+          if (await consentService.hasCurrentConsent(purpose)) return true;
+        } on ConsentServiceException {
+          serverLedgerUsable = false;
         }
+
         if (!mounted) return false;
         final accepted = await requestProcessingConsent(
           context,
           purpose: purpose,
         );
         if (!accepted) return false;
+
+        if (serverLedgerUsable) {
+          try {
+            await consentService.recordConsent(purpose);
+            return true;
+          } on ConsentConfigurationException {
+            // No active server document (yet): fall back to device ledger.
+          } on ConsentServiceException {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text(
+                    'We could not record your choice. Nothing was sent.',
+                  ),
+                ),
+              );
+            }
+            return false;
+          }
+        }
+
         final recorded = await TestConsentService.recordConsent(
           purpose.documentKey,
         );
         if (!recorded && mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('We could not record your choice. Nothing was sent.'),
+              content: Text(
+                'We could not record your choice. Nothing was sent.',
+              ),
             ),
           );
         }

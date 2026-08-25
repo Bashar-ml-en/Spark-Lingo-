@@ -45,6 +45,7 @@ type OperationalEvent = {
     | "ai_control_unavailable"
     | "ai_consent_blocked"
     | "ai_consent_unavailable"
+    | "ai_consent_test_mode_bypass"
     | "ai_feedback_persistence_failure";
   request_id: string;
   action?: Action;
@@ -224,6 +225,23 @@ async function assertAiProcessingConsent(
 
   if (error || !isRecord(consent) || typeof consent.has_consent !== "boolean" ||
     typeof consent.document_version !== "string") {
+    // Pre-store test deployments have no registered legal document yet
+    // (LEG-001). Only an operator who explicitly sets the hosted
+    // TEST_CONSENT_MODE secret to true may bypass the consent ledger;
+    // the bypass is audit-logged and never applies when a working ledger
+    // reports a real consent decision.
+    const testConsentMode = Deno.env.get("TEST_CONSENT_MODE")?.trim()
+      .toLowerCase();
+    if (testConsentMode === "true" || testConsentMode === "1") {
+      emitOperationalEvent({
+        event: "ai_consent_test_mode_bypass",
+        request_id: requestId,
+        action,
+        status: 200,
+        code: "test_consent_mode",
+      });
+      return;
+    }
     emitOperationalEvent({
       event: "ai_consent_unavailable",
       request_id: requestId,

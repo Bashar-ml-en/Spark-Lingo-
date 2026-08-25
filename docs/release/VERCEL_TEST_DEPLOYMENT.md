@@ -27,8 +27,25 @@ that serves nothing (404). The compiled output must be deployed directly.
 `ENABLE_TEST_CONSENT=true` unlocks Sparky AI chat/score/voice in this web
 test deployment: approved policy URLs do not exist yet (LEG-001), so the
 consent flow shows a clearly-labelled draft notice and records the choice
-on-device. Remove the flag for any store or production build — the default
-is `false` and release pipelines must not set it.
+(server ledger first, on-device fallback). Remove the flag for any store or
+production build — the default is `false` and release pipelines must not set
+it.
+
+The client flag alone is not enough: the `sparky-ai` edge function enforces
+the same gate server-side. For AI to respond in this test deployment, an
+operator must also (HUMAN-ONLY):
+
+1. Deploy the updated `sparky-ai` function (adds a default-off
+   `TEST_CONSENT_MODE` bypass, audit-logged via operational events):
+   `supabase functions deploy sparky-ai --project-ref dioisitgohusggmwowft`
+2. Set the hosted secret: `TEST_CONSENT_MODE=true`
+   (Dashboard → Edge Functions → sparky-ai → Secrets, or
+   `supabase secrets set TEST_CONSENT_MODE=true --project-ref dioisitgohusggmwowft`)
+3. Guest testing additionally requires `ALLOW_ANONYMOUS_AI=true`
+   (anonymous users are denied by default; see `.env.example`).
+
+Unset all three before any production or store release; the function fails
+closed when they are absent.
 
 `vercel.json` configures `@vercel/static` over `**` plus an SPA fallback
 rewrite to `/index.html` for Flutter's URL-strategy routes.
