@@ -85,11 +85,42 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       child: PhaseSidebar.drawerBody(
         scaffoldContext: context,
         langCode: lang,
-        units: [for (final u in units) (u.id, u.title)],
+        units: units,
         selectedUnitIndex: _selectedUnitIndex,
         onUnitSelected: _scrollToUnit,
+        onLessonSelected: _openLessonFromSidebar,
       ),
     );
+  }
+
+  /// Opens a lesson chosen from the learning-path sidebar using the same
+  /// practice sheets as the inline curriculum list.
+  void _openLessonFromSidebar(int unitIndex, Lesson lesson) {
+    _scrollToUnit(unitIndex);
+    if (lesson.type == 'ai_tutor_session' ||
+        lesson.type == 'mock_exam_section') {
+      _openSpeechPracticeSession(context, ref, lesson, _currentLanguageCode());
+    } else {
+      _openVocabularySheet(context, lesson, _currentLanguageCode());
+    }
+  }
+
+  /// Resolves the active language code exactly like build() does.
+  String _currentLanguageCode() {
+    final routeCode = LanguageCatalog.tryCanonicalCode(
+      GoRouterState.of(context).pathParameters['langCode'],
+    );
+    final user = ref.read(authProvider);
+    if (routeCode != null) return routeCode;
+    if (user == null) return 'en';
+    final profile = ref.read(userProfileProvider(user.id)).maybeWhen(
+      data: (value) => value,
+      orElse: () => null,
+    );
+    return profile?.activeLanguage ??
+        (profile?.targetLanguages.isNotEmpty == true
+            ? profile!.targetLanguages.first
+            : 'en');
   }
 
   void _openAITutor(BuildContext context, String activeLanguage) {
@@ -800,11 +831,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                     children: [
                                       PhaseSidebar(
                                         langCode: activeLanguage,
-                                        units: [
-                                          for (final u in units) (u.id, u.title),
-                                        ],
+                                        units: units,
                                         selectedUnitIndex: _selectedUnitIndex,
                                         onUnitSelected: _scrollToUnit,
+                                        onLessonSelected: _openLessonFromSidebar,
                                       ),
                                       VerticalDivider(
                                         width: 1,
@@ -1741,9 +1771,21 @@ class _FlashcardStudySessionState
   int _currentIndex = 0;
   bool _isFlipped = false;
   final Map<String, SRSState> _sessionProgress = {};
+  final TTSService _tts = TTSService();
+  final Map<int, int> _qualityCounts = {};
+
+  void _speakCardText(bool flipped) {
+    final card = widget.flashcards[_currentIndex];
+    // Front is the target language; the back is the English bridge.
+    _tts.speak(
+      flipped ? card.back : card.front,
+      flipped ? 'en' : widget.languageKey,
+    );
+  }
 
   void _handleQualitySelect(int quality) {
     final card = widget.flashcards[_currentIndex];
+    _qualityCounts.update(quality, (v) => v + 1, ifAbsent: () => 1);
 
     final user = ref.read(authProvider);
     if (user == null) return;
@@ -1856,6 +1898,22 @@ class _FlashcardStudySessionState
                         style: theme.textTheme.bodyMedium,
                         textAlign: TextAlign.center,
                       ),
+                      const SizedBox(height: 20),
+                      // Recall breakdown from this session.
+                      if (_qualityCounts.isNotEmpty) ...[
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            _sessionStat('Forgot', _qualityCounts[0] ?? 0, Colors.redAccent),
+                            const SizedBox(width: 16),
+                            _sessionStat('Hard', _qualityCounts[3] ?? 0, Colors.orangeAccent),
+                            const SizedBox(width: 16),
+                            _sessionStat('Good', _qualityCounts[4] ?? 0, Colors.blueAccent),
+                            const SizedBox(width: 16),
+                            _sessionStat('Easy', _qualityCounts[5] ?? 0, Colors.green),
+                          ],
+                        ),
+                      ],
                       const SizedBox(height: 32),
                       ElevatedButton(
                         onPressed: () => Navigator.pop(context),
@@ -1953,16 +2011,29 @@ class _FlashcardStudySessionState
                       ),
                       const SizedBox(height: 16),
                       Center(
-                        child: TextButton.icon(
-                          icon: const Icon(Icons.flip),
-                          label: Text(
-                            _isFlipped ? "Show Front" : "Reveal Answer",
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              _isFlipped = !_isFlipped;
-                            });
-                          },
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            TextButton.icon(
+                              icon: const Icon(Icons.flip),
+                              label: Text(
+                                _isFlipped ? "Show Front" : "Reveal Answer",
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _isFlipped = !_isFlipped;
+                                });
+                              },
+                            ),
+                            const SizedBox(width: 8),
+                            // Listen button: speaks the visible side with
+                            // the configured voice (male/female/auto).
+                            TextButton.icon(
+                              icon: const Icon(Icons.volume_up_rounded),
+                              label: const Text("Listen"),
+                              onPressed: () => _speakCardText(_isFlipped),
+                            ),
+                          ],
                         ),
                       ),
                       const Spacer(),
@@ -2005,6 +2076,26 @@ class _FlashcardStudySessionState
           ),
         );
       },
+    );
+  }
+
+  Widget _sessionStat(String label, int count, Color color) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          '$count',
+          style: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.w800,
+            color: color,
+          ),
+        ),
+        Text(
+          label,
+          style: const TextStyle(fontSize: 11, color: Color(0xFF6B7280)),
+        ),
+      ],
     );
   }
 

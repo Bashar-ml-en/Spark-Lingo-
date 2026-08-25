@@ -72,6 +72,9 @@ language plpgsql
 security definer
 set search_path = public
 as $$
+-- The RETURNS TABLE columns share names with table columns referenced below;
+-- resolve every conflict in favour of the table column.
+#variable_conflict use_column
 declare
     v_action text := lower(btrim(coalesce(p_action, '')));
     v_reference text := btrim(coalesce(p_change_reference, ''));

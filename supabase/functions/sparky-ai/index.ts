@@ -658,7 +658,6 @@ async function openAIChat(
         messages,
         temperature: 0.4,
         max_tokens: maxTokens,
-        store: false,
       }),
     });
 
@@ -902,7 +901,7 @@ serve(async (req) => {
             action as Action,
             provider,
             [{ role: "system", content: systemPrompt }, ...history],
-            500,
+            1500,
             markProviderSubmission,
           ),
         );
@@ -920,7 +919,7 @@ serve(async (req) => {
             action as Action,
             provider,
             messages,
-            600,
+            1500,
             markProviderSubmission,
           )),
         );

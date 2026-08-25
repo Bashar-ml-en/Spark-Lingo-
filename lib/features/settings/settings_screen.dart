@@ -7,6 +7,7 @@ import '../../core/constants/legal_config.dart';
 import '../../core/router/router.dart';
 import '../../core/services/auth_service.dart';
 import '../../core/services/database_service.dart';
+import '../../core/services/tts_service.dart';
 import '../../core/theme/language_theme_registry.dart';
 import '../../shared/widgets/analytics_consent_tile.dart';
 
@@ -315,6 +316,9 @@ class SettingsScreen extends ConsumerWidget {
             const _SettingsSectionLabel('Analytics & diagnostics'),
             AnalyticsConsentTile(signedIn: user != null),
             const Divider(),
+            const _SettingsSectionLabel('Voice for practice audio'),
+            const _VoiceSettingsTile(),
+            const Divider(),
             const _SettingsSectionLabel('Help & support'),
             _ExternalLinkTile(
               icon: Icons.help_outline,
@@ -411,6 +415,65 @@ class _ExternalLinkTile extends StatelessWidget {
       trailing: Icon(isAvailable ? Icons.open_in_new : Icons.block_outlined),
       enabled: isAvailable,
       onTap: isAvailable ? () => onOpen(context, uri, label: title) : null,
+    );
+  }
+}
+
+/// Male / female / system voice selector for practice audio.
+class _VoiceSettingsTile extends StatefulWidget {
+  const _VoiceSettingsTile();
+
+  @override
+  State<_VoiceSettingsTile> createState() => _VoiceSettingsTileState();
+}
+
+class _VoiceSettingsTileState extends State<_VoiceSettingsTile> {
+  late final TTSService _tts;
+
+  @override
+  void initState() {
+    super.initState();
+    _tts = TTSService();
+    _tts.preference; // ensure engine init path warms up
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: const Icon(Icons.record_voice_over_outlined),
+      title: const Text('Voice'),
+      subtitle: const Text('Choose the voice for practice audio.'),
+      trailing: SegmentedButton<VoicePreference>(
+        segments: const [
+          ButtonSegment(
+            value: VoicePreference.system,
+            label: Text('Auto'),
+          ),
+          ButtonSegment(
+            value: VoicePreference.female,
+            label: Text('Female'),
+          ),
+          ButtonSegment(
+            value: VoicePreference.male,
+            label: Text('Male'),
+          ),
+        ],
+        selected: {_tts.preference},
+        showSelectedIcon: false,
+        onSelectionChanged: (selection) async {
+          final value = selection.first;
+          await _tts.setPreference(value);
+          if (mounted) setState(() {});
+          await _tts.speak(
+            value == VoicePreference.male
+                ? 'Male voice selected.'
+                : value == VoicePreference.female
+                ? 'Female voice selected.'
+                : 'Default voice selected.',
+            'en',
+          );
+        },
+      ),
     );
   }
 }
