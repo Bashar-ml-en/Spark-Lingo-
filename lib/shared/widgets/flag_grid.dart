@@ -34,6 +34,7 @@ class _FlagGridState extends State<FlagGrid> {
     'hi': 'Hindi',
     'th': 'Thai',
     'tl': 'Tagalog',
+    'ms': 'Malay',
   };
 
   @override

@@ -170,21 +170,11 @@ class LanguageCatalog {
       _languages[canonicalCode(value)]!.curriculumKey;
 
   static bool hasBundledCurriculum(String? value) {
-    // Launch eligibility requires both reviewed curriculum and complete visual
-    // assets. Malay data exists in an internal draft, but it has no shipped
-    // theme/flag asset yet, so it is intentionally not selectable at launch.
-    switch (tryCanonicalCode(value)) {
-      case 'en':
-      case 'es':
-      case 'fr':
-      case 'zh':
-      case 'hi':
-      case 'ru':
-      case 'ar':
-        return true;
-      default:
-        return false;
-    }
+    // Every language in the catalog ships a full bundled curriculum
+    // (syllabus_master.json: 15 languages x 600 cards each). Availability is
+    // therefore driven by the catalog itself; the selection screen still
+    // intersects with LanguageThemeRegistry so only themed languages render.
+    return tryCanonicalCode(value) != null;
   }
 }
 

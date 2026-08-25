@@ -18,10 +18,20 @@ void main() {
       );
     });
 
-    test('keeps draft or unthemed languages out of launch selection', () {
-      expect(LanguageCatalog.hasBundledCurriculum('es'), isTrue);
-      expect(LanguageCatalog.hasBundledCurriculum('ms'), isFalse);
-      expect(LanguageCatalog.hasBundledCurriculum('ja'), isFalse);
+    test('exposes every catalog language — all 15 ship bundled curriculum', () {
+      final codes = LanguageCatalog.supportedLanguages;
+      expect(codes, hasLength(15));
+      for (final code in codes) {
+        expect(
+          LanguageCatalog.hasBundledCurriculum(code),
+          isTrue,
+          reason: code,
+        );
+      }
+      // Includes Malay — the Malay-first home market.
+      expect(LanguageCatalog.hasBundledCurriculum('ms'), isTrue);
+      // Unknown codes stay excluded.
+      expect(LanguageCatalog.hasBundledCurriculum('xx'), isFalse);
     });
   });
 

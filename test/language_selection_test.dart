@@ -66,7 +66,7 @@ void main() {
 
   group('Launch language availability', () {
     test(
-      'only languages with shipped curriculum and visual assets are launch enabled',
+      'all 15 themed languages ship bundled curriculum and are launch enabled',
       () {
         final launchCodes = LanguageThemeRegistry.availableLanguageCodes
             .where(LanguageCatalog.hasBundledCurriculum)
@@ -74,11 +74,25 @@ void main() {
 
         expect(
           launchCodes,
-          containsAll(<String>{'en', 'es', 'fr', 'zh', 'hi', 'ru', 'ar'}),
+          containsAll(<String>{
+            'en',
+            'es',
+            'fr',
+            'zh',
+            'hi',
+            'ru',
+            'ar',
+            'de',
+            'it',
+            'pt',
+            'ja',
+            'ko',
+            'th',
+            'tl',
+            'ms',
+          }),
         );
-        expect(launchCodes, isNot(contains('de')));
-        expect(launchCodes, isNot(contains('ja')));
-        expect(launchCodes, isNot(contains('ms')));
+        expect(launchCodes, hasLength(15));
       },
     );
   });
@@ -116,6 +130,11 @@ void main() {
 
   group('FlagGrid Widget Tests', () {
     testWidgets('Filters grid by search query', (WidgetTester tester) async {
+      // The grid is lazy; give the test surface enough height that every tile
+      // materialises (logical 800 x 2400, 3 columns -> 5 rows for 15 tiles).
+      tester.view.physicalSize = const Size(2400, 7200);
+      addTearDown(tester.view.reset);
+
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -124,19 +143,27 @@ void main() {
         ),
       );
 
-      // Only launch-enabled languages are exposed to a new learner.
-      expect(find.byType(FlagTile), findsAtLeastNWidgets(2));
+      // All 15 launch languages are exposed to a new learner.
+      expect(find.byType(FlagTile), findsNWidgets(15));
       expect(find.text('Español').first, findsOneWidget);
-      expect(find.text('Deutsch'), findsNothing);
+      expect(find.text('Deutsch'), findsOneWidget);
+      expect(find.text('Bahasa Melayu'), findsOneWidget);
 
-      // Future themes remain hidden even when searched for.
+      // Searching filters the grid.
       await tester.enterText(find.byType(TextField), 'German');
       await tester.pump();
 
-      expect(find.text('No languages found'), findsOneWidget);
+      expect(find.byType(FlagTile), findsNWidgets(1));
+      expect(find.text('Deutsch'), findsOneWidget);
 
       // Search for "日本語"
       await tester.enterText(find.byType(TextField), '日本語');
+      await tester.pump();
+
+      expect(find.byType(FlagTile), findsNWidgets(1));
+
+      // Unknown query shows the empty state.
+      await tester.enterText(find.byType(TextField), 'zzzz-no-match');
       await tester.pump();
 
       expect(find.text('No languages found'), findsOneWidget);

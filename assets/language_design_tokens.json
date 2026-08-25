@@ -4,8 +4,16 @@
     "en": {
       "display_name": "English",
       "flags": [
-        {"locale": "en-GB", "flag_asset": "assets/flags/en_gb.svg", "country_name": "United Kingdom"},
-        {"locale": "en-US", "flag_asset": "assets/flags/en_us.svg", "country_name": "United States"}
+        {
+          "locale": "en-GB",
+          "flag_asset": "assets/flags/en_gb.svg",
+          "country_name": "United Kingdom"
+        },
+        {
+          "locale": "en-US",
+          "flag_asset": "assets/flags/en_us.svg",
+          "country_name": "United States"
+        }
       ],
       "primary_color": "#1F3A93",
       "accent_color": "#C8102E",
@@ -15,8 +23,14 @@
       "motif_asset": "assets/symbols/en_symbol.svg"
     },
     "fr": {
-      "display_name": "Fran\u00e7ais",
-      "flags": [{"locale": "fr-FR", "flag_asset": "assets/flags/fr_fr.svg", "country_name": "France"}],
+      "display_name": "Français",
+      "flags": [
+        {
+          "locale": "fr-FR",
+          "flag_asset": "assets/flags/fr_fr.svg",
+          "country_name": "France"
+        }
+      ],
       "primary_color": "#0055A4",
       "accent_color": "#EF4135",
       "font_family": "Inter",
@@ -26,7 +40,13 @@
     },
     "de": {
       "display_name": "Deutsch",
-      "flags": [{"locale": "de-DE", "flag_asset": "assets/flags/de_de.svg", "country_name": "Germany"}],
+      "flags": [
+        {
+          "locale": "de-DE",
+          "flag_asset": "assets/flags/de_de.svg",
+          "country_name": "Germany"
+        }
+      ],
       "primary_color": "#1A1A1A",
       "accent_color": "#DD0000",
       "font_family": "Inter",
@@ -35,10 +55,18 @@
       "motif_asset": "assets/symbols/de_symbol.svg"
     },
     "es": {
-      "display_name": "Espa\u00f1ol",
+      "display_name": "Español",
       "flags": [
-        {"locale": "es-ES", "flag_asset": "assets/flags/es_es.svg", "country_name": "Spain"},
-        {"locale": "es-MX", "flag_asset": "assets/flags/es_mx.svg", "country_name": "Mexico"}
+        {
+          "locale": "es-ES",
+          "flag_asset": "assets/flags/es_es.svg",
+          "country_name": "Spain"
+        },
+        {
+          "locale": "es-MX",
+          "flag_asset": "assets/flags/es_mx.svg",
+          "country_name": "Mexico"
+        }
       ],
       "primary_color": "#AA151B",
       "accent_color": "#F1BF00",
@@ -49,7 +77,13 @@
     },
     "it": {
       "display_name": "Italiano",
-      "flags": [{"locale": "it-IT", "flag_asset": "assets/flags/it_it.svg", "country_name": "Italy"}],
+      "flags": [
+        {
+          "locale": "it-IT",
+          "flag_asset": "assets/flags/it_it.svg",
+          "country_name": "Italy"
+        }
+      ],
       "primary_color": "#008C45",
       "accent_color": "#CD212A",
       "font_family": "Inter",
@@ -58,10 +92,18 @@
       "motif_asset": "assets/symbols/it_symbol.svg"
     },
     "pt": {
-      "display_name": "Portugu\u00eas",
+      "display_name": "Português",
       "flags": [
-        {"locale": "pt-PT", "flag_asset": "assets/flags/pt_pt.svg", "country_name": "Portugal"},
-        {"locale": "pt-BR", "flag_asset": "assets/flags/pt_br.svg", "country_name": "Brazil"}
+        {
+          "locale": "pt-PT",
+          "flag_asset": "assets/flags/pt_pt.svg",
+          "country_name": "Portugal"
+        },
+        {
+          "locale": "pt-BR",
+          "flag_asset": "assets/flags/pt_br.svg",
+          "country_name": "Brazil"
+        }
       ],
       "primary_color": "#046A38",
       "accent_color": "#DA291C",
@@ -71,8 +113,14 @@
       "motif_asset": "assets/symbols/pt_symbol.svg"
     },
     "zh": {
-      "display_name": "\u4e2d\u6587 (Mandarin)",
-      "flags": [{"locale": "zh-CN", "flag_asset": "assets/flags/zh_cn.svg", "country_name": "China"}],
+      "display_name": "中文 (Mandarin)",
+      "flags": [
+        {
+          "locale": "zh-CN",
+          "flag_asset": "assets/flags/zh_cn.svg",
+          "country_name": "China"
+        }
+      ],
       "primary_color": "#DE2910",
       "accent_color": "#FFDE00",
       "font_family": "NotoSansSC",
@@ -81,8 +129,14 @@
       "motif_asset": "assets/symbols/zh_symbol.svg"
     },
     "ja": {
-      "display_name": "\u65e5\u672c\u8a9e",
-      "flags": [{"locale": "ja-JP", "flag_asset": "assets/flags/ja_jp.svg", "country_name": "Japan"}],
+      "display_name": "日本語",
+      "flags": [
+        {
+          "locale": "ja-JP",
+          "flag_asset": "assets/flags/ja_jp.svg",
+          "country_name": "Japan"
+        }
+      ],
       "primary_color": "#1A1A1A",
       "accent_color": "#BC002D",
       "font_family": "NotoSansJP",
@@ -91,8 +145,14 @@
       "motif_asset": "assets/symbols/ja_symbol.svg"
     },
     "ko": {
-      "display_name": "\ud55c\uad6d\uc5b4",
-      "flags": [{"locale": "ko-KR", "flag_asset": "assets/flags/ko_kr.svg", "country_name": "South Korea"}],
+      "display_name": "한국어",
+      "flags": [
+        {
+          "locale": "ko-KR",
+          "flag_asset": "assets/flags/ko_kr.svg",
+          "country_name": "South Korea"
+        }
+      ],
       "primary_color": "#003478",
       "accent_color": "#C60C30",
       "font_family": "NotoSansKR",
@@ -101,8 +161,14 @@
       "motif_asset": "assets/symbols/ko_symbol.svg"
     },
     "ru": {
-      "display_name": "\u0420\u0443\u0441\u0441\u043a\u0438\u0439",
-      "flags": [{"locale": "ru-RU", "flag_asset": "assets/flags/ru_ru.svg", "country_name": "Russia"}],
+      "display_name": "Русский",
+      "flags": [
+        {
+          "locale": "ru-RU",
+          "flag_asset": "assets/flags/ru_ru.svg",
+          "country_name": "Russia"
+        }
+      ],
       "primary_color": "#0039A6",
       "accent_color": "#D52B1E",
       "font_family": "Inter",
@@ -111,8 +177,14 @@
       "motif_asset": "assets/symbols/ru_symbol.svg"
     },
     "ar": {
-      "display_name": "\u0627\u0644\u0639\u0631\u0628\u064a\u0629",
-      "flags": [{"locale": "ar-SA", "flag_asset": "assets/flags/ar_sa.svg", "country_name": "Saudi Arabia"}],
+      "display_name": "العربية",
+      "flags": [
+        {
+          "locale": "ar-SA",
+          "flag_asset": "assets/flags/ar_sa.svg",
+          "country_name": "Saudi Arabia"
+        }
+      ],
       "primary_color": "#006C35",
       "accent_color": "#FFFFFF",
       "font_family": "NotoSansArabic",
@@ -122,8 +194,14 @@
       "layout_notes": "Full RTL mirroring required: nav, progress bars, chevrons, flashcard swipe direction all flip. Test with Flutter's Directionality widget, not manual mirroring."
     },
     "hi": {
-      "display_name": "\u0939\u093f\u0928\u094d\u0926\u0940",
-      "flags": [{"locale": "hi-IN", "flag_asset": "assets/flags/hi_in.svg", "country_name": "India"}],
+      "display_name": "हिन्दी",
+      "flags": [
+        {
+          "locale": "hi-IN",
+          "flag_asset": "assets/flags/hi_in.svg",
+          "country_name": "India"
+        }
+      ],
       "primary_color": "#FF9933",
       "accent_color": "#138808",
       "font_family": "NotoSansDevanagari",
@@ -132,8 +210,14 @@
       "motif_asset": "assets/symbols/hi_symbol.svg"
     },
     "th": {
-      "display_name": "\u0e44\u0e17\u0e22",
-      "flags": [{"locale": "th-TH", "flag_asset": "assets/flags/th_th.svg", "country_name": "Thailand"}],
+      "display_name": "ไทย",
+      "flags": [
+        {
+          "locale": "th-TH",
+          "flag_asset": "assets/flags/th_th.svg",
+          "country_name": "Thailand"
+        }
+      ],
       "primary_color": "#00247D",
       "accent_color": "#ED1C24",
       "font_family": "NotoSansThai",
@@ -144,7 +228,13 @@
     },
     "tl": {
       "display_name": "Tagalog",
-      "flags": [{"locale": "tl-PH", "flag_asset": "assets/flags/tl_ph.svg", "country_name": "Philippines"}],
+      "flags": [
+        {
+          "locale": "tl-PH",
+          "flag_asset": "assets/flags/tl_ph.svg",
+          "country_name": "Philippines"
+        }
+      ],
       "primary_color": "#0038A8",
       "accent_color": "#CE1126",
       "font_family": "Inter",
@@ -152,6 +242,23 @@
       "motif": "sun-ray-geometric",
       "motif_asset": "assets/symbols/tl_symbol.svg",
       "priority_note": "Duolingo's course has been effectively abandoned — real opportunity for heritage learners and diaspora."
+    },
+    "ms": {
+      "display_name": "Bahasa Melayu",
+      "flags": [
+        {
+          "locale": "ms-MY",
+          "flag_asset": "assets/flags/ms_my.svg",
+          "country_name": "Malaysia"
+        }
+      ],
+      "primary_color": "#010066",
+      "accent_color": "#FFCC00",
+      "font_family": "Inter",
+      "text_direction": "ltr",
+      "motif": "crescent-star-geometric",
+      "motif_asset": "assets/symbols/ms_symbol.svg",
+      "priority_note": "Malay-first home market: Bahasa Melayu bridge content is the flagship course."
     }
   },
   "fallback_theme": {
