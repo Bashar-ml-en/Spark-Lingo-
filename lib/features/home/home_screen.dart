@@ -13,6 +13,7 @@ import '../../shared/widgets/landmark_painter.dart';
 import '../../core/services/ai_service.dart';
 import '../../core/services/consent_service.dart';
 import '../../core/services/tts_service.dart';
+import '../../core/services/test_consent_service.dart';
 import '../../shared/models/curriculum.dart';
 import '../../core/theme/language_theme_registry.dart';
 import '../../shared/models/language_theme.dart';
@@ -1998,6 +1999,34 @@ class _AISpeechPracticeSessionState
     }
 
     if (purpose.document == null) {
+      // Test-deployment fallback: web test builds compiled with
+      // ENABLE_TEST_CONSENT=true show a clearly-labelled draft notice and
+      // record the choice on-device so QA can exercise Sparky AI before
+      // approved policy URLs exist (LEG-001). Store builds never compile the
+      // flag, so this path stays off for them.
+      if (TestConsentService.active) {
+        if (await TestConsentService.hasCurrentConsent(purpose.documentKey)) {
+          return true;
+        }
+        if (!mounted) return false;
+        final accepted = await requestProcessingConsent(
+          context,
+          purpose: purpose,
+        );
+        if (!accepted) return false;
+        final recorded = await TestConsentService.recordConsent(
+          purpose.documentKey,
+        );
+        if (!recorded && mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('We could not record your choice. Nothing was sent.'),
+            ),
+          );
+        }
+        return recorded;
+      }
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(

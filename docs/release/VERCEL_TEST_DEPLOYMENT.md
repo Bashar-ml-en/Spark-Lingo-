@@ -18,10 +18,17 @@ that serves nothing (404). The compiled output must be deployed directly.
      --dart-define=SUPABASE_URL=https://<project-ref>.supabase.co \
      --dart-define=SUPABASE_PUBLISHABLE_KEY=<public client key> \
      --dart-define=SUPABASE_PROJECT_REF=<project-ref> \
-     --dart-define=SPARK_LINGO_PRODUCTION_PROJECT_REF=<project-ref>
+     --dart-define=SPARK_LINGO_PRODUCTION_PROJECT_REF=<project-ref> \
+     --dart-define=ENABLE_TEST_CONSENT=true
 3. copy vercel.json build\web\vercel.json
 4. vercel deploy build/web --prod --name spark-lingo
 ```
+
+`ENABLE_TEST_CONSENT=true` unlocks Sparky AI chat/score/voice in this web
+test deployment: approved policy URLs do not exist yet (LEG-001), so the
+consent flow shows a clearly-labelled draft notice and records the choice
+on-device. Remove the flag for any store or production build — the default
+is `false` and release pipelines must not set it.
 
 `vercel.json` configures `@vercel/static` over `**` plus an SPA fallback
 rewrite to `/index.html` for Flutter's URL-strategy routes.
