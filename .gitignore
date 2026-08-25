@@ -77,3 +77,4 @@ android/key.properties
 # Local archive copies are review inputs, never repository release source.
 /spark_lingo_buildkit.zip
 /spark_lingo_pipeline.zip
+.vercel

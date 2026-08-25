@@ -24,14 +24,11 @@ class SettingsScreen extends ConsumerWidget {
     Uri? uri, {
     required String label,
   }) async {
+    // Releases without a configured HTTPS endpoint still expose the reviewed
+    // draft text in-app, clearly labelled as a draft. Purchases stay gated on
+    // real build-time policy URLs (LEG-001); only learning surfaces open.
     if (uri == null) {
-      _showMessage(context, '$label is not available in this build.');
-      return;
-    }
-
-    // If using default hypothetical URL, show in-app legal viewer
-    if (uri.host == 'sparklingo.app') {
-      _showInAppLegalViewer(context, label);
+      _showInAppLegalViewer(context, label, isDraft: true);
       return;
     }
 
@@ -47,7 +44,11 @@ class SettingsScreen extends ConsumerWidget {
     }
   }
 
-  void _showInAppLegalViewer(BuildContext context, String label) {
+  void _showInAppLegalViewer(
+    BuildContext context,
+    String label, {
+    bool isDraft = false,
+  }) {
     final theme = Theme.of(context);
     showModalBottomSheet<void>(
       context: context,
@@ -98,7 +99,9 @@ class SettingsScreen extends ConsumerWidget {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   child: Text(
-                    _getLegalDocumentContent(label),
+                    isDraft
+                        ? 'DRAFT — review copy only. Approved public policy URLs have not been configured for this release yet.\n\n${_getLegalDocumentContent(label)}'
+                        : _getLegalDocumentContent(label),
                     style: theme.textTheme.bodyMedium?.copyWith(
                       height: 1.6,
                     ),
