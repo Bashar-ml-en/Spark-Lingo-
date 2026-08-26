@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/design/components.dart';
+import '../../core/design/tokens.dart';
 import '../../core/services/auth_service.dart';
 import '../../core/services/database_service.dart';
 import '../../core/services/retention_service.dart';
@@ -163,18 +165,32 @@ class _FlashcardStudySessionState
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      const Icon(
-                        Icons.check_circle_outline,
-                        size: 72,
-                        color: Colors.green,
+                      Container(
+                        width: 88,
+                        height: 88,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: SparkStatus.success.withValues(alpha: 0.12),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.check_circle_rounded,
+                          size: 56,
+                          color: SparkStatus.success,
+                        ),
                       ),
                       const SizedBox(height: 24),
                       Text(
-                        "Session Completed! 🎉",
+                        "Session complete!",
                         style: theme.textTheme.displayLarge?.copyWith(
                           fontSize: 24,
                         ),
                         textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 8),
+                      // Visible XP reward: what this session earned.
+                      Center(
+                        child: SparkXpBadge(xp: XpAmounts.reviewSession),
                       ),
                       const SizedBox(height: 12),
                       Text(
@@ -188,20 +204,21 @@ class _FlashcardStudySessionState
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            _sessionStat('Forgot', _qualityCounts[0] ?? 0, Colors.redAccent),
+                            _sessionStat('Forgot', _qualityCounts[0] ?? 0, SparkStatus.danger),
                             const SizedBox(width: 16),
-                            _sessionStat('Hard', _qualityCounts[3] ?? 0, Colors.orangeAccent),
+                            _sessionStat('Hard', _qualityCounts[3] ?? 0, SparkStatus.warning),
                             const SizedBox(width: 16),
-                            _sessionStat('Good', _qualityCounts[4] ?? 0, Colors.blueAccent),
+                            _sessionStat('Good', _qualityCounts[4] ?? 0, SparkStatus.info),
                             const SizedBox(width: 16),
-                            _sessionStat('Easy', _qualityCounts[5] ?? 0, Colors.green),
+                            _sessionStat('Easy', _qualityCounts[5] ?? 0, SparkStatus.success),
                           ],
                         ),
                       ],
                       const SizedBox(height: 32),
-                      ElevatedButton(
+                      SparkButton(
+                        label: 'Back to Dashboard',
+                        expanded: true,
                         onPressed: () => Navigator.pop(context),
-                        child: const Text("Back to Dashboard"),
                       ),
                     ],
                   )
@@ -209,13 +226,10 @@ class _FlashcardStudySessionState
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       // Progress indicator
-                      LinearProgressIndicator(
-                        value: widget.flashcards.isEmpty
+                      SparkProgressBar(
+                        progress: widget.flashcards.isEmpty
                             ? 1.0
                             : (_currentIndex / widget.flashcards.length),
-                        backgroundColor: theme.colorScheme.primary.withAlpha(
-                          25,
-                        ),
                       ),
                       const SizedBox(height: 12),
                       Text(
@@ -336,20 +350,24 @@ class _FlashcardStudySessionState
                           children: [
                             _buildQualityButton(
                               0,
-                              "Forgot ❌",
-                              Colors.redAccent,
+                              "Forgot",
+                              SparkStatus.danger,
                             ),
                             _buildQualityButton(
                               3,
-                              "Hard ⏳",
-                              Colors.orangeAccent,
+                              "Hard",
+                              SparkStatus.warning,
                             ),
                             _buildQualityButton(
                               4,
-                              "Good 👍",
-                              Colors.blueAccent,
+                              "Good",
+                              SparkStatus.info,
                             ),
-                            _buildQualityButton(5, "Easy ⭐", Colors.green),
+                            _buildQualityButton(
+                              5,
+                              "Easy",
+                              SparkStatus.success,
+                            ),
                           ],
                         ),
                       ] else ...[
@@ -388,13 +406,19 @@ class _FlashcardStudySessionState
       style: ElevatedButton.styleFrom(
         backgroundColor: btnColor,
         foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        elevation: 0,
+        padding: const EdgeInsets.symmetric(
+          horizontal: SparkSpacing.sm,
+          vertical: SparkSpacing.sm,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(SparkRadius.button),
+        ),
       ),
       onPressed: () => _handleQualitySelect(q),
       child: Text(
         label,
-        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+        style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
       ),
     );
   }
