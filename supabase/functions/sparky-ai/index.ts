@@ -4,6 +4,7 @@ import { HttpError } from "./errors.ts";
 import {
   configuredValue,
   providerHeaders,
+  resolveFallbackChatProvider,
   resolveProviderForAction,
   type ProviderConfig,
 } from "./providers.ts";
@@ -1250,18 +1251,48 @@ serve(async (req) => {
             }
           };
           try {
-            return await openAIChatStream(
-              requestId,
-              provider,
-              chatMessages,
-              1500,
-              markProviderSubmission,
-              cors,
-              onStreamSettled,
-              quotaClient,
-              authenticated.userId,
-              language,
-            );
+            try {
+              return await openAIChatStream(
+                requestId,
+                provider,
+                chatMessages,
+                1500,
+                markProviderSubmission,
+                cors,
+                onStreamSettled,
+                quotaClient,
+                authenticated.userId,
+                language,
+              );
+            } catch (error) {
+              // Fallback before any learner-visible bytes are streamed: the
+              // stream constructor throws on upstream 502/503 before it
+              // returns, so retrying here is safe for the client.
+              const fallback = resolveFallbackChatProvider();
+              const retriable = error instanceof HttpError &&
+                (error.status === 502 || error.status === 503);
+              if (fallback && retriable) {
+                emitOperationalEvent({
+                  event: "ai_provider_failure",
+                  request_id: requestId,
+                  action,
+                  code: "fallback_attempted",
+                });
+                return await openAIChatStream(
+                  requestId,
+                  fallback,
+                  chatMessages,
+                  1500,
+                  markProviderSubmission,
+                  cors,
+                  onStreamSettled,
+                  quotaClient,
+                  authenticated.userId,
+                  language,
+                );
+              }
+              throw error;
+            }
           } catch (error) {
             if (submissionState === "not_started") {
               await releasePreSendQuota(quotaClient, authenticated.userId, action, requestId);
@@ -1275,14 +1306,43 @@ serve(async (req) => {
           authenticated.userId,
           action,
           requestId,
-          (markProviderSubmission) => openAIChat(
-            requestId,
-            action as Action,
-            provider,
-            chatMessages,
-            1500,
-            markProviderSubmission,
-          ),
+          async (markProviderSubmission) => {
+            try {
+              return await openAIChat(
+                requestId,
+                action as Action,
+                provider,
+                chatMessages,
+                1500,
+                markProviderSubmission,
+              );
+            } catch (error) {
+              // Provider fallback: retry the same request on the configured
+              // fallback provider only when the primary failed upstream
+              // (502/503) before any response content existed. The quota
+              // mark is idempotent, so the retry costs no extra slot.
+              const fallback = resolveFallbackChatProvider();
+              const retriable = error instanceof HttpError &&
+                (error.status === 502 || error.status === 503);
+              if (fallback && retriable) {
+                emitOperationalEvent({
+                  event: "ai_provider_failure",
+                  request_id: requestId,
+                  action,
+                  code: "fallback_attempted",
+                });
+                return await openAIChat(
+                  requestId,
+                  action as Action,
+                  fallback,
+                  chatMessages,
+                  1500,
+                  markProviderSubmission,
+                );
+              }
+              throw error;
+            }
+          },
         );
         // Strip the trailing focus marker before the reply reaches the
         // learner, and persist any observed error classes to the ledger.
@@ -1307,14 +1367,41 @@ serve(async (req) => {
           authenticated.userId,
           action,
           requestId,
-          async (markProviderSubmission) => normalizedScore(await openAIChat(
-            requestId,
-            action as Action,
-            provider,
-            messages,
-            1500,
-            markProviderSubmission,
-          )),
+          async (markProviderSubmission) => {
+            try {
+              return normalizedScore(await openAIChat(
+                requestId,
+                action as Action,
+                provider,
+                messages,
+                1500,
+                markProviderSubmission,
+              ));
+            } catch (error) {
+              // Same fallback contract as the chat action: retry upstream
+              // failures (502/503) once on the configured fallback provider.
+              const fallback = resolveFallbackChatProvider();
+              const retriable = error instanceof HttpError &&
+                (error.status === 502 || error.status === 503);
+              if (fallback && retriable) {
+                emitOperationalEvent({
+                  event: "ai_provider_failure",
+                  request_id: requestId,
+                  action,
+                  code: "fallback_attempted",
+                });
+                return normalizedScore(await openAIChat(
+                  requestId,
+                  action as Action,
+                  fallback,
+                  messages,
+                  1500,
+                  markProviderSubmission,
+                ));
+              }
+              throw error;
+            }
+          },
         );
         // Adaptive feedback loop: map criteria onto allow-listed pedagogical
         // classes and upsert them into the server-only ledger. Degrades to a
