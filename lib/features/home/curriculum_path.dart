@@ -245,24 +245,38 @@ class CurriculumPath extends ConsumerWidget {
                               ),
                             ),
                             const SizedBox(height: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: theme.colorScheme.onSurface.withAlpha(
-                                  25,
+                            Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: theme.colorScheme.onSurface
+                                        .withAlpha(25),
+                                    borderRadius: BorderRadius.circular(
+                                      SparkRadius.chip,
+                                    ),
+                                  ),
+                                  child: Text(
+                                    "Beginner pathway",
+                                    style:
+                                        theme.textTheme.bodySmall?.copyWith(
+                                          color: theme.colorScheme.onSurface,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                  ),
                                 ),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Text(
-                                "Beginner pathway",
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: theme.colorScheme.onSurface,
-                                  fontWeight: FontWeight.bold,
+                                const SizedBox(width: SparkSpacing.xs),
+                                // Overall course progress: completed lessons
+                                // across every unit, live from the DB.
+                                _HeroCourseProgress(
+                                  userId: userId,
+                                  units: units,
+                                  langKey: langKey,
                                 ),
-                              ),
+                              ],
                             ),
                             const SizedBox(height: 12),
                             Text(
@@ -553,6 +567,89 @@ class _UnitProgressRing extends ConsumerWidget {
         );
       },
       orElse: () => const SizedBox.shrink(),
+    );
+  }
+}
+
+/// Overall-course progress chip for the hero header: counts completed
+/// lessons across every unit (from the live lesson_progress data) against
+/// the total lessons currently loaded.
+class _HeroCourseProgress extends ConsumerWidget {
+  final String userId;
+  final List<Unit> units;
+  final String langKey;
+
+  const _HeroCourseProgress({
+    required this.userId,
+    required this.units,
+    required this.langKey,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final progressAsync = ref.watch(
+      lessonProgressProvider(CardReviewsParam(userId, langKey)),
+    );
+    final progressMap = progressAsync.value ?? const <String, int>{};
+
+    var total = 0;
+    var loadedUnits = 0;
+    final allLessonIds = <String>{};
+    for (final unit in units) {
+      final lessonsAsync = ref.read(lessonsProvider(unit.id));
+      lessonsAsync.maybeWhen(
+        data: (lessons) {
+          loadedUnits++;
+          for (final l in lessons) {
+            allLessonIds.add(l.id);
+          }
+        },
+        orElse: () {},
+      );
+    }
+    total = allLessonIds.length;
+
+    // Nothing loaded yet — hide the chip instead of showing 0/0.
+    if (loadedUnits == 0 || total == 0) return const SizedBox.shrink();
+
+    final completed =
+        progressMap.keys.where(allLessonIds.contains).length;
+    final pct = total > 0 ? completed / total : 0.0;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 10,
+        vertical: 4,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.white.withAlpha(38),
+        borderRadius: BorderRadius.circular(SparkRadius.pill),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            width: 14,
+            height: 14,
+            child: CircularProgressIndicator(
+              strokeWidth: 2.5,
+              value: pct,
+              color: Colors.white,
+              backgroundColor: Colors.white.withAlpha(51),
+            ),
+          ),
+          const SizedBox(width: 6),
+          Text(
+            '$completed/$total lessons',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 11,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
