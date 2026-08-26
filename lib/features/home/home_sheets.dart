@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/constants/language_catalog.dart';
 import '../../core/router/router.dart';
@@ -7,6 +8,7 @@ import '../../core/services/auth_service.dart';
 import '../../core/services/database_service.dart';
 import '../../core/services/spaced_repetition_service.dart';
 import '../../core/theme/language_theme_registry.dart';
+import '../../shared/models/language_theme.dart';
 import '../../shared/widgets/flag_grid.dart';
 import 'flashcard_study_session.dart';
 import 'sparky_chat_session.dart';
@@ -476,5 +478,133 @@ void showLanguageSwitcher(
         ),
       );
     },
+  );
+}
+
+/// First-launch language selector shown when no active language is set.
+Widget buildLanguageSelector(
+  BuildContext context,
+  WidgetRef ref,
+  String userId,
+) {
+  final theme = Theme.of(context);
+  return SafeArea(
+    child: Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
+          child: Text(
+            'Choose a language with lessons available in this release.',
+            style: theme.textTheme.titleMedium,
+            textAlign: TextAlign.center,
+          ),
+        ),
+        Expanded(
+          child: FlagGrid(
+            onLanguageSelected: (langCode, _) async {
+              final code = LanguageCatalog.canonicalCode(langCode);
+              final previous = ref.read(localActiveLanguageProvider);
+              ref.read(localActiveLanguageProvider.notifier).state = code;
+              try {
+                await ref.read(databaseServiceProvider).updateTargetLanguages(
+                  userId,
+                  [code],
+                );
+                ref.invalidate(userProfileProvider(userId));
+                if (context.mounted) context.go('/home/$code');
+              } catch (_) {
+                ref.read(localActiveLanguageProvider.notifier).state =
+                    previous;
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'We could not save your language choice. Please try again.',
+                      ),
+                    ),
+                  );
+                }
+              }
+            },
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+/// Shown when the chosen language has no reviewed curriculum yet.
+Widget buildHomeEmptyState(
+  BuildContext context,
+  WidgetRef ref,
+  LanguageTheme? theme,
+  String langCode,
+  void Function(BuildContext context, WidgetRef ref, String userId) onSwitchLanguage,
+) {
+  final primaryColor = theme?.primaryColor ?? const Color(0xFF1F3A93);
+  final displayName = theme?.displayName ?? langCode;
+
+  return Center(
+    child: Padding(
+      padding: const EdgeInsets.all(32.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          if (theme != null && theme.motifAsset.isNotEmpty) ...[
+            SvgPicture.asset(
+              theme.motifAsset,
+              width: 120,
+              height: 120,
+              colorFilter: ColorFilter.mode(
+                primaryColor.withValues(alpha: 0.3),
+                BlendMode.srcIn,
+              ),
+            ),
+            const SizedBox(height: 24),
+          ],
+          Text(
+            '$displayName lessons are not available yet',
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF1F2937),
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            "This release does not include reviewed curriculum for $displayName. Choose one of the available languages to start learning.",
+            style: const TextStyle(
+              fontSize: 14,
+              color: Color(0xFF6B7280),
+              height: 1.4,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 24),
+          ElevatedButton.icon(
+            onPressed: () {
+              final user = ref.read(authProvider);
+              if (user != null) {
+                onSwitchLanguage(context, ref, user.id);
+              }
+            },
+            icon: const Icon(Icons.language),
+            label: const Text('Choose an available language'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: primaryColor,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(
+                horizontal: 24,
+                vertical: 12,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          ),
+        ],
+      ),
+    ),
   );
 }

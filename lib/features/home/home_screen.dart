@@ -10,7 +10,6 @@ import '../../core/services/database_service.dart';
 import '../../shared/models/curriculum.dart';
 import '../../core/theme/language_theme_registry.dart';
 import '../../shared/models/language_theme.dart';
-import '../../shared/widgets/flag_grid.dart';
 import '../../shared/widgets/language_symbol_badge.dart';
 import '../../shared/widgets/phase_sidebar.dart';
 import '../monetization/paywall_screen.dart';
@@ -717,50 +716,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     WidgetRef ref,
     String userId,
   ) {
-    final theme = Theme.of(context);
-    return SafeArea(
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
-            child: Text(
-              'Choose a language with lessons available in this release.',
-              style: theme.textTheme.titleMedium,
-              textAlign: TextAlign.center,
-            ),
-          ),
-          Expanded(
-            child: FlagGrid(
-              onLanguageSelected: (langCode, _) async {
-                final code = LanguageCatalog.canonicalCode(langCode);
-                final previous = ref.read(localActiveLanguageProvider);
-                ref.read(localActiveLanguageProvider.notifier).state = code;
-                try {
-                  await ref.read(databaseServiceProvider).updateTargetLanguages(
-                    userId,
-                    [code],
-                  );
-                  ref.invalidate(userProfileProvider(userId));
-                  if (context.mounted) context.go('/home/$code');
-                } catch (_) {
-                  ref.read(localActiveLanguageProvider.notifier).state =
-                      previous;
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          'We could not save your language choice. Please try again.',
-                        ),
-                      ),
-                    );
-                  }
-                }
-              },
-            ),
-          ),
-        ],
-      ),
-    );
+    return buildLanguageSelector(context, ref, userId);
   }
 
   void _openSpeechPracticeSession(
@@ -819,71 +775,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     LanguageTheme? theme,
     String langCode,
   ) {
-    final primaryColor = theme?.primaryColor ?? const Color(0xFF1F3A93);
-    final displayName = theme?.displayName ?? langCode;
-
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (theme != null && theme.motifAsset.isNotEmpty) ...[
-              SvgPicture.asset(
-                theme.motifAsset,
-                width: 120,
-                height: 120,
-                colorFilter: ColorFilter.mode(
-                  primaryColor.withValues(alpha: 0.3),
-                  BlendMode.srcIn,
-                ),
-              ),
-              const SizedBox(height: 24),
-            ],
-            Text(
-              '$displayName lessons are not available yet',
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF1F2937),
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 12),
-            Text(
-              "This release does not include reviewed curriculum for $displayName. Choose one of the available languages to start learning.",
-              style: const TextStyle(
-                fontSize: 14,
-                color: Color(0xFF6B7280),
-                height: 1.4,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton.icon(
-              onPressed: () {
-                final user = ref.read(authProvider);
-                if (user != null) {
-                  _openLanguageSwitcher(context, ref, user.id);
-                }
-              },
-              icon: const Icon(Icons.language),
-              label: const Text('Choose an available language'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: primaryColor,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 12,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+    return buildHomeEmptyState(context, ref, theme, langCode, _openLanguageSwitcher);
   }
 }
