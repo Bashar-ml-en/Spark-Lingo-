@@ -16,6 +16,7 @@ import '../monetization/paywall_screen.dart';
 import 'curriculum_path.dart';
 import 'home_sheets.dart';
 import 'sparky_chat_session.dart';
+import 'vocabulary_sheets.dart';
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
