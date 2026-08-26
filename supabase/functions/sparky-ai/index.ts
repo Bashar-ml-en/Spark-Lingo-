@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { HttpError } from "./errors.ts";
+import { persistChatTurn, recentChatMessages } from "./chat_sessions.ts";
 import {
   configuredValue,
   providerHeaders,
@@ -26,7 +27,7 @@ const MAX_MESSAGE_CHARACTERS = 2_000;
 const MAX_HISTORY_CHARACTERS = 16_000;
 const MAX_SCORE_RESPONSE_CHARACTERS = 6_000;
 
-type Action = "chat" | "score" | "transcribe";
+type Action = "chat" | "score" | "transcribe" | "history";
 type ChatRole = "user" | "assistant";
 type ChatMessage = { role: ChatRole; content: string };
 type OpenAIMessage = { role: "system" | ChatRole; content: string };
@@ -324,7 +325,12 @@ async function boundedRequest(req: Request, maxBytes: number): Promise<Request> 
 
 function getAction(req: Request): Action {
   const value = new URL(req.url).searchParams.get("action");
-  if (value === "chat" || value === "score" || value === "transcribe") return value;
+  if (
+    value === "chat" || value === "score" ||
+    value === "transcribe" || value === "history"
+  ) {
+    return value;
+  }
   throw new HttpError(400, "invalid_action", "Choose a supported AI action.");
 }
 
@@ -754,6 +760,7 @@ async function openAIChatStream(
   quotaClientForStream: SupabaseClient,
   streamUserId: string,
   streamLanguage: string,
+  streamLastUserTurn: string,
 ): Promise<Response> {
   const controller = new AbortController();
   // Streaming legitimately takes longer than the single-shot 25s budget.
@@ -866,7 +873,8 @@ async function openAIChatStream(
           }
         }
         // Stream finished: strip a trailing focus marker from the held-back
-        // tail, send what remains, then persist any observed error classes.
+        // tail, send what remains, then persist any observed error classes
+        // and the durable chat turn.
         const markerResult = extractFocusMarker(pendingTail);
         emitDelta(markerResult.stripped);
         pendingTail = "";
@@ -876,6 +884,17 @@ async function openAIChatStream(
             streamUserId,
             streamLanguage,
             markerResult.classes,
+            requestId,
+            emitOperationalEvent,
+          );
+        }
+        if (fullContent.trim()) {
+          await persistChatTurn(
+            quotaClientForStream,
+            streamUserId,
+            streamLanguage,
+            streamLastUserTurn,
+            fullContent,
             requestId,
             emitOperationalEvent,
           );
@@ -1174,6 +1193,39 @@ serve(async (req) => {
       );
     }
     const client = authenticated.client;
+
+    if (action === "history") {
+      // Pure owner-read of persisted chat turns: no provider, quota, or
+      // consent gate (no new processing occurs). RLS plus the service-role
+      // read bound to the authenticated user id enforce isolation. The body
+      // is still bounded against oversized uploads.
+      const bounded = await boundedRequest(req, MAX_JSON_BODY_BYTES);
+      const body = await parseJsonBody(bounded);
+      const language = targetLanguage(body);
+      const quotaClient = createServerQuotaClient();
+      const messages = await recentChatMessages(
+        quotaClient,
+        authenticated.userId,
+        language,
+        40,
+      );
+      const historyPayload: JsonRecord = {
+        messages: messages.map((message) => ({
+          sender: message.sender,
+          text: message.content,
+        })),
+      };
+      emitOperationalEvent({
+        event: "ai_request_completed",
+        request_id: requestId,
+        action,
+        outcome: "success",
+        status: 200,
+        latency_ms: Date.now() - startedAt,
+      });
+      return jsonResponse(historyPayload, 200, corsHeaders(req));
+    }
+
     await assertAiRuntimeEnabled(client, action, requestId);
     await assertAiProcessingConsent(client, action, requestId);
     const request = await boundedRequest(
@@ -1250,6 +1302,8 @@ serve(async (req) => {
               await releasePreSendQuota(quotaClient, authenticated.userId, action, requestId);
             }
           };
+          const streamUserTurn = [...history].reverse()
+            .find((message) => message.role === "user")?.content ?? "";
           try {
             try {
               return await openAIChatStream(
@@ -1263,6 +1317,7 @@ serve(async (req) => {
                 quotaClient,
                 authenticated.userId,
                 language,
+                streamUserTurn,
               );
             } catch (error) {
               // Fallback before any learner-visible bytes are streamed: the
@@ -1289,6 +1344,7 @@ serve(async (req) => {
                   quotaClient,
                   authenticated.userId,
                   language,
+                  streamUserTurn,
                 );
               }
               throw error;
@@ -1358,6 +1414,18 @@ serve(async (req) => {
             emitOperationalEvent,
           );
         }
+        // Durable memory: append this turn to the rolling session.
+        const lastUserTurn = [...history].reverse()
+          .find((message) => message.role === "user")?.content ?? "";
+        await persistChatTurn(
+          quotaClient,
+          authenticated.userId,
+          language,
+          lastUserTurn,
+          responseContent,
+          requestId,
+          emitOperationalEvent,
+        );
       } else {
         const messages = scoringMessages(body);
         const provider = assertAiConfiguration(action);

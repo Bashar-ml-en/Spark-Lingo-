@@ -2164,6 +2164,26 @@ class _AISpeechPracticeSessionState
   @override
   void initState() {
     super.initState();
+    _restoreOrGreet();
+  }
+
+  /// Restores the persisted conversation when one exists; otherwise shows the
+  /// standard greeting. History loading is best-effort and never blocks.
+  Future<void> _restoreOrGreet() async {
+    if (widget.lesson != null) {
+      // Graded lesson tasks always start fresh with the task prompt.
+      _addSparkyGreeting();
+      return;
+    }
+    final history = await _aiService.loadChatHistory(widget.language);
+    if (!mounted) return;
+    if (history.isNotEmpty) {
+      setState(() {
+        _messages.addAll(history);
+      });
+      _scrollToBottom();
+      return;
+    }
     _addSparkyGreeting();
   }
 

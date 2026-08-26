@@ -163,6 +163,45 @@ class AIService {
     }
   }
 
+  /// Loads the learner's persisted Sparky conversation for a language,
+  /// oldest first. Returns an empty list when nothing is stored or the
+  /// request fails — history is an enhancement, never a launch blocker.
+  Future<List<Map<String, String>>> loadChatHistory(String targetLanguage) async {
+    try {
+      final response = await http
+          .post(
+            Uri.parse('$_edgeFunctionBaseUrl?action=history'),
+            headers: _headers(_accessToken()),
+            body: jsonEncode(<String, dynamic>{
+              'targetLanguage': targetLanguage.trim(),
+            }),
+          )
+          .timeout(_requestTimeout);
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        return const [];
+      }
+      final decoded = jsonDecode(response.body);
+      if (decoded is! Map<String, dynamic>) return const [];
+      final messages = decoded['messages'];
+      if (messages is! List) return const [];
+      final restored = <Map<String, String>>[];
+      for (final message in messages) {
+        if (message is! Map) continue;
+        final sender = message['sender'];
+        final text = message['text'];
+        if ((sender == 'user' || sender == 'assistant') && text is String) {
+          restored.add(<String, String>{
+            'sender': sender == 'assistant' ? 'sparky' : 'user',
+            'text': text,
+          });
+        }
+      }
+      return restored;
+    } catch (_) {
+      return const [];
+    }
+  }
+
   /// Streams a chat response as Server-Sent Events, yielding text deltas in
   /// arrival order. The caller appends deltas to build the reply. Throws
   /// [AIServiceException] for any server-reported failure, including errors
