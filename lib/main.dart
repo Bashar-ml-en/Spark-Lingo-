@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'core/theme/theme.dart';
+import 'core/theme/theme_mode_provider.dart';
 import 'core/theme/language_theme_registry.dart';
 import 'shared/models/language_theme.dart';
 import 'core/services/database_service.dart';
@@ -121,7 +122,9 @@ class SparkLingoApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authProvider);
-    ThemeData activeThemeData = SparkTheme.lightTheme;
+    final themeMode = ref.watch(themeModeProvider);
+    ThemeData lightThemeData = SparkTheme.lightTheme;
+    ThemeData darkThemeData = SparkTheme.darkTheme;
     LanguageTheme? activeTheme;
 
     final localLanguage = ref.watch(localActiveLanguageProvider);
@@ -142,7 +145,11 @@ class SparkLingoApp extends ConsumerWidget {
     if (activeLanguage != null) {
       try {
         activeTheme = LanguageThemeRegistry.themeFor(activeLanguage);
-        activeThemeData = LanguageThemeRegistry.buildTheme(activeTheme);
+        lightThemeData = LanguageThemeRegistry.buildTheme(activeTheme);
+        darkThemeData = LanguageThemeRegistry.buildTheme(
+          activeTheme,
+          brightness: Brightness.dark,
+        );
       } catch (e) {
         debugPrint("Error loading active language theme: $e");
       }
@@ -158,16 +165,22 @@ class SparkLingoApp extends ConsumerWidget {
       title: 'Spark Lingo',
       debugShowCheckedModeBanner: false,
 
-      // Inject dynamic theme data
-      theme: activeThemeData,
+      // Inject dynamic theme data: light + dark variants with the user's
+      // persisted brightness preference.
+      theme: lightThemeData,
+      darkTheme: darkThemeData,
+      themeMode: themeMode,
 
       // Inject GoRouter pathways reactively
       routerConfig: ref.watch(routerProvider),
 
       // Responsive App Wrapper matching exact user specifications
       builder: (context, child) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
         return Scaffold(
-          backgroundColor: const Color(0xFFF3F4F6), // Outer web background
+          // Outer web background: light grey in light mode, obsidian in dark.
+          backgroundColor:
+              isDark ? SparkTheme.obsidianBlack : const Color(0xFFF3F4F6),
           body: Center(
             child: LayoutBuilder(
               builder: (context, constraints) {
@@ -193,10 +206,12 @@ class SparkLingoApp extends ConsumerWidget {
                   child: Container(
                     width: containerWidth,
                     height: constraints.maxHeight, // Use full available height
-                    decoration: const BoxDecoration(
-                      color: Color(
-                        0xFFFFFFFF,
-                      ), // Pure white inner background as requested
+                    decoration: BoxDecoration(
+                      // Inner frame background: pure white in light mode
+                      // (as originally requested), obsidian in dark mode.
+                      color: isDark
+                          ? SparkTheme.obsidianBlack
+                          : const Color(0xFFFFFFFF),
                       borderRadius: BorderRadius.zero, // Explicitly 0px radius
                     ),
                     child: Directionality(

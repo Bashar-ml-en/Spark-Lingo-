@@ -9,6 +9,7 @@ import '../../core/services/auth_service.dart';
 import '../../core/services/database_service.dart';
 import '../../core/services/tts_service.dart';
 import '../../core/theme/language_theme_registry.dart';
+import '../../core/theme/theme_mode_provider.dart';
 import '../../shared/widgets/analytics_consent_tile.dart';
 
 /// A public, fail-closed surface for legal, support, and account links.
@@ -287,6 +288,9 @@ class SettingsScreen extends ConsumerWidget {
         child: ListView(
           padding: const EdgeInsets.symmetric(vertical: 12),
           children: [
+            const _SettingsSectionLabel('Appearance'),
+            const _ThemeModeTile(),
+            const Divider(),
             const _SettingsSectionLabel('Legal'),
             _ExternalLinkTile(
               icon: Icons.description_outlined,
@@ -377,6 +381,68 @@ class _SettingsSectionLabel extends StatelessWidget {
           fontWeight: FontWeight.w700,
         ),
       ),
+    );
+  }
+}
+
+/// Brightness picker: Light / Dark / System, persisted via SharedPreferences.
+class _ThemeModeTile extends ConsumerWidget {
+  const _ThemeModeTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final mode = ref.watch(themeModeProvider);
+    final label = switch (mode) {
+      ThemeMode.light => 'Light',
+      ThemeMode.dark => 'Dark',
+      ThemeMode.system => 'System',
+    };
+    return ListTile(
+      leading: const Icon(Icons.brightness_6_outlined),
+      title: const Text('Theme'),
+      subtitle: Text(label),
+      trailing: const Icon(Icons.chevron_right),
+      onTap: () => _pickThemeMode(context, ref, mode),
+    );
+  }
+
+  void _pickThemeMode(
+    BuildContext context,
+    WidgetRef ref,
+    ThemeMode current,
+  ) {
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (sheetContext) {
+        return SafeArea(
+          child: RadioGroup<ThemeMode>(
+            groupValue: current,
+            onChanged: (value) {
+              if (value != null) {
+                ref.read(themeModeProvider.notifier).setMode(value);
+              }
+              Navigator.of(sheetContext).pop();
+            },
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: const [
+                RadioListTile<ThemeMode>(
+                  value: ThemeMode.light,
+                  title: Text('Light'),
+                ),
+                RadioListTile<ThemeMode>(
+                  value: ThemeMode.dark,
+                  title: Text('Dark'),
+                ),
+                RadioListTile<ThemeMode>(
+                  value: ThemeMode.system,
+                  title: Text('System'),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

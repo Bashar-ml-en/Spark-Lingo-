@@ -146,7 +146,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         : null;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFFFFFF), // Pure white as requested
+      // Theme-aware canvas (pure white in light mode, obsidian in dark).
+      backgroundColor: theme.scaffoldBackgroundColor,
       drawer: user == null
           ? null
           : ref
@@ -174,12 +175,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 // Custom Sleek Flat Header
                 Container(
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFFFFFF),
+                    color: theme.scaffoldBackgroundColor,
                     border: Border(
                       bottom: BorderSide(
                         color: activeTheme != null
                             ? activeTheme.primaryColor.withValues(alpha: 0.08)
-                            : const Color(0xFFE5E7EB),
+                            : theme.colorScheme.outline.withValues(alpha: 0.15),
                         width: 1,
                       ),
                     ),
@@ -217,9 +218,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             children: [
                               Builder(
                                 builder: (context) => IconButton(
-                                  icon: const Icon(
+                                  icon: Icon(
                                     Icons.menu,
-                                    color: Colors.black87,
+                                    color: theme.colorScheme.onSurface,
                                   ),
                                   onPressed: () =>
                                       Scaffold.of(context).openDrawer(),
@@ -232,7 +233,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                     "Spark Lingo",
                                     style: theme.textTheme.titleLarge?.copyWith(
                                       fontWeight: FontWeight.bold,
-                                      color: Colors.black87,
+                                      color: theme.colorScheme.onSurface,
                                       fontFamily:
                                           activeTheme?.fontFamily == 'Inter'
                                           ? null
@@ -268,9 +269,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 ],
                               ),
                               IconButton(
-                                icon: const Icon(
+                                icon: Icon(
                                   Icons.logout,
-                                  color: Colors.black87,
+                                  color: theme.colorScheme.onSurface,
                                 ),
                                 onPressed: () async => await ref
                                     .read(authProvider.notifier)
@@ -289,9 +290,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                     return Builder(
                                       builder: (scaffoldContext) => IconButton(
                                         tooltip: 'Learning path',
-                                        icon: const Icon(
+                                        icon: Icon(
                                           Icons.format_list_numbered,
-                                          color: Colors.black87,
+                                          color: theme.colorScheme.onSurface,
                                         ),
                                         onPressed: () => Scaffold.of(
                                           scaffoldContext,

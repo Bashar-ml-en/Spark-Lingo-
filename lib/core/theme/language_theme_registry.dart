@@ -88,8 +88,16 @@ class LanguageThemeRegistry {
       ? Colors.white
       : Colors.black;
 
-  /// Build a ThemeData extending SparkTheme.lightTheme for a given LanguageTheme.
-  static ThemeData buildTheme(LanguageTheme langTheme) {
+  /// Build a ThemeData for a given LanguageTheme at the requested
+  /// brightness. Dark mode keeps each language's accent identity but maps
+  /// surfaces onto the SparkTheme dark canvas with contrast-safe accents.
+  static ThemeData buildTheme(
+    LanguageTheme langTheme, {
+    Brightness brightness = Brightness.light,
+  }) {
+    if (brightness == Brightness.dark) {
+      return _buildDark(langTheme);
+    }
     final baseTheme = SparkTheme.lightTheme;
     final primary = _accessibleOnLightSurface(langTheme.primaryColor);
     final secondary = _accessibleOnLightSurface(langTheme.accentColor);
@@ -145,6 +153,77 @@ class LanguageThemeRegistry {
         ),
       ),
     );
+  }
+
+  /// Dark variant: obsidian canvas, elevated charcoal cards, and a brightened
+  /// accent so language colors stay readable on dark surfaces.
+  static ThemeData _buildDark(LanguageTheme langTheme) {
+    final baseTheme = SparkTheme.darkTheme;
+    final primary = _accessibleOnDarkSurface(langTheme.primaryColor);
+    final secondary = _accessibleOnDarkSurface(langTheme.accentColor);
+    final onPrimary = _bestForeground(primary);
+    final onSecondary = _bestForeground(secondary);
+
+    final colorScheme = baseTheme.colorScheme.copyWith(
+      primary: primary,
+      secondary: secondary,
+      onPrimary: onPrimary,
+      onSecondary: onSecondary,
+    );
+
+    final textTheme = baseTheme.textTheme.copyWith(
+      displayLarge: baseTheme.textTheme.displayLarge?.copyWith(
+        fontFamily: langTheme.fontThemeName,
+      ),
+      titleLarge: baseTheme.textTheme.titleLarge?.copyWith(
+        fontFamily: langTheme.fontThemeName,
+      ),
+      bodyLarge: baseTheme.textTheme.bodyLarge?.copyWith(
+        fontFamily: langTheme.fontThemeName,
+      ),
+      bodyMedium: baseTheme.textTheme.bodyMedium?.copyWith(
+        fontFamily: langTheme.fontThemeName,
+      ),
+      labelLarge: baseTheme.textTheme.labelLarge?.copyWith(
+        fontFamily: langTheme.fontThemeName,
+      ),
+    );
+
+    return baseTheme.copyWith(
+      primaryColor: primary,
+      colorScheme: colorScheme,
+      textTheme: textTheme,
+      appBarTheme: baseTheme.appBarTheme.copyWith(
+        iconTheme: baseTheme.appBarTheme.iconTheme?.copyWith(color: primary),
+        titleTextStyle: baseTheme.appBarTheme.titleTextStyle?.copyWith(
+          fontFamily: langTheme.fontThemeName,
+        ),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: baseTheme.elevatedButtonTheme.style?.copyWith(
+          backgroundColor: WidgetStateProperty.all(primary),
+          foregroundColor: WidgetStateProperty.all(onPrimary),
+          textStyle: WidgetStateProperty.all(
+            baseTheme.elevatedButtonTheme.style?.textStyle
+                ?.resolve({})
+                ?.copyWith(fontFamily: langTheme.fontThemeName),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Brighten an accent until it passes AA contrast (4.5:1) on the dark
+  /// canvas; falls back to the raw color when already readable.
+  static Color _accessibleOnDarkSurface(Color color) {
+    var candidate = color;
+    var guard = 0;
+    while (_contrastRatio(candidate, SparkTheme.obsidianBlack) < 4.5 &&
+        guard < 10) {
+      candidate = Color.lerp(candidate, Colors.white, 0.15)!;
+      guard++;
+    }
+    return candidate;
   }
 }
 

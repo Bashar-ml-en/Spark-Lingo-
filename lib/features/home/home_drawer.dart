@@ -21,22 +21,23 @@ Widget buildHomeDrawer({
   required void Function(BuildContext context, WidgetRef ref, String userId) onOpenLanguageSwitcher,
 }) {
   final theme = Theme.of(context);
-                      return Drawer(
-                      child: Container(
-                        color: const Color(0xFFFFFFFF),
-                        child: Column(
-                          children: [
-                            DrawerHeader(
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFF9FAFB),
-                                border: Border(
-                                  bottom: BorderSide(
-                                    color: theme.colorScheme.primary.withAlpha(
-                                      15,
-                                    ),
-                                  ),
-                                ),
-                              ),
+  return Drawer(
+    child: Container(
+      // Theme-aware: white in light mode, deep charcoal in dark mode.
+      color: theme.colorScheme.surface,
+      child: Column(
+        children: [
+          DrawerHeader(
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surfaceContainerHighest.withValues(
+                alpha: 0.4,
+              ),
+              border: Border(
+                bottom: BorderSide(
+                  color: theme.colorScheme.primary.withAlpha(15),
+                ),
+              ),
+            ),
                               child: Center(
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
@@ -62,7 +63,7 @@ Widget buildHomeDrawer({
                               child: ListView(
                                 padding: EdgeInsets.zero,
                                 children: [
-                                  const Padding(
+                                  Padding(
                                     padding: EdgeInsetsDirectional.only(
                                       start: 16,
                                       top: 16,
@@ -73,7 +74,7 @@ Widget buildHomeDrawer({
                                       style: TextStyle(
                                         fontSize: 12,
                                         fontWeight: FontWeight.bold,
-                                        color: Color(0xFF9CA3AF),
+                                        color: theme.colorScheme.onSurfaceVariant,
                                         letterSpacing: 0.5,
                                       ),
                                     ),
@@ -91,7 +92,7 @@ Widget buildHomeDrawer({
                                             4,
                                           ),
                                           border: Border.all(
-                                            color: const Color(0xFFE5E7EB),
+                                            color: theme.dividerColor,
                                           ),
                                         ),
                                         clipBehavior: Clip.antiAlias,
@@ -110,7 +111,7 @@ Widget buildHomeDrawer({
                                               : FontWeight.normal,
                                           color: isActive
                                               ? theme.colorScheme.primary
-                                              : const Color(0xFF1F2937),
+                                              : theme.colorScheme.onSurface,
                                         ),
                                       ),
                                       trailing: isActive
@@ -144,19 +145,19 @@ Widget buildHomeDrawer({
                                       },
                                     );
                                   }),
-                                  const Divider(
-                                    color: Color(0xFFF3F4F6),
+                                  Divider(
+                                    color: theme.dividerColor,
                                     height: 24,
                                   ),
                                   ListTile(
-                                    leading: const Icon(
+                                    leading: Icon(
                                       Icons.add,
-                                      color: Color(0xFF4B5563),
+                                      color: theme.colorScheme.onSurfaceVariant,
                                     ),
-                                    title: const Text(
+                                    title: Text(
                                       "Add a Language",
                                       style: TextStyle(
-                                        color: Color(0xFF4B5563),
+                                        color: theme.colorScheme.onSurfaceVariant,
                                       ),
                                     ),
                                     onTap: () {
@@ -181,7 +182,7 @@ Widget buildHomeDrawer({
                                     Icons.workspace_premium,
                                     color: isPremium
                                         ? Colors.amber.shade600
-                                        : const Color(0xFF9CA3AF),
+                                        : theme.colorScheme.onSurfaceVariant,
                                   ),
                                   title: Text(
                                     isPremium
@@ -190,7 +191,7 @@ Widget buildHomeDrawer({
                                     style: TextStyle(
                                       color: isPremium
                                           ? Colors.amber.shade700
-                                          : const Color(0xFF9CA3AF),
+                                          : theme.colorScheme.onSurfaceVariant,
                                       fontWeight: isPremium
                                           ? FontWeight.bold
                                           : FontWeight.normal,
@@ -209,13 +210,15 @@ Widget buildHomeDrawer({
                               },
                             ),
                             ListTile(
-                              leading: const Icon(
+                              leading: Icon(
                                 Icons.settings_outlined,
-                                color: Color(0xFF4B5563),
+                                color: theme.colorScheme.onSurfaceVariant,
                               ),
-                              title: const Text(
+                              title: Text(
                                 'Settings & help',
-                                style: TextStyle(color: Color(0xFF4B5563)),
+                                style: TextStyle(
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
                               ),
                               onTap: () {
                                 Navigator.pop(context);
@@ -223,13 +226,15 @@ Widget buildHomeDrawer({
                               },
                             ),
                             ListTile(
-                              leading: const Icon(
+                              leading: Icon(
                                 Icons.refresh,
-                                color: Color(0xFF9CA3AF),
+                                color: theme.colorScheme.onSurfaceVariant,
                               ),
-                              title: const Text(
+                              title: Text(
                                 "Reset Active Languages",
-                                style: TextStyle(color: Color(0xFF9CA3AF)),
+                                style: TextStyle(
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
                               ),
                               onTap: () async {
                                 Navigator.pop(context);
