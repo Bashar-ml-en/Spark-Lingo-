@@ -258,6 +258,89 @@ export async function topErrorPatterns(
 }
 
 /**
+ * Machine-readable focus marker the tutor appends as the LAST line of a
+ * chat reply when it corrects the learner (prompted server-side). Only
+ * allow-listed class tokens survive extraction; the line is stripped before
+ * the reply reaches the learner. Shape:
+ *   SPARKY_FOCUS: grammar_accuracy, vocabulary_range
+ */
+const FOCUS_MARKER_RE = /(?:^|\n)\s*SPARKY_FOCUS:\s*([a-z_,\s]+)\s*$/i;
+
+/** Max characters a marker can occupy; streaming holds back this tail. */
+export const FOCUS_MARKER_HOLDBACK = 260;
+
+export type FocusMarkerResult = {
+  classes: ErrorClass[];
+  stripped: string;
+};
+
+/**
+ * Extracts and strips the focus marker from a full chat reply. Returns the
+ * reply unchanged with an empty class list when no valid marker is present.
+ * Tokens outside the allow-list are dropped individually; a marker with no
+ * valid tokens is stripped silently rather than surfaced to the learner.
+ */
+export function extractFocusMarker(content: string): FocusMarkerResult {
+  const match = content.match(FOCUS_MARKER_RE);
+  if (!match) return { classes: [], stripped: content };
+
+  const classes: ErrorClass[] = [];
+  for (const rawToken of match[1].split(",")) {
+    const token = rawToken.trim().toLowerCase();
+    if ((ERROR_CLASSES as readonly string[]).includes(token) &&
+      !classes.includes(token as ErrorClass)) {
+      classes.push(token as ErrorClass);
+    }
+  }
+  const stripped = content.slice(0, match.index).replace(/\s+$/, "");
+  return { classes, stripped };
+}
+
+/**
+ * Persists allow-listed error classes observed during chat corrections.
+ * Same degrade-never-throw contract as persistErrorPatterns: a persistence
+ * failure weakens the pedagogy, never the learner's request.
+ */
+export async function persistChatErrorPatterns(
+  quotaClient: SupabaseClient,
+  userId: string,
+  languageCode: string,
+  classes: ErrorClass[],
+  requestId: string,
+  emit: OperationalEmit,
+): Promise<void> {
+  try {
+    for (const cls of classes) {
+      const { error } = await quotaClient.rpc("record_learner_error_pattern", {
+        p_user_id: userId,
+        p_language_code: languageCode,
+        p_rubric_ref: "chat",
+        p_error_class: cls,
+        p_criterion_name: "chat correction",
+      });
+      if (error) {
+        emit({
+          event: "ai_feedback_persistence_failure",
+          request_id: requestId,
+          action: "chat",
+          operation: "write",
+          code: error.code ?? "unknown",
+        });
+        return;
+      }
+    }
+  } catch (_error) {
+    emit({
+      event: "ai_feedback_persistence_failure",
+      request_id: requestId,
+      action: "chat",
+      operation: "write",
+      code: "unexpected_error",
+    });
+  }
+}
+
+/**
  * Renders the focus list as a single system-prompt sentence. Only
  * allow-listed class tokens and occurrence counts are interpolated — no
  * learner content can reach the prompt through this path.
