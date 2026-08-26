@@ -13,6 +13,7 @@ import '../../shared/widgets/phase_sidebar.dart';
 import 'curriculum_path.dart';
 import 'home_drawer.dart';
 import 'home_sheets.dart';
+import 'retention_header.dart';
 import 'sparky_chat_session.dart';
 import 'vocabulary_sheets.dart';
 class HomeScreen extends ConsumerStatefulWidget {
@@ -402,7 +403,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                           langKey,
                                         ),
                                   );
-                                  if (!wide) return curriculum;
+                                  if (!wide) {
+                                    return Column(
+                                      children: [
+                                        const RetentionHeader(),
+                                        Expanded(child: curriculum),
+                                      ],
+                                    );
+                                  }
                                   // Wide layouts pin the learning-path sidebar
                                   // beside the curriculum content.
                                   return Row(
@@ -421,7 +429,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                                 .withValues(alpha: 0.12) ??
                                             const Color(0xFFE5E7EB),
                                       ),
-                                      Expanded(child: curriculum),
+                                      Expanded(
+                                        child: Column(
+                                          children: [
+                                            const RetentionHeader(),
+                                            Expanded(child: curriculum),
+                                          ],
+                                        ),
+                                      ),
                                     ],
                                   );
                                 },

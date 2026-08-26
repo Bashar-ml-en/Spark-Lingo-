@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/services/auth_service.dart';
 import '../../core/services/database_service.dart';
+import '../../core/services/retention_service.dart';
 import '../../core/services/spaced_repetition_service.dart';
 import '../../core/services/tts_service.dart';
 
@@ -88,6 +89,12 @@ class _FlashcardStudySessionState
         _isFlipped = false;
       } else {
         _currentIndex = widget.flashcards.length; // completed
+        // Retention: one XP award per completed review session.
+        ref.read(retentionServiceProvider).awardXp(
+          source: 'review_session',
+          amount: XpAmounts.reviewSession,
+          languageCode: widget.languageKey,
+        );
       }
     });
   }

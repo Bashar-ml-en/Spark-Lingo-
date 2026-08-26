@@ -5,6 +5,7 @@ import '../../core/constants/language_catalog.dart';
 import '../../core/services/ai_service.dart';
 import '../../core/services/auth_service.dart';
 import '../../core/services/consent_service.dart';
+import '../../core/services/retention_service.dart';
 import '../../core/services/test_consent_service.dart';
 import '../../core/services/tts_service.dart';
 import '../../shared/models/curriculum.dart';
@@ -42,6 +43,9 @@ class _SparkyChatSessionState
   bool _isListening = false;
   bool _isAiThinking = false;
   String _loadingMessage = "";
+
+  /// XP for AI practice is awarded once per session, not per turn.
+  bool _xpAwardedThisSession = false;
 
   /// Active Sparky conversation mode (server-validated token). Shown as a
   /// chip row under the app bar; defaults to free_chat.
@@ -317,6 +321,16 @@ class _SparkyChatSessionState
         });
       } else {
         _ttsService.speak(finalText, widget.language);
+        // Retention: one XP award for the first successful AI exchange in a
+        // session (not per turn, to keep the economy honest).
+        if (!_xpAwardedThisSession) {
+          _xpAwardedThisSession = true;
+          ref.read(retentionServiceProvider).awardXp(
+            source: 'ai_chat',
+            amount: XpAmounts.aiChatTurn,
+            languageCode: widget.language,
+          );
+        }
       }
       _scrollToBottom();
     } catch (e) {
