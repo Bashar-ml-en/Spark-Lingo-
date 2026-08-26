@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/constants/language_catalog.dart';
+import '../../core/design/components.dart';
+import '../../core/design/tokens.dart';
 import '../../core/router/router.dart';
 import '../../core/services/database_service.dart';
 import '../../core/services/revenuecat_service.dart';
@@ -306,145 +308,251 @@ class CurriculumPath extends ConsumerWidget {
         }
 
         final unit = units[index - 1];
-        return Card(
+        return Consumer(
           key: unitKeys[index - 1],
-          margin: const EdgeInsets.only(bottom: 20),
-          color: theme.cardColor,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-            side: BorderSide(color: theme.colorScheme.primary.withAlpha(25)),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Row(
+          builder: (context, ref, _) {
+            final progressAsync = ref.watch(
+              lessonProgressProvider(CardReviewsParam(userId, langKey)),
+            );
+            final progressMap = progressAsync.value ?? const <String, int>{};
+
+            return Card(
+              margin: const EdgeInsets.only(bottom: 20),
+              color: theme.cardColor,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+                side: BorderSide(
+                  color: theme.colorScheme.primary.withAlpha(25),
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Icon(
-                      Icons.assignment,
-                      color: theme.colorScheme.primary,
-                      size: 28,
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(unit.title, style: theme.textTheme.titleLarge),
-                          const SizedBox(height: 4),
-                          Text(
-                            unit.description,
-                            style: theme.textTheme.bodySmall,
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.assignment,
+                          color: theme.colorScheme.primary,
+                          size: 28,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(unit.title, style: theme.textTheme.titleLarge),
+                              const SizedBox(height: 4),
+                              Text(
+                                unit.description,
+                                style: theme.textTheme.bodySmall,
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
+                        ),
+                        // Unit completion ring: completed lessons in this
+                        // unit vs. total (computed from live lesson data).
+                        _UnitProgressRing(
+                          unit: unit,
+                          progressMap: progressMap,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    const Divider(),
+                    const SizedBox(height: 12),
+                    // Render lessons list fetched from Supabase
+                    Consumer(
+                      builder: (context, ref, child) {
+                        final lessonsAsync = ref.watch(lessonsProvider(unit.id));
+                        return lessonsAsync.when(
+                          loading: () =>
+                              const Center(child: CircularProgressIndicator()),
+                          error: (err, stack) => Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Expanded(
+                                child: Text('Lessons are unavailable right now.'),
+                              ),
+                              IconButton(
+                                tooltip: 'Retry',
+                                onPressed: () =>
+                                    ref.invalidate(lessonsProvider(unit.id)),
+                                icon: const Icon(Icons.refresh),
+                              ),
+                            ],
+                          ),
+                          data: (lessons) {
+                            return Column(
+                              children: lessons.map((lesson) {
+                                final isCompleted =
+                                    progressMap.containsKey(lesson.id);
+                                final attempts = progressMap[lesson.id] ?? 0;
+                                final isAiLesson =
+                                    lesson.type == 'ai_tutor_session' ||
+                                    lesson.type == 'mock_exam_section';
+                                return Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 8.0,
+                                  ),
+                                  child: InkWell(
+                                    onTap: () {
+                                      if ((index - 1) > 0 &&
+                                          billingReady &&
+                                          !isPremium) {
+                                        context.push(SparkRouter.paywall);
+                                      } else if (isAiLesson) {
+                                        onOpenSpeechSession(lesson, langKey);
+                                      } else {
+                                        onOpenVocabularySheet(lesson, langKey);
+                                      }
+                                    },
+                                    borderRadius: BorderRadius.circular(12),
+                                    child: Container(
+                                      padding: const EdgeInsets.all(12),
+                                      decoration: BoxDecoration(
+                                        color: isCompleted
+                                            ? SparkStatus.success
+                                                .withValues(alpha: 0.07)
+                                            : theme.scaffoldBackgroundColor
+                                                .withAlpha(127),
+                                        borderRadius: BorderRadius.circular(12),
+                                        border: Border.all(
+                                          color: isCompleted
+                                              ? SparkStatus.success
+                                                  .withValues(alpha: 0.35)
+                                              : theme.colorScheme.primary
+                                                  .withAlpha(15),
+                                        ),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          // Lesson type indicator.
+                                          Container(
+                                            width: 36,
+                                            height: 36,
+                                            decoration: BoxDecoration(
+                                              color: isCompleted
+                                                  ? SparkStatus.success
+                                                      .withValues(alpha: 0.15)
+                                                  : theme.colorScheme.primary
+                                                      .withValues(alpha: 0.10),
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: Icon(
+                                              isCompleted
+                                                  ? Icons.check_circle
+                                                  : isAiLesson
+                                                      ? Icons.mic_outlined
+                                                      : Icons.style_outlined,
+                                              size: 20,
+                                              color: isCompleted
+                                                  ? SparkStatus.success
+                                                  : theme.colorScheme.primary,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 12),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  lesson.title,
+                                                  style: theme
+                                                      .textTheme.titleMedium
+                                                      ?.copyWith(fontSize: 14),
+                                                ),
+                                                const SizedBox(height: 2),
+                                                Text(
+                                                  lesson.description,
+                                                  style: theme
+                                                      .textTheme.bodySmall
+                                                      ?.copyWith(fontSize: 12),
+                                                ),
+                                                if (isCompleted && attempts > 1)
+                                                  Padding(
+                                                    padding:
+                                                        const EdgeInsets.only(
+                                                          top: 2,
+                                                        ),
+                                                    child: Text(
+                                                      'Completed $attempts times',
+                                                      style: theme
+                                                          .textTheme.bodySmall
+                                                          ?.copyWith(
+                                                            fontSize: 11,
+                                                            color: SparkStatus
+                                                                .success,
+                                                          ),
+                                                    ),
+                                                  ),
+                                              ],
+                                            ),
+                                          ),
+                                          Icon(
+                                            Icons.arrow_forward_ios,
+                                            size: 14,
+                                            color: isCompleted
+                                                ? SparkStatus.success
+                                                : theme.colorScheme.secondary,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                            );
+                          },
+                        );
+                      },
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
-                const Divider(),
-                const SizedBox(height: 12),
-                // Render lessons list fetched from Supabase
-                Consumer(
-                  builder: (context, ref, child) {
-                    final lessonsAsync = ref.watch(lessonsProvider(unit.id));
-                    return lessonsAsync.when(
-                      loading: () =>
-                          const Center(child: CircularProgressIndicator()),
-                      error: (err, stack) => Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Expanded(
-                            child: Text('Lessons are unavailable right now.'),
-                          ),
-                          IconButton(
-                            tooltip: 'Retry',
-                            onPressed: () =>
-                                ref.invalidate(lessonsProvider(unit.id)),
-                            icon: const Icon(Icons.refresh),
-                          ),
-                        ],
-                      ),
-                      data: (lessons) {
-                        return Column(
-                          children: lessons.map((lesson) {
-                            return Padding(
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 8.0,
-                              ),
-                              child: InkWell(
-                                onTap: () {
-                                  if ((index - 1) > 0 &&
-                                      billingReady &&
-                                      !isPremium) {
-                                    context.push(SparkRouter.paywall);
-                                  } else if (lesson.type ==
-                                          'ai_tutor_session' ||
-                                      lesson.type == 'mock_exam_section') {
-                                    onOpenSpeechSession(lesson, langKey);
-                                  } else {
-                                    onOpenVocabularySheet(lesson, langKey);
-                                  }
-                                },
-                                borderRadius: BorderRadius.circular(8),
-                                child: Container(
-                                  padding: const EdgeInsets.all(12),
-                                  decoration: BoxDecoration(
-                                    color: theme.scaffoldBackgroundColor
-                                        .withAlpha(127),
-                                    borderRadius: BorderRadius.circular(8),
-                                    border: Border.all(
-                                      color: theme.colorScheme.primary
-                                          .withAlpha(15),
-                                    ),
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              lesson.title,
-                                              style: theme.textTheme.titleMedium
-                                                  ?.copyWith(fontSize: 14),
-                                            ),
-                                            const SizedBox(height: 4),
-                                            Text(
-                                              lesson.description,
-                                              style: theme.textTheme.bodySmall
-                                                  ?.copyWith(fontSize: 12),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      Icon(
-                                        Icons.arrow_forward_ios,
-                                        size: 14,
-                                        color: theme.colorScheme.secondary,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            );
-                          }).toList(),
-                        );
-                      },
-                    );
-                  },
-                ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         );
       },
         ),
       ],
+    );
+  }
+}
+
+/// Compact completion ring for a unit header: completed lessons over total.
+class _UnitProgressRing extends ConsumerWidget {
+  final Unit unit;
+  final Map<String, int> progressMap;
+
+  const _UnitProgressRing({
+    required this.unit,
+    required this.progressMap,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final lessonsAsync = ref.watch(lessonsProvider(unit.id));
+    return lessonsAsync.maybeWhen(
+      data: (lessons) {
+        final total = lessons.length;
+        if (total == 0) return const SizedBox.shrink();
+        final lessonIds = lessons.map((l) => l.id).toSet();
+        final completed =
+            progressMap.keys.where(lessonIds.contains).length;
+        return SparkGoalRing(
+          progress: completed / total,
+          centerLabel: '$completed/$total',
+          size: 44,
+          strokeWidth: 5,
+          color: completed == total
+              ? SparkStatus.success
+              : Theme.of(context).colorScheme.primary,
+        );
+      },
+      orElse: () => const SizedBox.shrink(),
     );
   }
 }

@@ -170,11 +170,12 @@ void showVocabularySheet(
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) =>
-                                            FlashcardStudySession(
-                                              title: lesson.title,
-                                              flashcards: flashcards,
-                                              languageKey: langKey,
-                                            ),
+                                                FlashcardStudySession(
+                                                  title: lesson.title,
+                                                  flashcards: flashcards,
+                                                  languageKey: langKey,
+                                                  lessonId: lesson.id,
+                                                ),
                                       ),
                                     );
                                   },

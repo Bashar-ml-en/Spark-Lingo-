@@ -165,6 +165,46 @@ class DatabaseService {
     }
   }
 
+  // Record a completed lesson through the security-definer RPC
+  // (migration 015). Completion can only be written server-side.
+  Future<void> completeLesson(String lessonId, String languageCode) async {
+    try {
+      await _client.rpc('complete_lesson', params: {
+        'p_lesson_id': lessonId,
+        'p_language_code': LanguageCatalog.canonicalCode(languageCode),
+      });
+    } catch (_) {
+      debugPrint('Lesson-completion record failed.');
+      rethrow;
+    }
+  }
+
+  // Fetch the learner's completed lesson ids for one language.
+  Future<Map<String, int>> fetchLessonAttempts(
+    String userId,
+    String languageKey,
+  ) async {
+    try {
+      final res = await _client
+          .from('lesson_progress')
+          .select('lesson_id,attempts')
+          .eq('user_id', userId)
+          .eq('language_code', LanguageCatalog.canonicalCode(languageKey));
+      final map = <String, int>{};
+      for (final row in res as List<dynamic>) {
+        final lessonId = row['lesson_id'] as String?;
+        final attempts = row['attempts'] as int?;
+        if (lessonId != null && attempts != null) {
+          map[lessonId] = attempts;
+        }
+      }
+      return map;
+    } catch (_) {
+      debugPrint('Lesson-progress lookup failed.');
+      rethrow;
+    }
+  }
+
   // Persist spaced repetition stats inside public.card_reviews table
   Future<void> upsertCardReview({
     required String userId,
@@ -498,6 +538,14 @@ final cardReviewsProvider = FutureProvider.autoDispose
     .family<Map<String, SRSState>, CardReviewsParam>((ref, param) {
       final dbService = ref.watch(databaseServiceProvider);
       return dbService.fetchCardReviews(param.userId, param.languageKey);
+    });
+
+/// Completed-lesson attempt counts for a (user, language) pair. Empty map
+/// while the learner has finished nothing yet.
+final lessonProgressProvider = FutureProvider.autoDispose
+    .family<Map<String, int>, CardReviewsParam>((ref, param) {
+      final dbService = ref.watch(databaseServiceProvider);
+      return dbService.fetchLessonAttempts(param.userId, param.languageKey);
     });
 
 // --- Exam Providers ---

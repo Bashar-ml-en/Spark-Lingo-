@@ -10,12 +10,16 @@ class FlashcardStudySession extends ConsumerStatefulWidget {
   final String title;
   final List<dynamic> flashcards;
   final String languageKey;
+  /// Curriculum lesson id this session belongs to. When set, finishing the
+  /// session records a lesson completion (migration 015).
+  final String? lessonId;
 
   const FlashcardStudySession({
     super.key,
     required this.title,
     required this.flashcards,
     required this.languageKey,
+    this.lessonId,
   });
 
   @override
@@ -95,6 +99,23 @@ class _FlashcardStudySessionState
           amount: XpAmounts.reviewSession,
           languageCode: widget.languageKey,
         );
+        // Progress: record the lesson completion server-side.
+        final lessonId = widget.lessonId;
+        if (lessonId != null) {
+          ref
+              .read(databaseServiceProvider)
+              .completeLesson(lessonId, widget.languageKey)
+              .then((_) {
+                ref.invalidate(
+                  lessonProgressProvider(
+                    CardReviewsParam(user.id, widget.languageKey),
+                  ),
+                );
+              })
+              .catchError((e) {
+                debugPrint('Lesson-completion sync failed.');
+              });
+        }
       }
     });
   }
