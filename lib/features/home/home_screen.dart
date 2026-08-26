@@ -2116,6 +2116,14 @@ class _FlashcardStudySessionState
   }
 }
 
+/// Display metadata for a Sparky conversation mode. Only the mode token is
+/// sent to the server; labels and icons stay client-side.
+class _ChatModeMeta {
+  final String label;
+  final IconData icon;
+  const _ChatModeMeta(this.label, this.icon);
+}
+
 class _AISpeechPracticeSession extends ConsumerStatefulWidget {
   final String language;
   final Lesson? lesson;
@@ -2141,6 +2149,17 @@ class _AISpeechPracticeSessionState
   bool _isListening = false;
   bool _isAiThinking = false;
   String _loadingMessage = "";
+
+  /// Active Sparky conversation mode (server-validated token). Shown as a
+  /// chip row under the app bar; defaults to free_chat.
+  String _chatMode = 'free_chat';
+
+  static const Map<String, _ChatModeMeta> _modeMeta = {
+    'free_chat': _ChatModeMeta('Chat', Icons.chat_bubble_outline),
+    'roleplay': _ChatModeMeta('Roleplay', Icons.theater_comedy_outlined),
+    'correction_focus': _ChatModeMeta('Corrections', Icons.spellcheck_outlined),
+    'grammar_drill': _ChatModeMeta('Grammar', Icons.school_outlined),
+  };
 
   @override
   void initState() {
@@ -2356,33 +2375,52 @@ class _AISpeechPracticeSessionState
     setState(() {
       _isAiThinking = true;
       _loadingMessage = "Sparky is thinking...";
+      // Streaming placeholder bubble: deltas append into this entry so the
+      // reply appears token-by-token instead of after a long blank wait.
+      _messages.add({"sender": "sparky", "text": ""});
     });
+    _scrollToBottom();
 
+    final buffer = StringBuffer();
     try {
-      final responseText = await _aiService.generateChatResponse(
-        _messages,
+      await for (final delta in _aiService.streamChatResponse(
+        _messages.where((m) => (m["text"] ?? "").isNotEmpty).toList(),
         widget.language,
-      );
-      if (responseText != null) {
+        mode: _chatMode,
+      )) {
+        buffer.write(delta);
+        if (!mounted) break;
         setState(() {
-          _messages.add({"sender": "sparky", "text": responseText});
+          _messages.last["text"] = buffer.toString();
         });
         _scrollToBottom();
-        await _ttsService.speak(responseText, widget.language);
       }
-    } catch (e) {
-      setState(() {
-        _messages.add({
-          "sender": "sparky",
-          "text":
-              "Sparky is having trouble connecting right now. Please check your connection and try again.",
+      if (!mounted) return;
+      final finalText = buffer.toString().trim();
+      if (finalText.isEmpty) {
+        setState(() {
+          _messages.last["text"] =
+              "Sparky couldn't think of a reply. Please try again.";
         });
+      } else {
+        _ttsService.speak(finalText, widget.language);
+      }
+      _scrollToBottom();
+    } catch (e) {
+      if (!mounted) return;
+      final partial = buffer.toString().trim();
+      setState(() {
+        _messages.last["text"] = partial.isNotEmpty
+            ? partial
+            : "Sparky is having trouble connecting right now. Please check your connection and try again.";
       });
       _scrollToBottom();
     } finally {
-      setState(() {
-        _isAiThinking = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isAiThinking = false;
+        });
+      }
     }
   }
 
@@ -2788,6 +2826,43 @@ class _AISpeechPracticeSessionState
       ),
       body: Column(
         children: [
+          // Conversation-mode picker. Only the mode token leaves the device;
+          // all prompt composition stays server-side.
+          if (widget.lesson == null)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+              child: Row(
+                children: [
+                  for (final entry in _modeMeta.entries)
+                    Padding(
+                      padding: const EdgeInsetsDirectional.only(end: 8),
+                      child: ChoiceChip(
+                        avatar: Icon(
+                          entry.value.icon,
+                          size: 16,
+                          color: _chatMode == entry.key
+                              ? theme.colorScheme.onSecondary
+                              : theme.colorScheme.secondary,
+                        ),
+                        label: Text(entry.value.label),
+                        selected: _chatMode == entry.key,
+                        selectedColor: theme.colorScheme.secondary,
+                        labelStyle: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: _chatMode == entry.key
+                              ? theme.colorScheme.onSecondary
+                              : theme.colorScheme.onSurface,
+                        ),
+                        onSelected: (_) {
+                          if (_isAiThinking) return;
+                          setState(() => _chatMode = entry.key);
+                        },
+                      ),
+                    ),
+                ],
+              ),
+            ),
           Expanded(
             child: ListView.builder(
               controller: _scrollController,

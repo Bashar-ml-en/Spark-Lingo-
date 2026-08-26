@@ -632,6 +632,293 @@ function scoringMessages(body: JsonRecord): OpenAIMessage[] {
   ];
 }
 
+const CEFR_LEVEL_RE = /^[ABC][12]$/;
+
+const LEVEL_DIRECTIVES: Record<string, string> = {
+  A1: "The learner is at CEFR level A1. Use very simple, high-frequency words and short sentences; repeat key structures; introduce at most one or two new words per turn and gloss them simply.",
+  A2: "The learner is at CEFR level A2. Use simple everyday language and short sentences; keep idioms out; gently recycle vocabulary from earlier turns.",
+  B1: "The learner is at CEFR level B1. Use clear standard language on familiar matters; vary sentence structure a little while staying concrete.",
+  B2: "The learner is at CEFR level B2. Use natural, idiomatic language on a wide range of topics; explain nuance and register when it helps.",
+  C1: "The learner is at CEFR level C1. Use fluent, nuanced language including idiomatic expressions; challenge precision of expression.",
+  C2: "The learner is at CEFR level C2. Use native-level nuanced language; discuss subtlety, register, and style.",
+};
+
+function normalizeCefrLevel(raw: unknown): string | null {
+  if (typeof raw !== "string") return null;
+  const match = raw.trim().toUpperCase().match(/[ABC][12]/);
+  return match && CEFR_LEVEL_RE.test(match[0]) ? match[0] : null;
+}
+
+/**
+ * Best-effort CEFR level read for prompt adaptation. Uses the learner's own
+ * exam-readiness rows via the service-role client (the RLS-protected table is
+ * not directly readable by the learner JWT). Degrades to null on any failure
+ * so chat never blocks on it.
+ */
+async function learnerCefrLevel(
+  client: SupabaseClient,
+  userId: string,
+): Promise<string | null> {
+  try {
+    const { data, error } = await client
+      .from("user_exam_readiness")
+      .select("current_estimated_level")
+      .eq("user_id", userId)
+      .limit(10);
+    if (error || !Array.isArray(data)) return null;
+    for (const row of data) {
+      const level = normalizeCefrLevel(
+        isRecord(row) ? row.current_estimated_level : null,
+      );
+      if (level) return level;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Conversation modes are a server-validated enum; the client sends only the
+ * token. Roleplay scenarios are chosen server-side so the client can never
+ * steer the prompt with free text.
+ */
+const chatModes = ["free_chat", "roleplay", "correction_focus", "grammar_drill"] as const;
+type ChatMode = (typeof chatModes)[number];
+
+const roleplayScenarios: Record<string, string[]> = {
+  en: ["ordering food at a café", "a job interview", "asking for directions in a new city"],
+  es: ["ordering food at a café", "a job interview", "asking for directions in a new city"],
+  fr: ["ordering food at a café", "a job interview", "asking for directions in a new city"],
+  ms: ["ordering food at a mamak stall", "a job interview", "asking for directions in a new city"],
+  zh: ["ordering food at a restaurant", "a job interview", "asking for directions in a new city"],
+  ja: ["ordering food at a restaurant", "a job interview", "asking for directions in a new city"],
+  ko: ["ordering food at a restaurant", "a job interview", "asking for directions in a new city"],
+  hi: ["ordering food at a restaurant", "a job interview", "asking for directions in a new city"],
+  ru: ["ordering food at a café", "a job interview", "asking for directions in a new city"],
+  ar: ["ordering food at a café", "a job interview", "asking for directions in a new city"],
+};
+
+function modePromptExtension(mode: ChatMode, language: string): string {
+  const base = language.split("-")[0].toLowerCase();
+  switch (mode) {
+    case "roleplay": {
+      const pool = roleplayScenarios[base] ?? roleplayScenarios.en;
+      const scenario = pool[Math.floor(Math.random() * pool.length)];
+      return `Run an immersive roleplay scenario: ${scenario}. Stay in character as a person inside the scenario, drive the conversation forward one turn at a time, and keep every reply short. After the learner's reply, gently model the natural way to say it if they made mistakes, then continue the scene.`;
+    }
+    case "correction_focus":
+      return "Adopt correction-focus mode: after each learner message, first show a brief bullet list of their mistakes with the corrected form, then continue the conversation naturally. Keep corrections concise.";
+    case "grammar_drill":
+      return "Adopt grammar-drill mode: choose one grammar point suitable for the learner's level, explain it in one or two sentences, then give short practice exercises one at a time. Confirm or correct each attempt before moving on.";
+    case "free_chat":
+    default:
+      return "";
+  }
+}
+
+function chatMode(body: JsonRecord): ChatMode {
+  const raw = body.mode;
+  if (raw === undefined || raw === null || raw === "") return "free_chat";
+  if (typeof raw === "string" && (chatModes as readonly string[]).includes(raw)) {
+    return raw as ChatMode;
+  }
+  throw new HttpError(400, "invalid_request", "mode must be a supported conversation mode.");
+}
+
+function sseEvent(payload: JsonRecord): string {
+  return `data: ${JSON.stringify(payload)}\n\n`;
+}
+
+/**
+ * Streaming chat for clients that opt in with `?stream=1` (or an
+ * `Accept: text/event-stream` header). Upstream is called with `stream: true`
+ * and the SSE deltas are forwarded as `data: {"delta":"..."}` events, then a
+ * final `data: {"done":true,"content":"<full text>"}` and `data: [DONE]`.
+ * Errors mid-stream are emitted as `data: {"error":{...}}` so the learner
+ * always sees a public-safe message instead of a dead socket.
+ */
+async function openAIChatStream(
+  requestId: string,
+  provider: ProviderConfig,
+  messages: OpenAIMessage[],
+  maxTokens: number,
+  markProviderSubmission: () => Promise<void>,
+  cors: Record<string, string>,
+  onStreamSettled: () => Promise<void>,
+): Promise<Response> {
+  const controller = new AbortController();
+  // Streaming legitimately takes longer than the single-shot 25s budget.
+  const timeout = setTimeout(() => controller.abort(), 90_000);
+  let response: Response;
+  try {
+    const chatEndpoint = `${provider.baseUrl}/chat/completions`;
+    response = await providerFetch(markProviderSubmission, chatEndpoint, {
+      method: "POST",
+      signal: controller.signal,
+      headers: {
+        ...providerHeaders(provider),
+        "Content-Type": "application/json",
+        "X-Client-Request-Id": requestId,
+      },
+      body: JSON.stringify({
+        model: provider.model,
+        messages,
+        temperature: 0.4,
+        max_tokens: maxTokens,
+        stream: true,
+      }),
+    });
+  } catch (error) {
+    clearTimeout(timeout);
+    if (error instanceof HttpError) throw error;
+    emitOperationalEvent({
+      event: "ai_provider_failure",
+      request_id: requestId,
+      action: "chat",
+      code: "network_error",
+    });
+    throw new HttpError(503, "ai_provider_unavailable", "AI practice is temporarily unavailable.");
+  }
+
+  if (!response.ok || !response.body) {
+    clearTimeout(timeout);
+    emitOperationalEvent({
+      event: "ai_provider_failure",
+      request_id: requestId,
+      action: "chat",
+      upstream_status: response.status,
+    });
+    throw new HttpError(503, "ai_provider_unavailable", "AI practice is temporarily unavailable.");
+  }
+
+  const upstreamReader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let upstreamBuffer = "";
+  let fullContent = "";
+  let settled = false;
+
+  const settle = async (): Promise<void> => {
+    if (settled) return;
+    settled = true;
+    clearTimeout(timeout);
+    await onStreamSettled();
+  };
+
+  const stream = new ReadableStream<Uint8Array>({
+    async start(out) {
+      const encoder = new TextEncoder();
+      const send = (payload: JsonRecord | "[DONE]"): void => {
+        out.enqueue(
+          encoder.encode(payload === "[DONE]" ? "data: [DONE]\n\n" : sseEvent(payload)),
+        );
+      };
+      try {
+        while (true) {
+          const { done, value } = await upstreamReader.read();
+          if (done) break;
+          upstreamBuffer += decoder.decode(value, { stream: true });
+          const lines = upstreamBuffer.split("\n");
+          upstreamBuffer = lines.pop() ?? "";
+          for (const rawLine of lines) {
+            const line = rawLine.trim();
+            if (!line.startsWith("data:")) continue;
+            const data = line.slice(5).trim();
+            if (data === "[DONE]") continue;
+            let parsed: unknown;
+            try {
+              parsed = JSON.parse(data);
+            } catch {
+              // Malformed or keep-alive lines are skipped, never surfaced.
+              continue;
+            }
+            const choice = isRecord(parsed) && Array.isArray(parsed.choices)
+              ? parsed.choices[0]
+              : undefined;
+            const delta = isRecord(choice) && isRecord(choice.delta)
+              ? choice.delta.content
+              : undefined;
+            if (typeof delta === "string" && delta) {
+              fullContent += delta;
+              send({ delta });
+            }
+          }
+        }
+        if (!fullContent.trim()) {
+          emitOperationalEvent({
+            event: "ai_provider_failure",
+            request_id: requestId,
+            action: "chat",
+            code: "invalid_provider_response",
+          });
+          send({
+            error: {
+              code: "invalid_ai_response",
+              message: "AI practice returned an empty response.",
+            },
+          });
+        } else {
+          send({ done: true, content: fullContent });
+        }
+        send("[DONE]");
+        out.close();
+        emitOperationalEvent({
+          event: "ai_request_completed",
+          request_id: requestId,
+          action: "chat",
+          outcome: "success",
+          status: 200,
+          code: "streamed",
+        });
+      } catch (_error) {
+        emitOperationalEvent({
+          event: "ai_provider_failure",
+          request_id: requestId,
+          action: "chat",
+          code: "stream_interrupted",
+        });
+        try {
+          send({
+            error: {
+              code: "ai_provider_unavailable",
+              message: "AI practice is temporarily unavailable.",
+            },
+          });
+        } catch {
+          // The downstream socket is already gone; nothing to report.
+        }
+        try {
+          out.close();
+        } catch {
+          // Ignore double-close on an aborted socket.
+        }
+      } finally {
+        await settle();
+      }
+    },
+    cancel() {
+      clearTimeout(timeout);
+      upstreamReader.cancel().catch(() => undefined);
+      settle().catch(() => undefined);
+    },
+  });
+
+  return new Response(stream, {
+    status: 200,
+    headers: {
+      ...cors,
+      "Content-Type": "text/event-stream; charset=utf-8",
+      "Cache-Control": "no-store",
+      "X-Accel-Buffering": "no",
+    },
+  });
+}
+
+function wantsStream(req: Request): boolean {
+  if (new URL(req.url).searchParams.get("stream") === "1") return true;
+  return (req.headers.get("accept") ?? "").toLowerCase().includes("text/event-stream");
+}
+
 async function openAIChat(
   requestId: string,
   action: Action,
@@ -888,9 +1175,63 @@ serve(async (req) => {
           emitOperationalEvent,
         );
         const focusSentence = focusPromptSentence(focusPatterns);
-        const systemPrompt = focusSentence
-          ? `${tutorSystemPrompt(language)} ${focusSentence}`
-          : tutorSystemPrompt(language);
+        // Best-effort CEFR adaptation: degrades to null, never blocks chat.
+        const cefrLevel = await learnerCefrLevel(quotaClient, authenticated.userId);
+        const levelDirective = cefrLevel ? LEVEL_DIRECTIVES[cefrLevel] : "";
+        const mode = chatMode(body);
+        const modeDirective = modePromptExtension(mode, language);
+        const systemPrompt = [
+          tutorSystemPrompt(language),
+          levelDirective,
+          modeDirective,
+          focusSentence,
+        ].filter(Boolean).join(" ");
+        const chatMessages: OpenAIMessage[] = [
+          { role: "system", content: systemPrompt },
+          ...history,
+        ];
+
+        if (wantsStream(request)) {
+          // Streaming keeps the same quota lifecycle but settles it when the
+          // stream closes, not when the handler returns: finalize on a
+          // completed stream, release only when the provider boundary was
+          // never marked.
+          await reserveQuota(quotaClient, authenticated.userId, action, requestId);
+          let submissionState: ProviderSubmissionState = "not_started";
+          const markProviderSubmission = async (): Promise<void> => {
+            if (submissionState === "submitted") return;
+            if (submissionState === "marking") {
+              throw new HttpError(503, "quota_unavailable", "AI practice is temporarily unavailable.");
+            }
+            submissionState = "marking";
+            await markQuotaProviderSubmission(quotaClient, authenticated.userId, action, requestId);
+            submissionState = "submitted";
+          };
+          const onStreamSettled = async (): Promise<void> => {
+            if (submissionState === "submitted") {
+              await finalizeQuota(quotaClient, authenticated.userId, action, requestId);
+            } else {
+              await releasePreSendQuota(quotaClient, authenticated.userId, action, requestId);
+            }
+          };
+          try {
+            return await openAIChatStream(
+              requestId,
+              provider,
+              chatMessages,
+              1500,
+              markProviderSubmission,
+              cors,
+              onStreamSettled,
+            );
+          } catch (error) {
+            if (submissionState === "not_started") {
+              await releasePreSendQuota(quotaClient, authenticated.userId, action, requestId);
+            }
+            throw error;
+          }
+        }
+
         responseContent = await withQuotaReservation(
           quotaClient,
           authenticated.userId,
@@ -900,7 +1241,7 @@ serve(async (req) => {
             requestId,
             action as Action,
             provider,
-            [{ role: "system", content: systemPrompt }, ...history],
+            chatMessages,
             1500,
             markProviderSubmission,
           ),

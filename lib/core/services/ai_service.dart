@@ -22,6 +22,15 @@ class AIService {
   // Keep client feedback requests aligned with the server-enforced cap.
   static const _maxPracticeResponseCharacters = 6000;
 
+  /// Server-validated conversation modes (must match the Edge Function enum).
+  /// The client sends only these tokens; the server composes all prompts.
+  static const List<String> chatModes = <String>[
+    'free_chat',
+    'roleplay',
+    'correction_focus',
+    'grammar_drill',
+  ];
+
   static String get _edgeFunctionBaseUrl =>
       '${SupabaseConfig.url}/functions/v1/sparky-ai';
 
@@ -151,6 +160,138 @@ class AIService {
       throw const AIServiceException(
         'Voice transcription is temporarily unavailable.',
       );
+    }
+  }
+
+  /// Streams a chat response as Server-Sent Events, yielding text deltas in
+  /// arrival order. The caller appends deltas to build the reply. Throws
+  /// [AIServiceException] for any server-reported failure, including errors
+  /// delivered mid-stream as SSE error events. [mode] must be one of
+  /// [chatModes] (server-validated); null means free_chat.
+  Stream<String> streamChatResponse(
+    List<Map<String, String>> history,
+    String targetLanguage, {
+    String? mode,
+  }) async* {
+    final language = targetLanguage.trim();
+    if (language.isEmpty) {
+      throw const AIServiceException(
+        'Choose a language before starting practice.',
+      );
+    }
+    if (mode != null && !chatModes.contains(mode)) {
+      throw const AIServiceException(
+        'Unsupported conversation mode.',
+      );
+    }
+
+    final messages = <Map<String, String>>[];
+    for (final message in history) {
+      final sender = message['sender'];
+      final role = sender == 'user'
+          ? 'user'
+          : sender == 'sparky'
+          ? 'assistant'
+          : null;
+      final content = (message['text'] ?? '').trim();
+      if (role != null && content.isNotEmpty) {
+        messages.add(<String, String>{
+          'role': role,
+          'content': _truncate(content, _maxMessageCharacters),
+        });
+      }
+    }
+
+    if (messages.isEmpty) {
+      throw const AIServiceException(
+        'Send a practice message before asking Sparky.',
+      );
+    }
+
+    final messageCountLimited = messages.length > _maxClientMessages
+        ? messages.sublist(messages.length - _maxClientMessages)
+        : messages;
+    final recentMessages = _retainNewestWithinCharacterBudget(
+      messageCountLimited,
+      _maxHistoryCharacters,
+    );
+
+    final request = http.Request(
+      'POST',
+      Uri.parse('$_edgeFunctionBaseUrl?action=chat&stream=1'),
+    );
+    request.headers.addAll(_headers(_accessToken()));
+    request.body = jsonEncode(<String, dynamic>{
+      'targetLanguage': language,
+      'messages': recentMessages,
+      if (mode != null) 'mode': mode, // ignore: use_null_aware_elements
+    });
+
+    final client = http.Client();
+    try {
+      final streamedResponse = await client
+          .send(request)
+          .timeout(_requestTimeout);
+
+      if (streamedResponse.statusCode < 200 ||
+          streamedResponse.statusCode >= 300) {
+        final responseBody = await streamedResponse.stream
+            .bytesToString()
+            .timeout(_requestTimeout);
+        throw AIServiceException(
+          _messageForStatus(streamedResponse.statusCode, responseBody),
+        );
+      }
+
+      var buffer = '';
+      await for (final chunk
+          in streamedResponse.stream.transform(utf8.decoder)) {
+        buffer += chunk;
+        var newlineIndex = buffer.indexOf('\n');
+        while (newlineIndex >= 0) {
+          final line = buffer.substring(0, newlineIndex).trim();
+          buffer = buffer.substring(newlineIndex + 1);
+          newlineIndex = buffer.indexOf('\n');
+          if (!line.startsWith('data:')) continue;
+          final data = line.substring(5).trim();
+          if (data == '[DONE]') return;
+          Map<String, dynamic>? decoded;
+          try {
+            final parsed = jsonDecode(data);
+            if (parsed is Map<String, dynamic>) decoded = parsed;
+          } on FormatException {
+            // Malformed or keep-alive lines are skipped, never surfaced.
+            continue;
+          }
+          if (decoded == null) continue;
+          final error = decoded['error'];
+          if (error is Map) {
+            final message = error['message'];
+            throw AIServiceException(
+              message is String && message.trim().isNotEmpty
+                  ? message
+                  : 'AI practice is temporarily unavailable. Please try again.',
+            );
+          }
+          final delta = decoded['delta'];
+          if (delta is String && delta.isNotEmpty) {
+            yield delta;
+          }
+          if (decoded['done'] == true) return;
+        }
+      }
+    } on AIServiceException {
+      rethrow;
+    } on TimeoutException {
+      throw const AIServiceException(
+        'AI practice timed out. Please try again.',
+      );
+    } catch (_) {
+      throw const AIServiceException(
+        'AI practice is temporarily unavailable. Please try again.',
+      );
+    } finally {
+      client.close();
     }
   }
 
