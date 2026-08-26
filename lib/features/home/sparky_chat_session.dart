@@ -730,7 +730,7 @@ class _SparkyChatSessionState
           ),
           if (_isListening || _isAiThinking)
             Padding(
-              padding: const EdgeInsets.all(12.0),
+              padding: const EdgeInsets.all(SparkSpacing.sm),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -740,16 +740,16 @@ class _SparkyChatSessionState
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
                       color: _isListening
-                          ? Colors.redAccent
+                          ? SparkStatus.danger
                           : theme.colorScheme.secondary,
                     ),
                   ),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: SparkSpacing.xs),
                   Text(
                     _isListening ? "Listening..." : _loadingMessage,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: _isListening
-                          ? Colors.redAccent
+                          ? SparkStatus.danger
                           : theme.colorScheme.secondary,
                     ),
                   ),
@@ -757,7 +757,10 @@ class _SparkyChatSessionState
               ),
             ),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.symmetric(
+              horizontal: SparkSpacing.md,
+              vertical: SparkSpacing.sm,
+            ),
             decoration: BoxDecoration(
               color: theme.cardColor,
               border: Border(
