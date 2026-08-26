@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:record/record.dart' as rec;
 import '../../core/constants/language_catalog.dart';
+import '../../core/design/tokens.dart';
 import '../../core/services/ai_service.dart';
 import '../../core/services/auth_service.dart';
 import '../../core/services/consent_service.dart';
@@ -16,6 +17,61 @@ class _ChatModeMeta {
   final String label;
   final IconData icon;
   const _ChatModeMeta(this.label, this.icon);
+}
+
+/// A single bouncing dot for the streaming "Sparky is typing" indicator.
+class _TypingDot extends StatefulWidget {
+  final int delayIndex;
+  const _TypingDot({required this.delayIndex});
+
+  @override
+  State<_TypingDot> createState() => _TypingDotState();
+}
+
+class _TypingDotState extends State<_TypingDot>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 900),
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(
+      Duration(milliseconds: widget.delayIndex * 180),
+      () {
+        if (mounted) _controller.repeat(reverse: true);
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, _) {
+        return Opacity(
+          opacity: 0.35 + 0.65 * _controller.value,
+          child: Container(
+            width: 7,
+            height: 7,
+            decoration: BoxDecoration(
+              color: theme.colorScheme.secondary,
+              shape: BoxShape.circle,
+            ),
+          ),
+        );
+      },
+    );
+  }
 }
 
 class SparkyChatSession extends ConsumerStatefulWidget {
@@ -598,18 +654,28 @@ class _SparkyChatSessionState
           Expanded(
             child: ListView.builder(
               controller: _scrollController,
-              padding: const EdgeInsets.all(20),
+              padding: SparkSpacing.padMd,
               itemCount: _messages.length,
               itemBuilder: (context, idx) {
                 final msg = _messages[idx];
                 final isSparky = msg["sender"] == "sparky";
+                final text = msg["text"] ?? "";
+                // A streaming bubble with no content yet shows a typing
+                // indicator instead of an empty box (immediate feedback).
+                final isStreamingPlaceholder =
+                    isSparky && _isAiThinking && text.isEmpty;
                 return Align(
                   alignment: isSparky
                       ? AlignmentDirectional.centerStart
                       : AlignmentDirectional.centerEnd,
                   child: Container(
-                    margin: const EdgeInsets.symmetric(vertical: 8),
-                    padding: const EdgeInsets.all(16),
+                    margin: const EdgeInsets.symmetric(
+                      vertical: SparkSpacing.xs,
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: SparkSpacing.md,
+                      vertical: SparkSpacing.sm,
+                    ),
                     constraints: BoxConstraints(
                       maxWidth: MediaQuery.of(context).size.width * 0.75,
                     ),
@@ -618,13 +684,13 @@ class _SparkyChatSessionState
                           ? theme.cardColor
                           : theme.colorScheme.primary.withAlpha(38),
                       borderRadius: BorderRadius.only(
-                        topLeft: const Radius.circular(16),
-                        topRight: const Radius.circular(16),
+                        topLeft: const Radius.circular(SparkRadius.card),
+                        topRight: const Radius.circular(SparkRadius.card),
                         bottomLeft: isSparky
                             ? Radius.zero
-                            : const Radius.circular(16),
+                            : const Radius.circular(SparkRadius.card),
                         bottomRight: isSparky
-                            ? const Radius.circular(16)
+                            ? const Radius.circular(SparkRadius.card)
                             : Radius.zero,
                       ),
                       border: Border.all(
@@ -632,14 +698,31 @@ class _SparkyChatSessionState
                             ? theme.colorScheme.primary.withAlpha(25)
                             : theme.colorScheme.primary.withAlpha(51),
                       ),
+                      boxShadow: isSparky ? null : SparkShadows.card,
                     ),
-                    child: Text(
-                      msg["text"] ?? "",
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontSize: 14,
-                        height: 1.4,
-                      ),
-                    ),
+                    child: isStreamingPlaceholder
+                        ? SizedBox(
+                            height: 20,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                for (var i = 0; i < 3; i++)
+                                  Padding(
+                                    padding: EdgeInsetsDirectional.only(
+                                      end: i == 2 ? 0 : SparkSpacing.xxs,
+                                    ),
+                                    child: _TypingDot(delayIndex: i),
+                                  ),
+                              ],
+                            ),
+                          )
+                        : Text(
+                            text,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              fontSize: 14,
+                              height: 1.4,
+                            ),
+                          ),
                   ),
                 );
               },
