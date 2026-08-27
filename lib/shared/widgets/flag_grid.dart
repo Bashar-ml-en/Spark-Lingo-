@@ -48,15 +48,17 @@ class _FlagGridState extends State<FlagGrid> {
     String langCode,
     LanguageTheme theme,
   ) {
+    final baseTheme = Theme.of(context);
     if (theme.flags.length > 1) {
       // Open bottom sheet for regional variants
       showModalBottomSheet(
         context: context,
-        backgroundColor: const Color(0xFFFFFFFF),
+        backgroundColor: baseTheme.colorScheme.surface,
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
         builder: (context) {
+          final sheetTheme = Theme.of(context);
           return SafeArea(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
@@ -66,10 +68,9 @@ class _FlagGridState extends State<FlagGrid> {
                 children: [
                   Text(
                     'Select region for ${theme.displayName}',
-                    style: const TextStyle(
-                      fontSize: 18,
+                    style: sheetTheme.textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF1F2937),
+                      color: sheetTheme.colorScheme.onSurface,
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -77,8 +78,10 @@ class _FlagGridState extends State<FlagGrid> {
                     child: ListView.separated(
                       shrinkWrap: true,
                       itemCount: theme.flags.length,
-                      separatorBuilder: (context, index) =>
-                          const Divider(color: Color(0xFFF3F4F6), height: 1),
+                      separatorBuilder: (context, index) => Divider(
+                        color: sheetTheme.dividerColor,
+                        height: 1,
+                      ),
                       itemBuilder: (context, index) {
                         final flag = theme.flags[index];
                         return ListTile(
@@ -92,7 +95,7 @@ class _FlagGridState extends State<FlagGrid> {
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(6),
                               border: Border.all(
-                                color: const Color(0xFFE5E7EB),
+                                color: sheetTheme.dividerColor,
                               ),
                             ),
                             clipBehavior: Clip.antiAlias,
@@ -103,17 +106,15 @@ class _FlagGridState extends State<FlagGrid> {
                           ),
                           title: Text(
                             flag.countryName,
-                            style: const TextStyle(
-                              fontSize: 16,
+                            style: sheetTheme.textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.w600,
-                              color: Color(0xFF1F2937),
+                              color: sheetTheme.colorScheme.onSurface,
                             ),
                           ),
                           subtitle: Text(
                             flag.locale,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: Color(0xFF9CA3AF),
+                            style: sheetTheme.textTheme.bodySmall?.copyWith(
+                              color: sheetTheme.colorScheme.onSurfaceVariant,
                             ),
                           ),
                           onTap: () {
@@ -174,9 +175,15 @@ class _FlagGridState extends State<FlagGrid> {
             },
             decoration: InputDecoration(
               hintText: 'Search languages...',
-              prefixIcon: const Icon(Icons.search, color: Color(0xFF9CA3AF)),
+              prefixIcon: Icon(
+                Icons.search,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
               filled: true,
-              fillColor: const Color(0xFFF3F4F6),
+              fillColor: Theme.of(context)
+                  .colorScheme
+                  .surfaceContainerHighest
+                  .withValues(alpha: 0.5),
               contentPadding: const EdgeInsets.symmetric(
                 vertical: 0,
                 horizontal: 16,
@@ -203,10 +210,13 @@ class _FlagGridState extends State<FlagGrid> {
               }
 
               if (filteredList.isEmpty) {
-                return const Center(
+                return Center(
                   child: Text(
                     'No languages found',
-                    style: TextStyle(fontSize: 16, color: Color(0xFF9CA3AF)),
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                   ),
                 );
               }
