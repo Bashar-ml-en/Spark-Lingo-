@@ -392,10 +392,13 @@ class _SparkyChatSessionState
     } catch (e) {
       if (!mounted) return;
       final partial = buffer.toString().trim();
+      // Surface the SPECIFIC failure (quota, sign-in, timeout, network)
+      // instead of one generic message, so learners can act on it.
+      final message = e is AIServiceException
+          ? e.message
+          : "Sparky is having trouble connecting right now. Please check your connection and try again.";
       setState(() {
-        _messages.last["text"] = partial.isNotEmpty
-            ? partial
-            : "Sparky is having trouble connecting right now. Please check your connection and try again.";
+        _messages.last["text"] = partial.isNotEmpty ? partial : message;
       });
       _scrollToBottom();
     } finally {

@@ -108,7 +108,9 @@ class AIService {
       case 413:
         return 'That practice response is too large. Please shorten it and try again.';
       case 429:
-        return 'You have reached your current AI practice limit. Please try again later.';
+        return 'You have reached your current AI practice limit. Please try again in a little while.';
+      case 503:
+        return 'Sparky’s service is briefly unavailable. Please try again in a moment.';
       default:
         return 'AI practice is temporarily unavailable. Please try again.';
     }
