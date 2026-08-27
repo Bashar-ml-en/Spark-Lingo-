@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 
-/// Exam preparation entry point.
+import '../../core/constants/language_catalog.dart';
+
+/// Exam preparation entry point — language-aware.
 ///
-/// Honesty contract: no placement levels, scoring, or readiness numbers are
-/// shown until they are built from officially-documented exam formats. This
-/// screen states exactly what exists, what is next, and which official
-/// bodies define each exam — no fabricated rubrics.
+/// Honesty contract: only exam bodies verified for the ACTIVE language are
+/// listed; languages without a verified official exam mapping say so
+/// explicitly instead of showing unrelated content. No fabricated scores.
 class ExamPickerScreen extends StatelessWidget {
   final String userId;
   final String languageCode;
@@ -16,49 +17,64 @@ class ExamPickerScreen extends StatelessWidget {
     required this.languageCode,
   });
 
+  /// Official exam bodies verified per language (sourced 2026-08-27 from the
+  /// organizers' own sites). Languages absent here have no verified mapping
+  /// yet — the UI must say that, never guess.
+  static const Map<String, List<_ExamBody>> _examBodiesByLanguage = {
+    'zh': [
+      _ExamBody('HSK', 'Chinese Testing International (CTI)'),
+    ],
+    'ja': [
+      _ExamBody('JLPT', 'The Japan Foundation & JEES'),
+    ],
+    'ko': [
+      _ExamBody('TOPIK', 'National Institute for International Education (NIIED)'),
+    ],
+    'fr': [
+      _ExamBody('DELF / DALF', 'France Éducation international'),
+    ],
+    'ms': [
+      _ExamBody('MUET', 'Majlis Peperiksaan Malaysia (MPM)'),
+    ],
+    'en': [
+      _ExamBody('MUET (Malaysia)', 'Majlis Peperiksaan Malaysia (MPM)'),
+    ],
+  };
+
   static const _roadmap = <_RoadmapItem>[
     _RoadmapItem(
-      icon: Icons.table_rows_outlined,
       title: 'Exam data model',
       detail: 'Definition, level-mapping, and mock-exam tables are live.',
       done: true,
     ),
     _RoadmapItem(
-      icon: Icons.fact_check_outlined,
       title: 'Official format research',
       detail:
-          'Each exam’s sections, timing, and scoring sourced from its official body before any mock is built.',
+          'Sections, timing, and scoring sourced from the official body before any mock is built.',
       done: false,
     ),
     _RoadmapItem(
-      icon: Icons.timer_outlined,
       title: 'Timed mock exams',
       detail: 'Section-by-section practice under real exam conditions.',
       done: false,
     ),
     _RoadmapItem(
-      icon: Icons.analytics_outlined,
       title: 'Readiness scoring',
       detail: 'Level estimates with disclosed methodology and sources.',
       done: false,
     ),
   ];
 
-  static const _officialBodies = <_ExamBody>[
-    _ExamBody('Chinese', 'HSK', 'Chinese Testing International (CTI)'),
-    _ExamBody('Japanese', 'JLPT', 'The Japan Foundation & JEES'),
-    _ExamBody('Korean', 'TOPIK', 'National Institute for International Education (NIIED)'),
-    _ExamBody('French', 'DELF / DALF', 'France Éducation international'),
-    _ExamBody('English (Malaysia)', 'MUET', 'Majlis Peperiksaan Malaysia (MPM)'),
-  ];
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
+    final canonical = LanguageCatalog.canonicalCode(languageCode);
+    final languageName = LanguageCatalog.displayName(canonical);
+    final bodies = _examBodiesByLanguage[canonical];
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Exam preparation')),
+      appBar: AppBar(title: Text('Exam preparation — $languageName')),
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(
@@ -66,14 +82,10 @@ class ExamPickerScreen extends StatelessWidget {
             child: ListView(
               padding: const EdgeInsets.all(24),
               children: [
-                Icon(
-                  Icons.construction_outlined,
-                  size: 64,
-                  color: cs.primary,
-                ),
+                Icon(Icons.construction_outlined, size: 64, color: cs.primary),
                 const SizedBox(height: 16),
                 Text(
-                  'Building the exam module',
+                  'Building the $languageName exam module',
                   textAlign: TextAlign.center,
                   style: theme.textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
@@ -89,6 +101,72 @@ class ExamPickerScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 24),
+                // Language-specific exam bodies.
+                Text(
+                  bodies != null
+                      ? 'OFFICIAL EXAM BODIES FOR $languageName'.toUpperCase()
+                      : 'OFFICIAL EXAM MAPPING',
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: cs.primary,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 1.2,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                if (bodies != null)
+                  ...bodies.map(
+                    (body) => Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 5),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(
+                            Icons.verified_outlined,
+                            size: 18,
+                            color: cs.primary,
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: RichText(
+                              text: TextSpan(
+                                style: theme.textTheme.bodyMedium,
+                                children: [
+                                  TextSpan(
+                                    text: '${body.exam} — ',
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                  TextSpan(
+                                    text: body.body,
+                                    style: TextStyle(
+                                      color: cs.onSurfaceVariant,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                else
+                  Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: cs.surfaceContainerHighest.withValues(alpha: 0.4),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      'No official exam mapping has been verified for $languageName yet. We will only list an exam once its format is confirmed with the official organizer — invented exam content is never shipped.',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: cs.onSurfaceVariant,
+                        height: 1.45,
+                      ),
+                    ),
+                  ),
+                const SizedBox(height: 20),
                 // Roadmap.
                 Text(
                   'WHAT’S BUILT, WHAT’S NEXT',
@@ -140,52 +218,6 @@ class ExamPickerScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(height: 20),
-                // Official bodies — verified names, no invented details.
-                Text(
-                  'OFFICIAL EXAM BODIES WE SOURCE FROM',
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: cs.primary,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 1.2,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                ..._officialBodies.map(
-                  (body) => Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 5),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Icon(
-                          Icons.verified_outlined,
-                          size: 18,
-                          color: cs.primary,
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: RichText(
-                            text: TextSpan(
-                              style: theme.textTheme.bodyMedium,
-                              children: [
-                                TextSpan(
-                                  text: '${body.language}: ',
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                                TextSpan(
-                                  text: '${body.exam} — ${body.body}',
-                                  style: TextStyle(color: cs.onSurfaceVariant),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
                 const SizedBox(height: 24),
                 ElevatedButton.icon(
                   onPressed: () => Navigator.maybePop(context),
@@ -209,13 +241,11 @@ class ExamPickerScreen extends StatelessWidget {
 }
 
 class _RoadmapItem {
-  final IconData icon;
   final String title;
   final String detail;
   final bool done;
 
   const _RoadmapItem({
-    required this.icon,
     required this.title,
     required this.detail,
     required this.done,
@@ -223,9 +253,8 @@ class _RoadmapItem {
 }
 
 class _ExamBody {
-  final String language;
   final String exam;
   final String body;
 
-  const _ExamBody(this.language, this.exam, this.body);
+  const _ExamBody(this.exam, this.body);
 }

@@ -332,11 +332,12 @@ class AIService {
         'AI practice timed out. Please try again.',
       );
     } catch (e, stack) {
-      // Log the real cause for diagnostics; the learner still gets a short,
-      // actionable message rather than a raw stack trace.
+      // Log the real cause for diagnostics. In release web builds runtimeType
+      // is minified and meaningless to the learner, so keep the message
+      // actionable and short.
       debugPrint('Sparky chat failed: $e\n$stack');
-      throw AIServiceException(
-        'AI practice could not connect (${e.runtimeType}). Please check your connection and try again.',
+      throw const AIServiceException(
+        'Sparky could not connect. Please check your internet connection and try again.',
       );
     } finally {
       client.close();
