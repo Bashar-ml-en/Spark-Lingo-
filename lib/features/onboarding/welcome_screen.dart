@@ -206,16 +206,16 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen>
                         ),
                       ),
                     ),
-                    const SizedBox(height: 44),
-                    // Hero: SL monogram emblem.
+                    const SizedBox(height: 28),
+                    // Hero: SL monogram emblem (tightened — CTA comes sooner).
                     _entranceItem(
                       delay: 0.08,
                       child: Center(
                         child: Container(
-                          width: 132,
-                          height: 132,
+                          width: 108,
+                          height: 108,
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(34),
+                            borderRadius: BorderRadius.circular(28),
                             boxShadow: [
                               BoxShadow(
                                 color: const Color(0xFF38BDF8).withAlpha(110),
@@ -232,7 +232,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen>
                         ),
                       ),
                     ),
-                    const SizedBox(height: 26),
+                    const SizedBox(height: 22),
                     // Wordmark.
                     _entranceItem(
                       delay: 0.18,
@@ -243,7 +243,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen>
                         child: const Text(
                           'Spark Lingo',
                           style: TextStyle(
-                            fontSize: 38,
+                            fontSize: 34,
                             fontWeight: FontWeight.w900,
                             color: Colors.white,
                             letterSpacing: -0.8,
@@ -252,11 +252,11 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen>
                         ),
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 10),
                     _entranceItem(
                       delay: 0.26,
                       child: const Text(
-                        'Master 15 languages with AI-guided conversation\nand native audio practice',
+                        'Learn 15 languages with an AI tutor that talks,\nlistens, and adapts to you.',
                         style: TextStyle(
                           fontSize: 15,
                           color: Color(0xFF94A3B8),
@@ -266,74 +266,52 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen>
                       ),
                     ),
                     const SizedBox(height: 24),
-                    // Proof points.
+                    // Value proposition — three verified facts, one card.
+                    // (Replaces the old stat chips + language strip that
+                    // duplicated each other above the fold.)
                     _entranceItem(
                       delay: 0.34,
-                      child: const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          _StatChip(value: '15', label: 'languages'),
-                          SizedBox(width: 10),
-                          _StatChip(value: '9,000+', label: 'real cards'),
-                          SizedBox(width: 10),
-                          _StatChip(value: 'AI', label: 'tutor inside'),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 28),
-                    // Language strip.
-                    _entranceItem(
-                      delay: 0.42,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 18,
+                          vertical: 16,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.white.withAlpha(9),
                           borderRadius: BorderRadius.circular(22),
                           border: Border.all(color: Colors.white.withAlpha(20)),
                         ),
-                        child: Column(
+                        child: const Column(
                           children: [
-                            const Text(
-                              '15 LANGUAGES · MALAY-FIRST',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
-                                color: Color(0xFF38BDF8),
-                                letterSpacing: 1.6,
-                              ),
-                              textAlign: TextAlign.center,
+                            _ValueRow(
+                              icon: Icons.chat_bubble_outline,
+                              title: 'Sparky, your AI tutor',
+                              detail:
+                                  'Conversation practice with streaming replies and corrections',
                             ),
-                            const SizedBox(height: 12),
-                            SizedBox(
-                              height: 36,
-                              child: ListView.separated(
-                                scrollDirection: Axis.horizontal,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 14,
-                                ),
-                                itemCount:
-                                    LanguageCatalog.supportedLanguages.length,
-                                separatorBuilder: (_, _) =>
-                                    const SizedBox(width: 8),
-                                itemBuilder: (context, i) {
-                                  final code =
-                                      LanguageCatalog.supportedLanguages[i];
-                                  return _LanguageChip(
-                                    label: _nativeName(code),
-                                    dot: _nativeAccent(code),
-                                  );
-                                },
-                              ),
+                            SizedBox(height: 14),
+                            _ValueRow(
+                              icon: Icons.auto_awesome_outlined,
+                              title: 'Smart spaced repetition',
+                              detail:
+                                  'Cards resurface right before you forget them',
+                            ),
+                            SizedBox(height: 14),
+                            _ValueRow(
+                              icon: Icons.style_outlined,
+                              title: '21,600 real cards',
+                              detail:
+                                  '120 lessons in every language — Malay-first',
                             ),
                           ],
                         ),
                       ),
                     ),
-                    const SizedBox(height: 28),
-                    // Primary CTA stack.
+                    const SizedBox(height: 24),
+                    // Primary CTA — moved up: this is the screen's one job.
                     if (AuthConfig.googleOAuthEnabled)
                       _entranceItem(
-                        delay: 0.52,
+                        delay: 0.44,
                         child: _PrimaryActionButton(
                           isLoading: _isLoading,
                           onPressed: _handleGoogleSignIn,
@@ -345,7 +323,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen>
                         !kIsWeb &&
                         defaultTargetPlatform == TargetPlatform.iOS) ...[
                       _entranceItem(
-                        delay: 0.6,
+                        delay: 0.5,
                         child: OutlinedButton.icon(
                           onPressed: _isLoading ? null : _handleAppleSignIn,
                           style: OutlinedButton.styleFrom(
@@ -369,7 +347,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen>
                       const SizedBox(height: 12),
                     ],
                     _entranceItem(
-                      delay: 0.68,
+                      delay: 0.56,
                       child: OutlinedButton(
                         onPressed: _isLoading ? null : _handleGetStarted,
                         style: OutlinedButton.styleFrom(
@@ -401,7 +379,61 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen>
                               ),
                       ),
                     ),
-                    const SizedBox(height: 18),
+                    const SizedBox(height: 26),
+                    // Language catalog — proof section below the CTA.
+                    _entranceItem(
+                      delay: 0.64,
+                      child: Column(
+                        children: [
+                          const Text(
+                            'CHOOSE FROM 15 LANGUAGES',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFF38BDF8),
+                              letterSpacing: 1.6,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 12),
+                          SizedBox(
+                            height: 36,
+                            child: ListView.separated(
+                              scrollDirection: Axis.horizontal,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                              ),
+                              itemCount:
+                                  LanguageCatalog.supportedLanguages.length,
+                              separatorBuilder: (_, _) =>
+                                  const SizedBox(width: 8),
+                              itemBuilder: (context, i) {
+                                final code =
+                                    LanguageCatalog.supportedLanguages[i];
+                                return _LanguageChip(
+                                  label: _nativeName(code),
+                                  dot: _nativeAccent(code),
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    // Micro trust footer.
+                    _entranceItem(
+                      delay: 0.72,
+                      child: const Text(
+                        'Free to start · Progress syncs to your account',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFF64748B),
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
                   ],
                 ),
               ),
@@ -463,39 +495,59 @@ class _PrimaryActionButton extends StatelessWidget {
   }
 }
 
-class _StatChip extends StatelessWidget {
-  final String value;
-  final String label;
+/// One row of the welcome value-proposition card: icon + title + detail.
+class _ValueRow extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String detail;
 
-  const _StatChip({required this.value, required this.label});
+  const _ValueRow({
+    required this.icon,
+    required this.title,
+    required this.detail,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-      decoration: BoxDecoration(
-        color: const Color(0xFF0F172A).withAlpha(200),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withAlpha(20)),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w800,
-              color: Colors.white,
-            ),
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 38,
+          height: 38,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: const Color(0xFF38BDF8).withAlpha(30),
+            borderRadius: BorderRadius.circular(11),
           ),
-          const SizedBox(height: 2),
-          Text(
-            label,
-            style: const TextStyle(fontSize: 10.5, color: Color(0xFF94A3B8)),
+          child: Icon(icon, size: 20, color: const Color(0xFF38BDF8)),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                detail,
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: Color(0xFF94A3B8),
+                  height: 1.35,
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

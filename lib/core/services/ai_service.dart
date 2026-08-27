@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -102,6 +103,8 @@ class AIService {
     }
 
     switch (statusCode) {
+      case 400:
+        return 'Sparky couldn’t start that request. Please try sending your message again.';
       case 401:
       case 403:
         return 'Please sign in again before using AI practice.';
@@ -112,7 +115,8 @@ class AIService {
       case 503:
         return 'Sparky’s service is briefly unavailable. Please try again in a moment.';
       default:
-        return 'AI practice is temporarily unavailable. Please try again.';
+        // Keep the HTTP status visible so support can pinpoint the cause.
+        return 'AI practice is temporarily unavailable (error $statusCode). Please try again.';
     }
   }
 
@@ -327,9 +331,12 @@ class AIService {
       throw const AIServiceException(
         'AI practice timed out. Please try again.',
       );
-    } catch (_) {
-      throw const AIServiceException(
-        'AI practice is temporarily unavailable. Please try again.',
+    } catch (e, stack) {
+      // Log the real cause for diagnostics; the learner still gets a short,
+      // actionable message rather than a raw stack trace.
+      debugPrint('Sparky chat failed: $e\n$stack');
+      throw AIServiceException(
+        'AI practice could not connect (${e.runtimeType}). Please check your connection and try again.',
       );
     } finally {
       client.close();
