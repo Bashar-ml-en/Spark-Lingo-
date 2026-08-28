@@ -6,12 +6,19 @@ import '../../core/services/auth_service.dart';
 import '../../core/services/database_service.dart';
 import '../../core/services/retention_service.dart';
 import '../../core/services/spaced_repetition_service.dart';
-import '../../core/services/tts_service.dart';
+import '../../core/services/voice_controller.dart';
+import '../../shared/models/curriculum.dart';
+import '../practice/practice_engine.dart';
 
+/// Progressive practice session powered by [PracticeEngine].
+///
+/// Escalates easy→hard through four phases instead of passive flipping:
+///   Learn → Recognize (4-choice) → Produce (type it) → Recall (failed items).
 class FlashcardStudySession extends ConsumerStatefulWidget {
   final String title;
   final List<dynamic> flashcards;
   final String languageKey;
+
   /// Curriculum lesson id this session belongs to. When set, finishing the
   /// session records a lesson completion (migration 015).
   final String? lessonId;
@@ -31,25 +38,151 @@ class FlashcardStudySession extends ConsumerStatefulWidget {
 
 class _FlashcardStudySessionState
     extends ConsumerState<FlashcardStudySession> {
-  int _currentIndex = 0;
-  bool _isFlipped = false;
+  final PracticeEngine _engine = PracticeEngine();
+  final VoiceController _voice = VoiceController();
+  final TextEditingController _typeController = TextEditingController();
+
+  late final List<PracticeCard> _practiceCards;
+  List<Exercise> _queue = const [];
+  int _index = 0;
+
+  // Recall phase bookkeeping: failed items awaiting re-test.
+  final Map<String, int> _recallStrikes = {};
+
+  // Session stats.
+  int _correct = 0;
+  int _wrong = 0;
+
+  // Interaction state for the current exercise.
+  String? _selectedChoice; // recognize phase
+  bool _answered = false;
+  bool _wasCorrect = false;
+  String? _typeFeedback;
+
   final Map<String, SRSState> _sessionProgress = {};
-  final TTSService _tts = TTSService();
   final Map<int, int> _qualityCounts = {};
 
-  void _speakCardText(bool flipped) {
-    final card = widget.flashcards[_currentIndex];
-    // Front is the target language; the back is the English bridge.
-    _tts.speak(
-      flipped ? card.back : card.front,
-      flipped ? 'en' : widget.languageKey,
-    );
+  @override
+  void initState() {
+    super.initState();
+    _practiceCards = [
+      for (final c in widget.flashcards)
+        if (c is Flashcard)
+          PracticeCard(
+            id: c.id,
+            front: c.front,
+            back: c.back,
+            context: c.context,
+          ),
+    ];
+    _queue = _engine.buildSession(_practiceCards);
   }
 
-  void _handleQualitySelect(int quality) {
-    final card = widget.flashcards[_currentIndex];
-    _qualityCounts.update(quality, (v) => v + 1, ifAbsent: () => 1);
+  @override
+  void dispose() {
+    _typeController.dispose();
+    _voice.stop();
+    super.dispose();
+  }
 
+  Exercise? get _currentExercise =>
+      _index < _queue.length ? _queue[_index] : null;
+
+  String _phaseLabel(ExerciseType type) => switch (type) {
+        ExerciseType.learn => 'Learn',
+        ExerciseType.recognize => 'Recognize',
+        ExerciseType.produce => 'Write it',
+        ExerciseType.recall => 'Second chance',
+      };
+
+  // ------------------------------------------------------------- actions
+
+  void _next() {
+    final ex = _currentExercise;
+    if (ex == null) return;
+
+    // Failed recognize/produce items re-enter as recall exercises.
+    if (!_wasCorrect &&
+        (ex.type == ExerciseType.recognize ||
+            ex.type == ExerciseType.produce)) {
+      final strikes = (_recallStrikes[ex.card.id] ?? 0) + 1;
+      _recallStrikes[ex.card.id] = strikes;
+      if (strikes < 3) {
+        setState(() {
+          _queue = [
+            ..._queue,
+            _engine.recallExercise(
+              ex.card,
+              frontToBack: !ex.frontToBack, // flip direction on retry
+            ),
+          ];
+        });
+      }
+    }
+
+    setState(() {
+      _index++;
+      _selectedChoice = null;
+      _answered = false;
+      _wasCorrect = false;
+      _typeFeedback = null;
+      _typeController.clear();
+    });
+
+    if (_index >= _queue.length) {
+      _finishSession();
+    }
+  }
+
+  void _finishSession() {
+    final user = ref.read(authProvider);
+    if (user == null) return;
+    ref.read(retentionServiceProvider).awardXp(
+      source: 'review_session',
+      amount: XpAmounts.reviewSession,
+      languageCode: widget.languageKey,
+    );
+    final lessonId = widget.lessonId;
+    if (lessonId != null) {
+      ref
+          .read(databaseServiceProvider)
+          .completeLesson(lessonId, widget.languageKey)
+          .then((_) {
+            ref.invalidate(
+              lessonProgressProvider(
+                CardReviewsParam(user.id, widget.languageKey),
+              ),
+            );
+          })
+          .catchError((e) {
+            debugPrint('Lesson-completion sync failed.');
+          });
+    }
+  }
+
+  void _recordOutcome(bool passed) {
+    final ex = _currentExercise;
+    if (ex == null) return;
+    setState(() {
+      _answered = true;
+      _wasCorrect = passed;
+      if (passed) {
+        _correct++;
+      } else {
+        _wrong++;
+      }
+    });
+
+    // SRS only for exercises that test memory (skip pure learn exposure
+    // for cards already known? keep simple: grade every tested card once).
+    final quality = srsQualityFor(type: ex.type, passed: passed);
+    if (ex.type != ExerciseType.learn) {
+      _qualityCounts.update(quality, (v) => v + 1, ifAbsent: () => 1);
+      _applySrs(ex.card, quality);
+    }
+  }
+
+  void _applySrs(PracticeCard card, int quality) {
     final user = ref.read(authProvider);
     if (user == null) return;
 
@@ -59,21 +192,14 @@ class _FlashcardStudySessionState
     final cardReviews = cardReviewsAsync.value ?? {};
     final existingState = _sessionProgress[card.id] ?? cardReviews[card.id];
 
-    final prevRepetitions = existingState?.repetitions ?? 0;
-    final prevEfactor = existingState?.efactor ?? 2.5;
-    final prevInterval = existingState?.interval ?? 0;
-
-    // Calculate next SM-2 interval
     final nextState = SpacedRepetitionService.calculateNextState(
       quality: quality,
-      prevRepetitions: prevRepetitions,
-      prevEfactor: prevEfactor,
-      prevInterval: prevInterval,
+      prevRepetitions: existingState?.repetitions ?? 0,
+      prevEfactor: existingState?.efactor ?? 2.5,
+      prevInterval: existingState?.interval ?? 0,
     );
-
     _sessionProgress[card.id] = nextState;
 
-    // Sync stats to Supabase database reactively
     ref
         .read(databaseServiceProvider)
         .upsertCardReview(
@@ -88,39 +214,18 @@ class _FlashcardStudySessionState
         .catchError((e) {
           debugPrint('Card-review synchronization failed.');
         });
-
-    setState(() {
-      if (_currentIndex < widget.flashcards.length - 1) {
-        _currentIndex++;
-        _isFlipped = false;
-      } else {
-        _currentIndex = widget.flashcards.length; // completed
-        // Retention: one XP award per completed review session.
-        ref.read(retentionServiceProvider).awardXp(
-          source: 'review_session',
-          amount: XpAmounts.reviewSession,
-          languageCode: widget.languageKey,
-        );
-        // Progress: record the lesson completion server-side.
-        final lessonId = widget.lessonId;
-        if (lessonId != null) {
-          ref
-              .read(databaseServiceProvider)
-              .completeLesson(lessonId, widget.languageKey)
-              .then((_) {
-                ref.invalidate(
-                  lessonProgressProvider(
-                    CardReviewsParam(user.id, widget.languageKey),
-                  ),
-                );
-              })
-              .catchError((e) {
-                debugPrint('Lesson-completion sync failed.');
-              });
-        }
-      }
-    });
   }
+
+  void _speakPrompt(Exercise ex) {
+    // Prompts in the target language are spoken in the target language.
+    final isTarget = ex.frontToBack;
+    _voice.toggle(
+      ex.prompt,
+      isTarget ? widget.languageKey : 'en',
+    );
+  }
+
+  // --------------------------------------------------------------- build
 
   @override
   Widget build(BuildContext context) {
@@ -131,262 +236,437 @@ class _FlashcardStudySessionState
       return const Scaffold(body: Center(child: Text("Please sign in.")));
     }
 
-    final cardReviewsAsync = ref.watch(
-      cardReviewsProvider(CardReviewsParam(user.id, widget.languageKey)),
-    );
+    final isCompleted = _index >= _queue.length;
+    final ex = _currentExercise;
 
-    return cardReviewsAsync.when(
-      loading: () => Scaffold(
-        appBar: AppBar(title: Text(widget.title)),
-        body: const Center(child: CircularProgressIndicator()),
-      ),
-      error: (err, stack) => Scaffold(
-        appBar: AppBar(title: Text(widget.title)),
-        body: const Center(
-          child: Text('Review progress is unavailable right now.'),
+    return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
+      appBar: AppBar(
+        title: Text('${widget.title} — practice'),
+        leading: IconButton(
+          icon: const Icon(Icons.close),
+          onPressed: () => Navigator.pop(context),
         ),
       ),
-      data: (reviews) {
-        final isCompleted = _currentIndex >= widget.flashcards.length;
-
-        return Scaffold(
-          backgroundColor: theme.scaffoldBackgroundColor,
-          appBar: AppBar(
-            title: Text('${widget.title} — practice session'),
-            leading: IconButton(
-              icon: const Icon(Icons.close),
-              onPressed: () => Navigator.pop(context),
-            ),
-          ),
-          body: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: isCompleted
-                ? Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
+      body: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: isCompleted
+            ? _buildCompletion(theme)
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  SparkProgressBar(
+                    progress: _queue.isEmpty ? 1.0 : _index / _queue.length,
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Container(
-                        width: 88,
-                        height: 88,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: SparkStatus.success.withValues(alpha: 0.12),
-                          shape: BoxShape.circle,
+                      Chip(
+                        avatar: Icon(
+                          switch (ex!.type) {
+                            ExerciseType.learn => Icons.auto_stories,
+                            ExerciseType.recognize => Icons.touch_app,
+                            ExerciseType.produce => Icons.keyboard,
+                            ExerciseType.recall => Icons.replay,
+                          },
+                          size: 16,
                         ),
-                        child: const Icon(
-                          Icons.check_circle_rounded,
-                          size: 56,
-                          color: SparkStatus.success,
-                        ),
+                        label: Text(_phaseLabel(ex.type)),
+                        visualDensity: VisualDensity.compact,
                       ),
-                      const SizedBox(height: 24),
                       Text(
-                        "Session complete!",
-                        style: theme.textTheme.displayLarge?.copyWith(
-                          fontSize: 24,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 8),
-                      // Visible XP reward: what this session earned.
-                      Center(
-                        child: SparkXpBadge(xp: XpAmounts.reviewSession),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        'You practiced ${widget.flashcards.length} cards. Your ratings schedule future reviews.',
-                        style: theme.textTheme.bodyMedium,
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 20),
-                      // Recall breakdown from this session.
-                      if (_qualityCounts.isNotEmpty) ...[
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            _sessionStat('Forgot', _qualityCounts[0] ?? 0, SparkStatus.danger),
-                            const SizedBox(width: 16),
-                            _sessionStat('Hard', _qualityCounts[3] ?? 0, SparkStatus.warning),
-                            const SizedBox(width: 16),
-                            _sessionStat('Good', _qualityCounts[4] ?? 0, SparkStatus.info),
-                            const SizedBox(width: 16),
-                            _sessionStat('Easy', _qualityCounts[5] ?? 0, SparkStatus.success),
-                          ],
-                        ),
-                      ],
-                      const SizedBox(height: 32),
-                      SparkButton(
-                        label: 'Back to Dashboard',
-                        expanded: true,
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                    ],
-                  )
-                : Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      // Progress indicator
-                      SparkProgressBar(
-                        progress: widget.flashcards.isEmpty
-                            ? 1.0
-                            : (_currentIndex / widget.flashcards.length),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        "Card ${_currentIndex + 1} of ${widget.flashcards.length}",
+                        '${_index + 1} / ${_queue.length}',
                         style: theme.textTheme.bodySmall,
-                        textAlign: TextAlign.right,
                       ),
-                      const Spacer(),
-                      // Flashcard Container
-                      GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            _isFlipped = !_isFlipped;
-                          });
-                        },
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 300),
-                          padding: const EdgeInsets.all(32),
-                          height: 240,
-                          decoration: BoxDecoration(
-                            color: theme.cardColor,
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: theme.colorScheme.primary.withAlpha(
-                                _isFlipped ? 100 : 38,
-                              ),
-                              width: 2,
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withAlpha(12),
-                                blurRadius: 8,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
-                          ),
-                          child: Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  _isFlipped ? "MEANING" : "FRONT",
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: theme.colorScheme.secondary,
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: 1.5,
-                                  ),
-                                ),
-                                const SizedBox(height: 16),
-                                Text(
-                                  _isFlipped
-                                      ? widget.flashcards[_currentIndex].back
-                                      : widget.flashcards[_currentIndex].front,
-                                  style: theme.textTheme.displayLarge?.copyWith(
-                                    fontSize: 28,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                                if (_isFlipped &&
-                                    widget.flashcards[_currentIndex].context !=
-                                        null) ...[
-                                  const SizedBox(height: 16),
-                                  Text(
-                                    widget.flashcards[_currentIndex].context!,
-                                    style: theme.textTheme.bodyMedium?.copyWith(
-                                      fontStyle: FontStyle.italic,
-                                      color: theme.textTheme.bodySmall?.color,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ],
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Center(
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            TextButton.icon(
-                              icon: const Icon(Icons.flip),
-                              label: Text(
-                                _isFlipped ? "Show Front" : "Reveal Answer",
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  _isFlipped = !_isFlipped;
-                                });
-                              },
-                            ),
-                            const SizedBox(width: 8),
-                            // Listen button: speaks the visible side with
-                            // the configured voice (male/female/auto).
-                            TextButton.icon(
-                              icon: const Icon(Icons.volume_up_rounded),
-                              label: const Text("Listen"),
-                              onPressed: () => _speakCardText(_isFlipped),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const Spacer(),
-                      // Quality Rating buttons
-                      if (_isFlipped) ...[
-                        Text(
-                          "How well did you recall this card?",
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontSize: 14,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 12),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            _buildQualityButton(
-                              0,
-                              "Forgot",
-                              SparkStatus.danger,
-                            ),
-                            _buildQualityButton(
-                              3,
-                              "Hard",
-                              SparkStatus.warning,
-                            ),
-                            _buildQualityButton(
-                              4,
-                              "Good",
-                              SparkStatus.info,
-                            ),
-                            _buildQualityButton(
-                              5,
-                              "Easy",
-                              SparkStatus.success,
-                            ),
-                          ],
-                        ),
-                      ] else ...[
-                        const SizedBox(height: 60),
-                      ],
                     ],
                   ),
-          ),
-        );
-      },
+                  const SizedBox(height: 20),
+                  Expanded(child: _buildExercise(theme, ex)),
+                ],
+              ),
+      ),
     );
   }
 
-  Widget _sessionStat(String label, int count, Color color) {
+  Widget _buildExercise(ThemeData theme, Exercise ex) {
+    return switch (ex.type) {
+      ExerciseType.learn => _buildLearn(theme, ex),
+      ExerciseType.recognize => _buildRecognize(theme, ex),
+      ExerciseType.produce ||
+      ExerciseType.recall =>
+        _buildProduce(theme, ex),
+    };
+  }
+
+  // Phase 1 — Learn ------------------------------------------------------
+
+  Widget _buildLearn(ThemeData theme, Exercise ex) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Expanded(
+          child: Container(
+            padding: const EdgeInsets.all(32),
+            decoration: BoxDecoration(
+              color: theme.cardColor,
+              borderRadius: BorderRadius.circular(SparkRadius.card),
+              border: Border.all(
+                color: theme.colorScheme.primary.withAlpha(38),
+                width: 2,
+              ),
+              boxShadow: SparkShadows.card,
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  ex.card.front,
+                  style: theme.textTheme.displayLarge?.copyWith(
+                    fontSize: 30,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                TextButton.icon(
+                  icon: const Icon(Icons.volume_up_rounded, size: 18),
+                  label: const Text('Listen'),
+                  onPressed: () => _voice.toggle(
+                    ex.card.front,
+                    widget.languageKey,
+                  ),
+                ),
+                if (ex.card.context != null) ...[
+                  const SizedBox(height: 12),
+                  Text(
+                    ex.card.context!,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontStyle: FontStyle.italic,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+                const SizedBox(height: 24),
+                Text(
+                  ex.card.back,
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    color: theme.colorScheme.secondary,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 20),
+        SparkButton(
+          label: 'Got it — next',
+          expanded: true,
+          onPressed: _next,
+        ),
+      ],
+    );
+  }
+
+  // Phase 2 — Recognize ---------------------------------------------------
+
+  Widget _buildRecognize(ThemeData theme, Exercise ex) {
+    final options = [...ex.distractors, ex.answer]..shuffle();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          'What does this mean?',
+          style: theme.textTheme.titleMedium,
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 12),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Flexible(
+              child: Text(
+                ex.prompt,
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            IconButton(
+              tooltip: 'Listen',
+              icon: const Icon(Icons.volume_up_rounded),
+              onPressed: () => _speakPrompt(ex),
+            ),
+          ],
+        ),
+        const SizedBox(height: 24),
+        Expanded(
+          child: ListView.separated(
+            itemCount: options.length,
+            separatorBuilder: (_, _) => const SizedBox(height: 10),
+            itemBuilder: (context, i) {
+              final opt = options[i];
+              final isAnswer = opt == ex.answer;
+              Color? fill;
+              Color border = theme.dividerColor;
+              if (_answered) {
+                if (isAnswer) {
+                  fill = SparkStatus.success.withAlpha(30);
+                  border = SparkStatus.success;
+                } else if (opt == _selectedChoice) {
+                  fill = SparkStatus.danger.withAlpha(30);
+                  border = SparkStatus.danger;
+                }
+              } else if (opt == _selectedChoice) {
+                border = theme.colorScheme.primary;
+              }
+              return InkWell(
+                borderRadius: BorderRadius.circular(SparkRadius.button),
+                onTap: _answered
+                    ? null
+                    : () {
+                        setState(() => _selectedChoice = opt);
+                        _recordOutcome(isAnswer);
+                      },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: SparkSpacing.md,
+                    vertical: SparkSpacing.sm + 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: fill ?? theme.cardColor,
+                    borderRadius:
+                        BorderRadius.circular(SparkRadius.button),
+                    border: Border.all(color: border, width: 1.5),
+                  ),
+                  child: Row(
+                    children: [
+                      if (_answered && isAnswer)
+                        const Icon(
+                          Icons.check_circle,
+                          size: 20,
+                          color: SparkStatus.success,
+                        ),
+                      if (_answered &&
+                          opt == _selectedChoice &&
+                          !isAnswer)
+                        const Icon(
+                          Icons.cancel,
+                          size: 20,
+                          color: SparkStatus.danger,
+                        ),
+                      if (_answered &&
+                          (isAnswer || opt == _selectedChoice))
+                        const SizedBox(width: 8),
+                      Expanded(child: Text(opt)),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+        if (_answered) ...[
+          const SizedBox(height: 12),
+          SparkButton(
+            label: 'Continue',
+            variant: _wasCorrect
+                ? SparkButtonVariant.primary
+                : SparkButtonVariant.secondary,
+            expanded: true,
+            onPressed: _next,
+          ),
+        ],
+      ],
+    );
+  }
+
+  // Phase 3/4 — Produce / Recall -----------------------------------------
+
+  Widget _buildProduce(ThemeData theme, Exercise ex) {
+    final isRecall = ex.type == ExerciseType.recall;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          isRecall
+              ? 'Second chance — write it from memory'
+              : (ex.frontToBack
+                  ? 'Write the meaning'
+                  : 'Write it in your new language'),
+          style: theme.textTheme.titleMedium,
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 12),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Flexible(
+              child: Text(
+                ex.prompt,
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            IconButton(
+              tooltip: 'Listen',
+              icon: const Icon(Icons.volume_up_rounded),
+              onPressed: () => _speakPrompt(ex),
+            ),
+          ],
+        ),
+        const SizedBox(height: 24),
+        TextField(
+          controller: _typeController,
+          enabled: !_answered,
+          autofocus: true,
+          textAlign: TextAlign.center,
+          style: theme.textTheme.titleLarge,
+          decoration: InputDecoration(
+            hintText: 'Type your answer…',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(SparkRadius.button),
+            ),
+          ),
+          onSubmitted: (_) {
+            if (!_answered) _gradeTyped(ex);
+          },
+        ),
+        if (_typeFeedback != null) ...[
+          const SizedBox(height: 10),
+          Text(
+            _typeFeedback!,
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: _wasCorrect ? SparkStatus.success : SparkStatus.danger,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+        const Spacer(),
+        if (!_answered)
+          SparkButton(
+            label: 'Check',
+            expanded: true,
+            onPressed: _typeController.text.trim().isEmpty
+                ? null
+                : () => _gradeTyped(ex),
+          )
+        else ...[
+          if (!_wasCorrect)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: Text(
+                'Correct answer: ${ex.answer}',
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: SparkStatus.success,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          SparkButton(
+            label: 'Continue',
+            variant: _wasCorrect
+                ? SparkButtonVariant.primary
+                : SparkButtonVariant.secondary,
+            expanded: true,
+            onPressed: _next,
+          ),
+        ],
+      ],
+    );
+  }
+
+  void _gradeTyped(Exercise ex) {
+    final given = _typeController.text;
+    final passed = answersMatch(ex.answer, given);
+    setState(() {
+      _typeFeedback = passed
+          ? 'Correct! 🎉'
+          : 'Not quite — expected “${ex.answer}”';
+    });
+    _recordOutcome(passed);
+  }
+
+  // Completion ------------------------------------------------------------
+
+  Widget _buildCompletion(ThemeData theme) {
+    final total = _correct + _wrong;
+    final accuracy = total == 0 ? 0 : (_correct * 100 / total).round();
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Center(
+          child: Container(
+            width: 88,
+            height: 88,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: SparkStatus.success.withValues(alpha: 0.12),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.emoji_events_rounded,
+              size: 56,
+              color: SparkStatus.success,
+            ),
+          ),
+        ),
+        const SizedBox(height: 24),
+        Text(
+          'Practice complete!',
+          style: theme.textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.w800,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 8),
+        Center(child: SparkXpBadge(xp: XpAmounts.reviewSession)),
+        const SizedBox(height: 16),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _sessionStat('Correct', _correct, SparkStatus.success),
+            const SizedBox(width: 24),
+            _sessionStat('Missed', _wrong, SparkStatus.danger),
+            const SizedBox(width: 24),
+            _sessionStat('Accuracy', accuracy, SparkStatus.info,
+                suffix: '%'),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Text(
+          'You practiced ${_practiceCards.length} cards through learn → '
+          'recognize → write → recall.',
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 32),
+        SparkButton(
+          label: 'Back to Dashboard',
+          expanded: true,
+          onPressed: () => Navigator.pop(context),
+        ),
+      ],
+    );
+  }
+
+  Widget _sessionStat(String label, int count, Color color,
+      {String suffix = ''}) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          '$count',
+          '$count$suffix',
           style: TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.w800,
@@ -395,34 +675,12 @@ class _FlashcardStudySessionState
         ),
         Text(
           label,
-          style: const TextStyle(fontSize: 11, color: Color(0xFF6B7280)),
+          style: TextStyle(
+            fontSize: 11,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
         ),
       ],
     );
   }
-
-  Widget _buildQualityButton(int q, String label, Color btnColor) {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: btnColor,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        padding: const EdgeInsets.symmetric(
-          horizontal: SparkSpacing.sm,
-          vertical: SparkSpacing.sm,
-        ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(SparkRadius.button),
-        ),
-      ),
-      onPressed: () => _handleQualitySelect(q),
-      child: Text(
-        label,
-        style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
-      ),
-    );
-  }
 }
-
-/// Display metadata for a Sparky conversation mode. Only the mode token is
-/// sent to the server; labels and icons stay client-side.
