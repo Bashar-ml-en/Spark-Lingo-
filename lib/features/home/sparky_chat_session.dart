@@ -246,11 +246,20 @@ class _SparkyChatSessionState
         var serverLedgerUsable = true;
         try {
           if (await consentService.hasCurrentConsent(purpose)) {
-        _sessionConsents.add(purpose);
-        return true;
-      }
+            _sessionConsents.add(purpose);
+            return true;
+          }
         } on ConsentServiceException {
           serverLedgerUsable = false;
+        }
+
+        // Device ledger check: an accepted choice recorded on this device
+        // in an earlier session must NOT re-prompt the learner.
+        if (await TestConsentService.hasCurrentConsent(
+          purpose.documentKey,
+        )) {
+          _sessionConsents.add(purpose);
+          return true;
         }
 
         if (!mounted) return false;

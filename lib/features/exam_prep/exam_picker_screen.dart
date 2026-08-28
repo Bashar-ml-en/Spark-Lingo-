@@ -1,260 +1,277 @@
 import 'package:flutter/material.dart';
 
 import '../../core/constants/language_catalog.dart';
+import 'exam_format_registry.dart';
 
-/// Exam preparation entry point — language-aware.
+/// Exam preparation entry point — language-aware and fact-based.
 ///
-/// Honesty contract: only exam bodies verified for the ACTIVE language are
-/// listed; languages without a verified official exam mapping say so
-/// explicitly instead of showing unrelated content. No fabricated scores.
-class ExamPickerScreen extends StatelessWidget {
-  final String userId;
+/// Every format detail shown here comes from [officialExamFormats], which is
+/// sourced from official exam bodies (Workstream C, Phase 0 research pass).
+/// Languages without a verified official exam get an honest notice instead
+/// of invented content. No readiness percentages or score predictions are
+/// shown until official scoring rubrics are implemented.
+class ExamPrepScreen extends StatelessWidget {
   final String languageCode;
 
-  const ExamPickerScreen({
-    super.key,
-    required this.userId,
-    required this.languageCode,
-  });
-
-  /// Official exam bodies verified per language (sourced 2026-08-27 from the
-  /// organizers' own sites). Languages absent here have no verified mapping
-  /// yet — the UI must say that, never guess.
-  static const Map<String, List<_ExamBody>> _examBodiesByLanguage = {
-    'zh': [
-      _ExamBody('HSK', 'Chinese Testing International (CTI)'),
-    ],
-    'ja': [
-      _ExamBody('JLPT', 'The Japan Foundation & JEES'),
-    ],
-    'ko': [
-      _ExamBody('TOPIK', 'National Institute for International Education (NIIED)'),
-    ],
-    'fr': [
-      _ExamBody('DELF / DALF', 'France Éducation international'),
-    ],
-    'ms': [
-      _ExamBody('MUET', 'Majlis Peperiksaan Malaysia (MPM)'),
-    ],
-    'en': [
-      _ExamBody('MUET (Malaysia)', 'Majlis Peperiksaan Malaysia (MPM)'),
-    ],
-  };
-
-  static const _roadmap = <_RoadmapItem>[
-    _RoadmapItem(
-      title: 'Exam data model',
-      detail: 'Definition, level-mapping, and mock-exam tables are live.',
-      done: true,
-    ),
-    _RoadmapItem(
-      title: 'Official format research',
-      detail:
-          'Sections, timing, and scoring sourced from the official body before any mock is built.',
-      done: false,
-    ),
-    _RoadmapItem(
-      title: 'Timed mock exams',
-      detail: 'Section-by-section practice under real exam conditions.',
-      done: false,
-    ),
-    _RoadmapItem(
-      title: 'Readiness scoring',
-      detail: 'Level estimates with disclosed methodology and sources.',
-      done: false,
-    ),
-  ];
+  const ExamPrepScreen({super.key, required this.languageCode});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-    final canonical = LanguageCatalog.canonicalCode(languageCode);
-    final languageName = LanguageCatalog.displayName(canonical);
-    final bodies = _examBodiesByLanguage[canonical];
+    final languageName = LanguageCatalog.displayName(languageCode);
+    final format = officialExamFormats[languageCode];
 
     return Scaffold(
-      appBar: AppBar(title: Text('Exam preparation — $languageName')),
-      body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 520),
-            child: ListView(
-              padding: const EdgeInsets.all(24),
+      appBar: AppBar(
+        title: Text('Exam preparation — $languageName'),
+        backgroundColor: theme.colorScheme.surface,
+        foregroundColor: theme.colorScheme.onSurface,
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(20),
+        children: [
+          if (format != null) ...[
+            _OfficialExamCard(format: format, theme: theme),
+            const SizedBox(height: 16),
+            _BuildStatusCard(theme: theme),
+          ] else ...[
+            _NoVerifiedExamCard(languageName: languageName, theme: theme),
+            const SizedBox(height: 16),
+            _BuildStatusCard(theme: theme),
+          ],
+          const SizedBox(height: 16),
+          Center(
+            child: TextButton.icon(
+              onPressed: () => Navigator.of(context).pop(),
+              icon: const Icon(Icons.arrow_back),
+              label: const Text('Back to learning'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// A verified official exam: name, organizer, levels, sections with real
+/// timings, scoring scale, and passing rule — all from the registry.
+class _OfficialExamCard extends StatelessWidget {
+  final OfficialExamFormat format;
+  final ThemeData theme;
+
+  const _OfficialExamCard({required this.format, required this.theme});
+
+  @override
+  Widget build(BuildContext context) {
+    final titleStyle = theme.textTheme.titleLarge?.copyWith(
+      fontWeight: FontWeight.w800,
+    );
+    final sectionTitle = theme.textTheme.titleSmall?.copyWith(
+      fontWeight: FontWeight.w700,
+    );
+    final body = theme.textTheme.bodyMedium;
+    final small = theme.textTheme.bodySmall?.copyWith(
+      color: theme.colorScheme.onSurfaceVariant,
+    );
+
+    return Card(
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: theme.colorScheme.primary.withAlpha(40)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(format.examName, style: titleStyle),
+            const SizedBox(height: 4),
+            Text('Organizer: ${format.organizer}', style: small),
+            Text('Verified source: ${format.source}', style: small),
+            const SizedBox(height: 16),
+            Text('Official levels', style: sectionTitle),
+            const SizedBox(height: 6),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
               children: [
-                Icon(Icons.construction_outlined, size: 64, color: cs.primary),
-                const SizedBox(height: 16),
-                Text(
-                  'Building the $languageName exam module',
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
+                for (final level in format.levels)
+                  Chip(
+                    label: Text(level),
+                    backgroundColor:
+                        theme.colorScheme.primary.withAlpha(22),
+                    side: BorderSide.none,
                   ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'We refuse to show fabricated scores. Mock exams ship only after every format detail is sourced from the official body for that exam.',
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: cs.onSurfaceVariant,
-                    height: 1.45,
-                  ),
-                ),
-                const SizedBox(height: 24),
-                // Language-specific exam bodies.
-                Text(
-                  bodies != null
-                      ? 'OFFICIAL EXAM BODIES FOR $languageName'.toUpperCase()
-                      : 'OFFICIAL EXAM MAPPING',
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: cs.primary,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 1.2,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                if (bodies != null)
-                  ...bodies.map(
-                    (body) => Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 5),
-                      child: Row(
+              ],
+            ),
+            const SizedBox(height: 16),
+            Text('Exam sections', style: sectionTitle),
+            const SizedBox(height: 8),
+            for (final section in format.sections)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      Icons.check_circle_outline,
+                      size: 18,
+                      color: theme.colorScheme.primary,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Icon(
-                            Icons.verified_outlined,
-                            size: 18,
-                            color: cs.primary,
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: RichText(
-                              text: TextSpan(
-                                style: theme.textTheme.bodyMedium,
-                                children: [
-                                  TextSpan(
-                                    text: '${body.exam} — ',
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                  TextSpan(
-                                    text: body.body,
-                                    style: TextStyle(
-                                      color: cs.onSurfaceVariant,
-                                    ),
-                                  ),
-                                ],
-                              ),
+                          Text(
+                            section.code != null
+                                ? '${section.name} (paper ${section.code})'
+                                : section.name,
+                            style: body?.copyWith(
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
+                          if (section.minutes != null)
+                            Text('Time: ${section.minutes}', style: small),
+                          if (section.note != null)
+                            Text(section.note!, style: small),
                         ],
                       ),
                     ),
-                  )
-                else
-                  Container(
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: cs.surfaceContainerHighest.withValues(alpha: 0.4),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      'No official exam mapping has been verified for $languageName yet. We will only list an exam once its format is confirmed with the official organizer — invented exam content is never shipped.',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: cs.onSurfaceVariant,
-                        height: 1.45,
-                      ),
-                    ),
-                  ),
-                const SizedBox(height: 20),
-                // Roadmap.
-                Text(
-                  'WHAT’S BUILT, WHAT’S NEXT',
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: cs.primary,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 1.2,
-                  ),
+                  ],
                 ),
-                const SizedBox(height: 8),
-                ..._roadmap.map(
-                  (item) => Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 6),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Icon(
-                          item.done
-                              ? Icons.check_circle
-                              : Icons.radio_button_unchecked,
-                          color: item.done
-                              ? const Color(0xFF22C55E)
-                              : cs.outline,
-                          size: 22,
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                item.title,
-                                style: theme.textTheme.titleSmall?.copyWith(
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                item.detail,
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: cs.onSurfaceVariant,
-                                  height: 1.35,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                ElevatedButton.icon(
-                  onPressed: () => Navigator.maybePop(context),
-                  icon: const Icon(Icons.arrow_back),
-                  label: const Text('Back to learning'),
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: const Size.fromHeight(50),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-              ],
-            ),
-          ),
+              ),
+            if (format.scoringScale != null) ...[
+              const SizedBox(height: 12),
+              Text('Scoring', style: sectionTitle),
+              const SizedBox(height: 6),
+              Text(format.scoringScale!, style: body),
+            ],
+            if (format.passingRule != null) ...[
+              const SizedBox(height: 12),
+              Text('Passing requirement', style: sectionTitle),
+              const SizedBox(height: 6),
+              Text(format.passingRule!, style: body),
+            ],
+            if (format.formatNotes != null) ...[
+              const SizedBox(height: 12),
+              Text('Notes', style: sectionTitle),
+              const SizedBox(height: 6),
+              Text(format.formatNotes!, style: body),
+            ],
+          ],
         ),
       ),
     );
   }
 }
 
-class _RoadmapItem {
-  final String title;
-  final String detail;
-  final bool done;
+/// Honest notice for languages whose official exam was not verified yet.
+class _NoVerifiedExamCard extends StatelessWidget {
+  final String languageName;
+  final ThemeData theme;
 
-  const _RoadmapItem({
-    required this.title,
-    required this.detail,
-    required this.done,
+  const _NoVerifiedExamCard({
+    required this.languageName,
+    required this.theme,
   });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: theme.dividerColor),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'No official exam mapping yet',
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'We have not yet verified the official proficiency exam '
+              'format for $languageName from its official body. We refuse '
+              'to invent exam details, so this page shows real data only. '
+              'It will appear here as soon as the official format is '
+              'researched and confirmed.',
+              style: theme.textTheme.bodyMedium,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
-class _ExamBody {
-  final String exam;
-  final String body;
+/// Transparent build status: what exists today vs. what ships next.
+class _BuildStatusCard extends StatelessWidget {
+  final ThemeData theme;
 
-  const _ExamBody(this.exam, this.body);
+  const _BuildStatusCard({required this.theme});
+
+  @override
+  Widget build(BuildContext context) {
+    final titleStyle = theme.textTheme.titleMedium?.copyWith(
+      fontWeight: FontWeight.w700,
+    );
+    final body = theme.textTheme.bodyMedium;
+
+    return Card(
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: theme.dividerColor),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Building the exam module', style: titleStyle),
+            const SizedBox(height: 8),
+            Text(
+              'We refuse to show fabricated scores. Mock exams ship only '
+              'after every format detail is sourced from the official body '
+              'for that exam.',
+              style: body,
+            ),
+            const SizedBox(height: 12),
+            _statusRow('✅', 'Exam data model — definition, level-mapping, '
+                'and mock-exam tables are live.'),
+            _statusRow('✅', 'Official format research — verified sections, '
+                'timings, and scoring scales above, sourced from official '
+                'bodies.'),
+            _statusRow('⚪', 'Timed mock exams — section-by-section practice '
+                'under real exam conditions.'),
+            _statusRow('⚪', 'Readiness scoring — level estimates with '
+                'disclosed methodology and sources.'),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _statusRow(String marker, String text) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 3),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('$marker  ', style: theme.textTheme.bodyMedium),
+          Expanded(
+            child: Text(text, style: theme.textTheme.bodySmall),
+          ),
+        ],
+      ),
+    );
+  }
 }

@@ -294,8 +294,7 @@ class CurriculumPath extends ConsumerWidget {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (_) => ExamPickerScreen(
-                                      userId: userId,
+                                    builder: (_) => ExamPrepScreen(
                                       languageCode: langKey,
                                     ),
                                   ),
