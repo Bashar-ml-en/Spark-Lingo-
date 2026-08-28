@@ -5,14 +5,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/constants/auth_config.dart';
 import '../../core/constants/language_catalog.dart';
+import '../../core/design/neumorph.dart';
 import '../../core/router/router.dart';
 import '../../core/services/auth_service.dart';
 import '../../core/theme/language_theme_registry.dart';
 
-/// Premium dark onboarding landing screen.
+/// Light-neumorphic onboarding landing screen.
 ///
-/// Design language: deep obsidian canvas with a single cyan signature glow,
-/// glass surfaces, staggered entrance motion, and one clear primary action.
+/// Design language: soft off-white canvas, surfaces extruded with paired
+/// light/dark shadows (SparkNeumorph), staggered entrance motion, and one
+/// clear primary action. Replaces the earlier dark glass design per the
+/// 2026-08 design review.
 class WelcomeScreen extends ConsumerStatefulWidget {
   const WelcomeScreen({super.key});
 
@@ -133,319 +136,272 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFF050B1F), // Near-black indigo
-              Color(0xFF0B132B), // Obsidian navy
-              Color(0xFF0F172A), // Dark slate canvas
-            ],
-          ),
-        ),
-        child: Stack(
-          children: [
-            // Ambient signature glow behind the hero emblem.
-            Positioned(
-              top: -180,
-              left: -120,
-              right: -120,
-              child: IgnorePointer(
-                child: Container(
-                  height: 520,
-                  decoration: BoxDecoration(
-                    gradient: RadialGradient(
-                      colors: [
-                        const Color(0xFF38BDF8).withAlpha(46),
-                        Colors.transparent,
-                      ],
+      backgroundColor: SparkNeumorph.canvas,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Top header: extruded settings pill.
+              _entranceItem(
+                delay: 0.0,
+                child: Align(
+                  alignment: AlignmentDirectional.centerEnd,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: SparkNeumorph.surface,
+                      borderRadius:
+                          BorderRadius.circular(SparkNeumorph.pill),
+                      boxShadow: SparkNeumorph.raised(
+                        distance: 4,
+                        blur: 10,
+                      ),
+                    ),
+                    child: TextButton.icon(
+                      onPressed: () => context.push(SparkRouter.settings),
+                      icon: const Icon(
+                        Icons.settings_outlined,
+                        size: 18,
+                        color: Color(0xFF38BDF8),
+                      ),
+                      label: const Text(
+                        'Settings & help',
+                        style: TextStyle(
+                          color: SparkNeumorph.ink,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-            SafeArea(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 16,
+              const SizedBox(height: 28),
+              // Hero: SL monogram in an extruded circle.
+              _entranceItem(
+                delay: 0.08,
+                child: Center(
+                  child: Container(
+                    width: 112,
+                    height: 112,
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: SparkNeumorph.surface,
+                      boxShadow: SparkNeumorph.raised(
+                        distance: 8,
+                        blur: 18,
+                      ),
+                    ),
+                    child: Container(
+                      clipBehavior: Clip.antiAlias,
+                      decoration: const BoxDecoration(shape: BoxShape.circle),
+                      child: Image.asset(
+                        'assets/symbols/sl_logo.jpg',
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // Top header: glass settings pill.
-                    _entranceItem(
-                      delay: 0.0,
-                      child: Align(
-                        alignment: AlignmentDirectional.centerEnd,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white.withAlpha(14),
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: Colors.white.withAlpha(30),
-                            ),
-                          ),
-                          child: TextButton.icon(
-                            onPressed: () => context.push(SparkRouter.settings),
-                            icon: const Icon(
-                              Icons.settings_outlined,
-                              size: 18,
-                              color: Color(0xFF38BDF8),
-                            ),
-                            label: const Text(
-                              'Settings & help',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ),
+              ),
+              const SizedBox(height: 24),
+              // Wordmark.
+              _entranceItem(
+                delay: 0.18,
+                child: const Text(
+                  'Spark Lingo',
+                  style: TextStyle(
+                    fontSize: 34,
+                    fontWeight: FontWeight.w900,
+                    color: SparkNeumorph.ink,
+                    letterSpacing: -0.8,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              const SizedBox(height: 10),
+              _entranceItem(
+                delay: 0.26,
+                child: const Text(
+                  'Learn 15 languages with an AI tutor that talks,\nlistens, and adapts to you.',
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: SparkNeumorph.inkSoft,
+                    height: 1.5,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              const SizedBox(height: 24),
+              // Value proposition — three verified facts, one extruded card.
+              _entranceItem(
+                delay: 0.34,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 18,
+                  ),
+                  decoration: BoxDecoration(
+                    color: SparkNeumorph.surface,
+                    borderRadius:
+                        BorderRadius.circular(SparkNeumorph.card),
+                    boxShadow: SparkNeumorph.raised(),
+                  ),
+                  child: const Column(
+                    children: [
+                      _ValueRow(
+                        icon: Icons.chat_bubble_outline,
+                        title: 'Sparky, your AI tutor',
+                        detail:
+                            'Conversation practice with streaming replies and corrections',
                       ),
-                    ),
-                    const SizedBox(height: 28),
-                    // Hero: SL monogram emblem (tightened — CTA comes sooner).
-                    _entranceItem(
-                      delay: 0.08,
-                      child: Center(
-                        child: Container(
-                          width: 108,
-                          height: 108,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(28),
-                            boxShadow: [
-                              BoxShadow(
-                                color: const Color(0xFF38BDF8).withAlpha(110),
-                                blurRadius: 46,
-                                spreadRadius: 2,
-                              ),
-                            ],
-                          ),
-                          clipBehavior: Clip.antiAlias,
-                          child: Image.asset(
-                            'assets/symbols/sl_logo.jpg',
-                            fit: BoxFit.cover,
-                          ),
-                        ),
+                      SizedBox(height: 14),
+                      _ValueRow(
+                        icon: Icons.auto_awesome_outlined,
+                        title: 'Smart spaced repetition',
+                        detail:
+                            'Cards resurface right before you forget them',
                       ),
-                    ),
-                    const SizedBox(height: 22),
-                    // Wordmark.
-                    _entranceItem(
-                      delay: 0.18,
-                      child: ShaderMask(
-                        shaderCallback: (bounds) => const LinearGradient(
-                          colors: [Color(0xFFFFFFFF), Color(0xFF38BDF8)],
-                        ).createShader(bounds),
-                        child: const Text(
-                          'Spark Lingo',
-                          style: TextStyle(
-                            fontSize: 34,
-                            fontWeight: FontWeight.w900,
-                            color: Colors.white,
-                            letterSpacing: -0.8,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
+                      SizedBox(height: 14),
+                      _ValueRow(
+                        icon: Icons.style_outlined,
+                        title: '21,600 real cards',
+                        detail:
+                            '120 lessons in every language — Malay-first',
                       ),
-                    ),
-                    const SizedBox(height: 10),
-                    _entranceItem(
-                      delay: 0.26,
-                      child: const Text(
-                        'Learn 15 languages with an AI tutor that talks,\nlistens, and adapts to you.',
-                        style: TextStyle(
-                          fontSize: 15,
-                          color: Color(0xFF94A3B8),
-                          height: 1.5,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    // Value proposition — three verified facts, one card.
-                    // (Replaces the old stat chips + language strip that
-                    // duplicated each other above the fold.)
-                    _entranceItem(
-                      delay: 0.34,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 18,
-                          vertical: 16,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withAlpha(9),
-                          borderRadius: BorderRadius.circular(22),
-                          border: Border.all(color: Colors.white.withAlpha(20)),
-                        ),
-                        child: const Column(
-                          children: [
-                            _ValueRow(
-                              icon: Icons.chat_bubble_outline,
-                              title: 'Sparky, your AI tutor',
-                              detail:
-                                  'Conversation practice with streaming replies and corrections',
-                            ),
-                            SizedBox(height: 14),
-                            _ValueRow(
-                              icon: Icons.auto_awesome_outlined,
-                              title: 'Smart spaced repetition',
-                              detail:
-                                  'Cards resurface right before you forget them',
-                            ),
-                            SizedBox(height: 14),
-                            _ValueRow(
-                              icon: Icons.style_outlined,
-                              title: '21,600 real cards',
-                              detail:
-                                  '120 lessons in every language — Malay-first',
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    // Primary CTA — moved up: this is the screen's one job.
-                    if (AuthConfig.googleOAuthEnabled)
-                      _entranceItem(
-                        delay: 0.44,
-                        child: _PrimaryActionButton(
-                          isLoading: _isLoading,
-                          onPressed: _handleGoogleSignIn,
-                        ),
-                      ),
-                    if (AuthConfig.googleOAuthEnabled)
-                      const SizedBox(height: 12),
-                    if (AuthConfig.appleOAuthEnabled &&
-                        !kIsWeb &&
-                        defaultTargetPlatform == TargetPlatform.iOS) ...[
-                      _entranceItem(
-                        delay: 0.5,
-                        child: OutlinedButton.icon(
-                          onPressed: _isLoading ? null : _handleAppleSignIn,
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: Colors.white,
-                            side: const BorderSide(color: Colors.white54),
-                            minimumSize: const Size.fromHeight(54),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                          ),
-                          icon: const Icon(Icons.apple, color: Colors.white),
-                          label: const Text(
-                            'Continue with Apple',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
                     ],
-                    _entranceItem(
-                      delay: 0.56,
-                      child: OutlinedButton(
-                        onPressed: _isLoading ? null : _handleGetStarted,
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: const Color(0xFF38BDF8),
-                          side: const BorderSide(
-                            color: Color(0xFF38BDF8),
-                            width: 1.5,
-                          ),
-                          minimumSize: const Size.fromHeight(54),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              // Primary CTA — moved up: this is the screen's one job.
+              if (AuthConfig.googleOAuthEnabled)
+                _entranceItem(
+                  delay: 0.44,
+                  child: _PrimaryActionButton(
+                    isLoading: _isLoading,
+                    onPressed: _handleGoogleSignIn,
+                  ),
+                ),
+              if (AuthConfig.googleOAuthEnabled)
+                const SizedBox(height: 14),
+              if (AuthConfig.appleOAuthEnabled &&
+                  !kIsWeb &&
+                  defaultTargetPlatform == TargetPlatform.iOS) ...[
+                _entranceItem(
+                  delay: 0.5,
+                  child: SparkNeumorphButton(
+                    onPressed: _isLoading ? null : _handleAppleSignIn,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.apple, color: SparkNeumorph.ink),
+                        SizedBox(width: 8),
+                        Text(
+                          'Continue with Apple',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: SparkNeumorph.ink,
                           ),
                         ),
-                        child: _isLoading
-                            ? const SizedBox(
-                                width: 24,
-                                height: 24,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2.5,
-                                  color: Color(0xFF38BDF8),
-                                ),
-                              )
-                            : const Text(
-                                'Explore as Guest',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                      ),
+                      ],
                     ),
-                    const SizedBox(height: 26),
-                    // Language catalog — proof section below the CTA.
-                    _entranceItem(
-                      delay: 0.64,
-                      child: Column(
-                        children: [
-                          const Text(
-                            'CHOOSE FROM 15 LANGUAGES',
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 14),
+              ],
+              _entranceItem(
+                delay: 0.56,
+                child: SparkNeumorphButton(
+                  onPressed: _isLoading ? null : _handleGetStarted,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  child: _isLoading
+                      ? const Center(
+                          child: SizedBox(
+                            width: 22,
+                            height: 22,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.5,
                               color: Color(0xFF38BDF8),
-                              letterSpacing: 1.6,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 12),
-                          SizedBox(
-                            height: 36,
-                            child: ListView.separated(
-                              scrollDirection: Axis.horizontal,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 14,
-                              ),
-                              itemCount:
-                                  LanguageCatalog.supportedLanguages.length,
-                              separatorBuilder: (_, _) =>
-                                  const SizedBox(width: 8),
-                              itemBuilder: (context, i) {
-                                final code =
-                                    LanguageCatalog.supportedLanguages[i];
-                                return _LanguageChip(
-                                  label: _nativeName(code),
-                                  dot: _nativeAccent(code),
-                                );
-                              },
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    // Micro trust footer.
-                    _entranceItem(
-                      delay: 0.72,
-                      child: const Text(
-                        'Free to start · Progress syncs to your account',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Color(0xFF64748B),
+                        )
+                      : const Text(
+                          'Explore as Guest',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF38BDF8),
+                          ),
                         ),
-                        textAlign: TextAlign.center,
+                ),
+              ),
+              const SizedBox(height: 28),
+              // Language catalog — proof section below the CTA.
+              _entranceItem(
+                delay: 0.64,
+                child: Column(
+                  children: [
+                    const Text(
+                      'CHOOSE FROM 15 LANGUAGES',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF38BDF8),
+                        letterSpacing: 1.6,
                       ),
+                      textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 12),
+                    SizedBox(
+                      height: 38,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.symmetric(horizontal: 14),
+                        itemCount:
+                            LanguageCatalog.supportedLanguages.length,
+                        separatorBuilder: (_, _) =>
+                            const SizedBox(width: 8),
+                        itemBuilder: (context, i) {
+                          final code =
+                              LanguageCatalog.supportedLanguages[i];
+                          return _LanguageChip(
+                            label: _nativeName(code),
+                            dot: _nativeAccent(code),
+                          );
+                        },
+                      ),
+                    ),
                   ],
                 ),
               ),
-            ),
-          ],
+              const SizedBox(height: 20),
+              // Micro trust footer.
+              _entranceItem(
+                delay: 0.72,
+                child: const Text(
+                  'Free to start · Progress syncs to your account',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: SparkNeumorph.inkSoft,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              const SizedBox(height: 12),
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-/// Google sign-in primary action with branded G glyph.
+/// Google sign-in primary action with branded G glyph — extruded on the
+/// neumorphic canvas.
 class _PrimaryActionButton extends StatelessWidget {
   final bool isLoading;
   final VoidCallback onPressed;
@@ -460,19 +416,13 @@ class _PrimaryActionButton extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.white.withAlpha(26),
-            blurRadius: 24,
-            offset: const Offset(0, 8),
-          ),
-        ],
+        boxShadow: SparkNeumorph.raised(distance: 5, blur: 12),
       ),
       child: ElevatedButton(
         onPressed: isLoading ? null : onPressed,
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.white,
-          foregroundColor: const Color(0xFF0F172A),
+          foregroundColor: SparkNeumorph.ink,
           elevation: 0,
           minimumSize: const Size.fromHeight(54),
           shape: RoundedRectangleBorder(
@@ -532,7 +482,7 @@ class _ValueRow extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
-                  color: Colors.white,
+                  color: SparkNeumorph.ink,
                 ),
               ),
               const SizedBox(height: 2),
@@ -540,7 +490,7 @@ class _ValueRow extends StatelessWidget {
                 detail,
                 style: const TextStyle(
                   fontSize: 12,
-                  color: Color(0xFF94A3B8),
+                  color: SparkNeumorph.inkSoft,
                   height: 1.35,
                 ),
               ),
@@ -564,9 +514,9 @@ class _LanguageChip extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12),
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: const Color(0xFF0F172A).withAlpha(180),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFF38BDF8).withAlpha(55)),
+        color: SparkNeumorph.surface,
+        borderRadius: BorderRadius.circular(19),
+        boxShadow: SparkNeumorph.raised(distance: 3, blur: 7),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -581,7 +531,7 @@ class _LanguageChip extends StatelessWidget {
             label,
             style: const TextStyle(
               fontSize: 12,
-              color: Color(0xFFE2E8F0),
+              color: SparkNeumorph.ink,
               fontWeight: FontWeight.w600,
             ),
           ),
