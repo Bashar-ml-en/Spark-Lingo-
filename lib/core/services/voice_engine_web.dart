@@ -7,13 +7,22 @@ import 'dart:js_interop';
 import 'package:flutter/foundation.dart';
 
 class VoiceEngine {
+  /// Chrome auto-pauses speech synthesis after ~15s of continuous
+  /// speaking; a periodic resume() keeps longer AI replies audible.
+  Timer? _keepAlive;
+
   Future<void> speak(String text, String locale) async {
     final synth = speechSynthesisGlobal;
     if (synth == null) {
       debugPrint('speechSynthesis unavailable in this browser');
       return;
     }
-    synth.cancel();
+    // Chrome bug #679437: cancel() immediately before speak() makes the
+    // new utterance silently drop. Only cancel when audio is actually
+    // queued or playing.
+    if (synth.speaking || synth.pending) {
+      synth.cancel();
+    }
     final utterance = JSUtterance(text);
     utterance.lang = locale;
     utterance.rate = 0.95;
@@ -23,15 +32,28 @@ class VoiceEngine {
     }
     final done = Completer<void>();
     void finish(JSAny? _) {
+      _keepAlive?.cancel();
+      _keepAlive = null;
       if (!done.isCompleted) done.complete();
     }
+
     utterance.onend = finish.toJS;
     utterance.onerror = finish.toJS;
+    _keepAlive?.cancel();
+    _keepAlive = Timer.periodic(const Duration(seconds: 10), (_) {
+      try {
+        synth.resume();
+      } catch (e) {
+        debugPrint('Voice keep-alive resume failed: $e');
+      }
+    });
     synth.speak(utterance);
     await done.future;
   }
 
   Future<void> stop() async {
+    _keepAlive?.cancel();
+    _keepAlive = null;
     try {
       speechSynthesisGlobal?.cancel();
     } catch (e) {
@@ -69,6 +91,9 @@ extension type JSSpeechSynthesis._(JSObject _) implements JSObject {
   external JSArray<JSVoice> getVoices();
   external void speak(JSUtterance utterance);
   external void cancel();
+  external void resume();
+  external bool get speaking;
+  external bool get pending;
 }
 
 extension type JSUtterance._(JSObject _) implements JSObject {
