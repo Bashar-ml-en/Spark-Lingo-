@@ -37,6 +37,26 @@ class _FlagGridState extends State<FlagGrid> {
     'ms': 'Malay',
   };
 
+  /// Standard greetings in each language, spoken on demand. Verified
+  /// against standard greeting forms for all 15 languages.
+  static const Map<String, String> _greetings = {
+    'en': 'Hello!',
+    'fr': 'Bonjour !',
+    'de': 'Hallo!',
+    'es': '¡Hola!',
+    'it': 'Ciao!',
+    'pt': 'Olá!',
+    'zh': '你好！',
+    'ja': 'こんにちは！',
+    'ko': '안녕하세요!',
+    'ru': 'Привет!',
+    'ar': 'مرحبا!',
+    'hi': 'नमस्ते!',
+    'th': 'สวัสดี!',
+    'tl': 'Kumusta!',
+    'ms': 'Hai! Apa khabar?',
+  };
+
   @override
   void dispose() {
     _searchController.dispose();
@@ -242,6 +262,8 @@ class _FlagGridState extends State<FlagGrid> {
                     flagAsset: theme.flags.isNotEmpty
                         ? theme.flags.first.flagAsset
                         : 'assets/flags/en_us.svg',
+                    greeting: _greetings[code] ?? 'Hello!',
+                    languageKey: code,
                     onTap: () => _handleLanguageTap(context, code, theme),
                   );
                 },

@@ -1,11 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../../core/services/voice_controller.dart';
+
 class FlagTile extends StatefulWidget {
   final String nativeName;
   final String englishName;
   final String flagAsset;
   final VoidCallback onTap;
+
+  /// Native greeting displayed on the card and spoken on demand.
+  final String greeting;
+
+  /// Language key used for TTS of the greeting.
+  final String languageKey;
 
   const FlagTile({
     super.key,
@@ -13,6 +21,8 @@ class FlagTile extends StatefulWidget {
     required this.englishName,
     required this.flagAsset,
     required this.onTap,
+    required this.greeting,
+    required this.languageKey,
   });
 
   @override
@@ -24,6 +34,9 @@ class _FlagTileState extends State<FlagTile>
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
   late Animation<double> _fadeAnimation;
+
+  /// Shared voice controller (one utterance at a time across the grid).
+  static final VoiceController _voice = VoiceController();
 
   @override
   void initState() {
@@ -57,6 +70,7 @@ class _FlagTileState extends State<FlagTile>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -71,15 +85,18 @@ class _FlagTileState extends State<FlagTile>
             );
           },
           child: Container(
-            constraints: const BoxConstraints(minHeight: 120),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+            constraints: const BoxConstraints(minHeight: 150),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
             decoration: BoxDecoration(
-              color: const Color(0xFFFFFFFF),
+              color: theme.cardColor,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: const Color(0xFFE5E7EB), width: 1.5),
+              border: Border.all(
+                color: theme.dividerColor.withAlpha(140),
+                width: 1.5,
+              ),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0x05000000),
+                  color: Colors.black.withAlpha(10),
                   blurRadius: 4,
                   offset: const Offset(0, 2),
                 ),
@@ -95,7 +112,7 @@ class _FlagTileState extends State<FlagTile>
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: const Color(0xFFF3F4F6),
+                      color: theme.dividerColor.withAlpha(90),
                       width: 1,
                     ),
                   ),
@@ -104,7 +121,7 @@ class _FlagTileState extends State<FlagTile>
                     widget.flagAsset,
                     fit: BoxFit.cover,
                     placeholderBuilder: (BuildContext context) => Container(
-                      color: const Color(0xFFE5E7EB),
+                      color: theme.colorScheme.surfaceContainerHighest,
                       child: const Center(
                         child: SizedBox(
                           width: 16,
@@ -115,30 +132,73 @@ class _FlagTileState extends State<FlagTile>
                     ),
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 10),
                 // Native name as the primary label
                 Text(
                   widget.nativeName,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 16,
+                  style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF1F2937),
+                    color: theme.colorScheme.onSurface,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 2),
                 // English name as a smaller subtitle
                 Text(
                   widget.englishName,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: Color(0xFF6B7280),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 8),
+                // Interactive greeting: see it, then hear it.
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primary.withAlpha(18),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          widget.greeting,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.primary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      IconButton(
+                        tooltip: 'Hear the greeting',
+                        visualDensity: VisualDensity.compact,
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(
+                          minWidth: 28,
+                          minHeight: 28,
+                        ),
+                        icon: Icon(
+                          Icons.volume_up_rounded,
+                          size: 15,
+                          color: theme.colorScheme.primary,
+                        ),
+                        onPressed: () {
+                          _voice.toggle(widget.greeting, widget.languageKey);
+                        },
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),

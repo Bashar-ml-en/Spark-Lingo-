@@ -110,6 +110,8 @@ void main() {
               nativeName: 'Deutsch',
               englishName: 'German',
               flagAsset: 'assets/flags/de_de.svg',
+              greeting: 'Hallo!',
+              languageKey: 'de',
               onTap: () {
                 tapped = true;
               },
