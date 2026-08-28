@@ -8,7 +8,7 @@ import '../../core/services/auth_service.dart';
 import '../../core/services/consent_service.dart';
 import '../../core/services/retention_service.dart';
 import '../../core/services/test_consent_service.dart';
-import '../../core/services/tts_service.dart';
+import '../../core/services/voice_controller.dart';
 import '../../shared/models/curriculum.dart';
 import '../../shared/widgets/consent_request_dialog.dart';
 import 'sparky_scorecard.dart';
@@ -94,7 +94,10 @@ class _SparkyChatSessionState
   final rec.AudioRecorder _audioRecorder = rec.AudioRecorder();
 
   final AIService _aiService = AIService();
-  final TTSService _ttsService = TTSService();
+  final VoiceController _voice = VoiceController();
+
+  /// Index of the bubble currently being read aloud, if any.
+  int? _speakingIndex;
 
   bool _isListening = false;
   bool _isAiThinking = false;
@@ -143,7 +146,7 @@ class _SparkyChatSessionState
   @override
   void dispose() {
     _audioRecorder.dispose();
-    _ttsService.stop();
+    _voice.stop();
     _textController.dispose();
     _scrollController.dispose();
     super.dispose();
@@ -209,7 +212,13 @@ class _SparkyChatSessionState
     await _generateRealAIResponse();
   }
 
+  /// Consent accepted earlier this app session. Re-checking the server
+  /// ledger on every message adds latency and can re-prompt after transient
+  /// failures; consent never expires mid-session, so cache it in memory.
+  final Set<ConsentPurpose> _sessionConsents = <ConsentPurpose>{};
+
   Future<bool> _ensureProcessingConsent(ConsentPurpose purpose) async {
+    if (_sessionConsents.contains(purpose)) return true;
     final user = ref.read(authProvider);
     if (user == null) {
       if (mounted) {
@@ -236,7 +245,10 @@ class _SparkyChatSessionState
         final consentService = ref.read(consentServiceProvider);
         var serverLedgerUsable = true;
         try {
-          if (await consentService.hasCurrentConsent(purpose)) return true;
+          if (await consentService.hasCurrentConsent(purpose)) {
+        _sessionConsents.add(purpose);
+        return true;
+      }
         } on ConsentServiceException {
           serverLedgerUsable = false;
         }
@@ -251,6 +263,7 @@ class _SparkyChatSessionState
         if (serverLedgerUsable) {
           try {
             await consentService.recordConsent(purpose);
+            _sessionConsents.add(purpose);
             return true;
           } on ConsentConfigurationException {
             // No active server document (yet): fall back to device ledger.
@@ -271,6 +284,7 @@ class _SparkyChatSessionState
         final recorded = await TestConsentService.recordConsent(
           purpose.documentKey,
         );
+        if (recorded) _sessionConsents.add(purpose);
         if (!recorded && mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -297,7 +311,10 @@ class _SparkyChatSessionState
 
     final consentService = ref.read(consentServiceProvider);
     try {
-      if (await consentService.hasCurrentConsent(purpose)) return true;
+      if (await consentService.hasCurrentConsent(purpose)) {
+        _sessionConsents.add(purpose);
+        return true;
+      }
     } on ConsentServiceException {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -317,6 +334,7 @@ class _SparkyChatSessionState
 
     try {
       await consentService.recordConsent(purpose);
+      _sessionConsents.add(purpose);
       return true;
     } on ConsentServiceException {
       if (mounted) {
@@ -376,7 +394,8 @@ class _SparkyChatSessionState
               "Sparky couldn't think of a reply. Please try again.";
         });
       } else {
-        _ttsService.speak(finalText, widget.language);
+        // Voice is opt-in: each Sparky bubble has a speaker button. Auto-
+        // speaking every reply was removed after the web gap was found.
         // Retention: one XP award for the first successful AI exchange in a
         // session (not per turn, to keep the economy honest).
         if (!_xpAwardedThisSession) {
@@ -719,12 +738,54 @@ class _SparkyChatSessionState
                               ],
                             ),
                           )
-                        : Text(
-                            text,
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              fontSize: 14,
-                              height: 1.4,
-                            ),
+                        : Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                text,
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  fontSize: 14,
+                                  height: 1.4,
+                                ),
+                              ),
+                              if (isSparky && text.isNotEmpty)
+                                Align(
+                                  alignment: AlignmentDirectional.centerEnd,
+                                  child: IconButton(
+                                    tooltip: _speakingIndex == idx
+                                        ? 'Stop reading'
+                                        : 'Listen to this answer',
+                                    visualDensity: VisualDensity.compact,
+                                    padding: EdgeInsets.zero,
+                                    constraints: const BoxConstraints(
+                                      minWidth: 32,
+                                      minHeight: 32,
+                                    ),
+                                    icon: Icon(
+                                      _speakingIndex == idx
+                                          ? Icons.stop_circle
+                                          : Icons.volume_up_rounded,
+                                      size: 18,
+                                      color: _speakingIndex == idx
+                                          ? SparkStatus.danger
+                                          : theme.colorScheme.secondary,
+                                    ),
+                                    onPressed: () async {
+                                      await _voice.toggle(
+                                        text,
+                                        widget.language,
+                                      );
+                                      if (!mounted) return;
+                                      setState(() {
+                                        _speakingIndex = _voice.isSpeaking
+                                            ? idx
+                                            : null;
+                                      });
+                                    },
+                                  ),
+                                ),
+                            ],
                           ),
                   ),
                 );
