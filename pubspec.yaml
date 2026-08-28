@@ -76,6 +76,7 @@ flutter:
     - assets/flags/
     - assets/symbols/
     - assets/audio/
+    - assets/google_fonts/
     - assets/language_design_tokens.json
 
   fonts:

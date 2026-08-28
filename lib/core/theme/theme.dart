@@ -112,39 +112,46 @@ class SparkTheme {
     );
   }
 
+  /// Light theme — SparkLingo design system (ui-ux-pro-max generated,
+  /// 2026-08): learning-indigo primary, progress-green success accent,
+  /// soft indigo-tinted canvas, Nunito display + DM Sans body.
+  /// Contrast checked: #4F46E5 on #EEF2FF ≈ 5.3:1, #312E81 body ≈ 10.5:1.
   static ThemeData get lightTheme {
-    const Color lightScaffold = Color(0xFFFFFFFF);
-    const Color lightSurface = Color(0xFFF3F4F6);
-    const Color darkText = Color(0xFF111827);
-    const Color greyText = Color(0xFF6B7280);
-    const Color accessibleCyan = Color(
-      0xFF0097A7,
-    ); // Darker cyan for legibility on white
-
+    const Color learningIndigo = Color(0xFF4F46E5);
+    const Color indigoLight = Color(0xFF818CF8);
+    const Color progressGreen = Color(0xFF16A34A);
+    const Color canvas = Color(0xFFEEF2FF);
+    const Color cardSurface = Color(0xFFFFFFFF);
+    const Color ink = Color(0xFF312E81);
+    const Color mutedInk = Color(0xFF475569);
+    const Color borderIndigo = Color(0xFFC7D2FE);
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
-      primaryColor: accessibleCyan,
-      scaffoldBackgroundColor: lightScaffold,
-      cardColor: lightSurface,
+      primaryColor: learningIndigo,
+      scaffoldBackgroundColor: canvas,
+      cardColor: cardSurface,
 
       colorScheme: const ColorScheme.light(
-        primary: accessibleCyan,
-        secondary: vividOrange,
-        surface: lightSurface,
+        primary: learningIndigo,
+        secondary: progressGreen,
+        tertiary: indigoLight,
+        surface: cardSurface,
         error: errorRed,
         onPrimary: Colors.white,
         onSecondary: Colors.white,
-        onSurface: darkText,
+        onSurface: ink,
+        onSurfaceVariant: mutedInk,
+        outline: borderIndigo,
       ),
 
       appBarTheme: const AppBarTheme(
-        backgroundColor: lightScaffold,
+        backgroundColor: canvas,
         elevation: 0,
         centerTitle: true,
-        iconTheme: IconThemeData(color: accessibleCyan),
+        iconTheme: IconThemeData(color: learningIndigo),
         titleTextStyle: TextStyle(
-          color: darkText,
+          color: ink,
           fontSize: 20,
           fontWeight: FontWeight.bold,
           fontFamilyFallback: fontFallbacks,
@@ -152,59 +159,61 @@ class SparkTheme {
       ),
 
       cardTheme: CardThemeData(
-        color: lightSurface,
+        color: cardSurface,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: BorderSide(color: Colors.grey.withAlpha(30)),
+          borderRadius: BorderRadius.circular(20),
+          side: const BorderSide(color: borderIndigo, width: 1),
         ),
         elevation: 0,
       ),
 
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: accessibleCyan,
+          backgroundColor: learningIndigo,
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(14),
           ),
           textStyle: const TextStyle(
             fontSize: 16,
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w800,
             fontFamilyFallback: fontFallbacks,
           ),
         ),
       ),
 
+      // Typography: Nunito (rounded display) + DM Sans (geometric body) —
+      // the ui-ux-pro-max pairing for gamified education apps.
       textTheme: TextTheme(
-        displayLarge: GoogleFonts.lexend(
+        displayLarge: GoogleFonts.nunito(
           fontSize: 32,
-          fontWeight: FontWeight.bold,
-          color: darkText,
+          fontWeight: FontWeight.w800,
+          color: ink,
           textStyle: const TextStyle(fontFamilyFallback: fontFallbacks),
         ),
-        titleLarge: GoogleFonts.lexend(
+        titleLarge: GoogleFonts.nunito(
           fontSize: 20,
-          fontWeight: FontWeight.bold,
-          color: darkText,
+          fontWeight: FontWeight.w800,
+          color: ink,
           textStyle: const TextStyle(fontFamilyFallback: fontFallbacks),
         ),
-        bodyLarge: GoogleFonts.inter(
+        bodyLarge: GoogleFonts.dmSans(
           fontSize: 16,
-          fontWeight: FontWeight.normal,
-          color: darkText,
+          fontWeight: FontWeight.w500,
+          color: ink,
           textStyle: const TextStyle(fontFamilyFallback: fontFallbacks),
         ),
-        bodyMedium: GoogleFonts.inter(
+        bodyMedium: GoogleFonts.dmSans(
           fontSize: 14,
-          fontWeight: FontWeight.normal,
-          color: greyText,
+          fontWeight: FontWeight.w500,
+          color: mutedInk,
           textStyle: const TextStyle(fontFamilyFallback: fontFallbacks),
         ),
-        labelLarge: GoogleFonts.inter(
+        labelLarge: GoogleFonts.dmSans(
           fontSize: 14,
-          fontWeight: FontWeight.bold,
-          color: accessibleCyan,
+          fontWeight: FontWeight.w700,
+          color: learningIndigo,
           textStyle: const TextStyle(fontFamilyFallback: fontFallbacks),
         ),
       ),

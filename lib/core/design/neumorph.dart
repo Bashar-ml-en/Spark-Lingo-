@@ -10,10 +10,12 @@ import 'package:flutter/material.dart';
 ///   * pressed elements invert to inset shadows
 abstract final class SparkNeumorph {
   // Canvas ------------------------------------------------------------
-  static const Color canvas = Color(0xFFF2F4F8);
-  static const Color surface = Color(0xFFF2F4F8); // extruded = same as canvas
-  static const Color ink = Color(0xFF3B4256);
-  static const Color inkSoft = Color(0xFF8A91A8);
+  // Aligned with the ui-ux-pro-max generated SparkLingo palette: soft
+  // indigo-tinted canvas (learning-indigo family), not neutral gray.
+  static const Color canvas = Color(0xFFEEF2FF);
+  static const Color surface = Color(0xFFEEF2FF); // extruded = same as canvas
+  static const Color ink = Color(0xFF312E81);
+  static const Color inkSoft = Color(0xFF475569);
 
   // Shadow pair --------------------------------------------------------
   static const Color _light = Colors.white;
