@@ -8,6 +8,7 @@ import '../../core/services/revenuecat_service.dart';
 import '../../core/theme/language_theme_registry.dart';
 import '../../shared/models/user_profile.dart';
 import '../monetization/paywall_screen.dart';
+import '../academy/script_academy_screen.dart';
 import 'home_sheets.dart';
 
 /// The signed-in user's side drawer: language list, premium entry,
@@ -206,6 +207,37 @@ Widget buildHomeDrawer({
                                       ),
                                     );
                                   },
+                                );
+                              },
+                            ),
+                            ListTile(
+                              leading: Icon(
+                                Icons.translate_rounded,
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                              title: Text(
+                                'Writing Academy',
+                                style: TextStyle(
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                              subtitle: Text(
+                                'Letters, sounds & scripts',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: theme.colorScheme.onSurfaceVariant
+                                      .withAlpha(170),
+                                ),
+                              ),
+                              onTap: () {
+                                Navigator.pop(context);
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => ScriptAcademyScreen(
+                                      languageKey: activeLanguage ?? 'en',
+                                    ),
+                                  ),
                                 );
                               },
                             ),
