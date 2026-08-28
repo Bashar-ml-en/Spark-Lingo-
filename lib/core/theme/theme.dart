@@ -23,89 +23,112 @@ class SparkTheme {
     'sans-serif',
   ];
 
+  /// Dark theme — dark-mode equivalent of the ui-ux-pro-max indigo
+  /// palette (same hue family, contrast-checked for dark surfaces):
+  /// light indigo #A5B4FC on #0F1024 ≈ 8.6:1; body #CBD5E1 ≈ 12:1.
   static ThemeData get darkTheme {
+    const Color nightCanvas = Color(0xFF0F1024);
+    const Color nightSurface = Color(0xFF1B1D3A);
+    const Color primaryIndigo = Color(0xFFA5B4FC);
+    const Color accentGreen = Color(0xFF4ADE80);
+    const Color bodyInk = Color(0xFFCBD5E1);
+    const Color mutedInk = Color(0xFF94A3B8);
+    const Color borderIndigo = Color(0xFF373A63);
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
-      primaryColor: electricCyan,
-      scaffoldBackgroundColor: obsidianBlack,
-      cardColor: deepCharcoal,
+      primaryColor: primaryIndigo,
+      scaffoldBackgroundColor: nightCanvas,
+      cardColor: nightSurface,
 
       colorScheme: const ColorScheme.dark(
-        primary: electricCyan,
-        secondary: vividOrange,
-        surface: deepCharcoal,
+        primary: primaryIndigo,
+        secondary: accentGreen,
+        tertiary: Color(0xFF818CF8),
+        surface: nightSurface,
         error: errorRed,
-        onPrimary: obsidianBlack,
-        onSecondary: Colors.white,
-        onSurface: textPrimary,
+        onPrimary: Color(0xFF0F1024),
+        onSecondary: Color(0xFF0F1024),
+        onSurface: bodyInk,
+        onSurfaceVariant: mutedInk,
+        outline: borderIndigo,
       ),
 
       appBarTheme: const AppBarTheme(
-        backgroundColor: obsidianBlack,
+        backgroundColor: nightCanvas,
         elevation: 0,
         centerTitle: true,
+        iconTheme: IconThemeData(color: primaryIndigo),
         titleTextStyle: TextStyle(
-          color: textPrimary,
+          color: bodyInk,
           fontSize: 20,
           fontWeight: FontWeight.bold,
           fontFamilyFallback: fontFallbacks,
         ),
-        iconTheme: IconThemeData(color: electricCyan),
       ),
 
       cardTheme: CardThemeData(
-        color: deepCharcoal,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        elevation: 2,
+        color: nightSurface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: const BorderSide(color: borderIndigo, width: 1),
+        ),
+        elevation: 0,
       ),
 
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: electricCyan,
-          foregroundColor: obsidianBlack,
+          backgroundColor: primaryIndigo,
+          foregroundColor: const Color(0xFF0F1024),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(14),
           ),
           textStyle: const TextStyle(
             fontSize: 16,
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w800,
             fontFamilyFallback: fontFallbacks,
           ),
         ),
       ),
 
-      // Text Theme mapping with Google Fonts + Safe system fallbacks
+      // Typography: Nunito (display) + DM Sans (body), lineHeight tokens
+      // per ux rule #72 (1.5-1.75 for body text).
       textTheme: TextTheme(
-        displayLarge: GoogleFonts.lexend(
+        displayLarge: GoogleFonts.nunito(
           fontSize: 32,
-          fontWeight: FontWeight.bold,
-          color: textPrimary,
+          fontWeight: FontWeight.w800,
+          color: bodyInk,
           textStyle: const TextStyle(fontFamilyFallback: fontFallbacks),
         ),
-        titleLarge: GoogleFonts.lexend(
+        titleLarge: GoogleFonts.nunito(
           fontSize: 20,
-          fontWeight: FontWeight.bold,
-          color: textPrimary,
+          fontWeight: FontWeight.w800,
+          color: bodyInk,
           textStyle: const TextStyle(fontFamilyFallback: fontFallbacks),
         ),
-        bodyLarge: GoogleFonts.inter(
+        bodyLarge: GoogleFonts.dmSans(
           fontSize: 16,
-          fontWeight: FontWeight.normal,
-          color: textPrimary,
-          textStyle: const TextStyle(fontFamilyFallback: fontFallbacks),
+          fontWeight: FontWeight.w500,
+          color: bodyInk,
+          textStyle: const TextStyle(
+            fontFamilyFallback: fontFallbacks,
+            height: 1.55,
+          ),
         ),
-        bodyMedium: GoogleFonts.inter(
+        bodyMedium: GoogleFonts.dmSans(
           fontSize: 14,
-          fontWeight: FontWeight.normal,
-          color: textSecondary,
-          textStyle: const TextStyle(fontFamilyFallback: fontFallbacks),
+          fontWeight: FontWeight.w500,
+          color: mutedInk,
+          textStyle: const TextStyle(
+            fontFamilyFallback: fontFallbacks,
+            height: 1.55,
+          ),
         ),
-        labelLarge: GoogleFonts.inter(
+        labelLarge: GoogleFonts.dmSans(
           fontSize: 14,
-          fontWeight: FontWeight.bold,
-          color: electricCyan,
+          fontWeight: FontWeight.w700,
+          color: primaryIndigo,
           textStyle: const TextStyle(fontFamilyFallback: fontFallbacks),
         ),
       ),
@@ -202,13 +225,19 @@ class SparkTheme {
           fontSize: 16,
           fontWeight: FontWeight.w500,
           color: ink,
-          textStyle: const TextStyle(fontFamilyFallback: fontFallbacks),
+          textStyle: const TextStyle(
+            fontFamilyFallback: fontFallbacks,
+            height: 1.55,
+          ),
         ),
         bodyMedium: GoogleFonts.dmSans(
           fontSize: 14,
           fontWeight: FontWeight.w500,
           color: mutedInk,
-          textStyle: const TextStyle(fontFamilyFallback: fontFallbacks),
+          textStyle: const TextStyle(
+            fontFamilyFallback: fontFallbacks,
+            height: 1.55,
+          ),
         ),
         labelLarge: GoogleFonts.dmSans(
           fontSize: 14,

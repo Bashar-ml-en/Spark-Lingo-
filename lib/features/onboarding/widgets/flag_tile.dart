@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../core/design/getwidget_theme.dart';
+import '../../../core/design/motion_tokens.dart';
 import '../../../core/services/voice_controller.dart';
 
 class FlagTile extends StatefulWidget {
@@ -46,9 +47,12 @@ class _FlagTileState extends State<FlagTile>
   @override
   void initState() {
     super.initState();
+    // SparkMotion.feedback (180ms) — press feedback per the motion
+    // database; keep displacement under 2px scale change so it reads as
+    // feedback, not motion (skill guidance).
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 250),
+      duration: SparkMotion.feedback,
     );
     _scaleAnimation = Tween<double>(
       begin: 1.0,
