@@ -264,6 +264,8 @@ class _FlagGridState extends State<FlagGrid> {
                         : 'assets/flags/en_us.svg',
                     greeting: _greetings[code] ?? 'Hello!',
                     languageKey: code,
+                    // Malay-first product: highlight the flagship courses.
+                    popular: code == 'ms' || code == 'en' || code == 'zh',
                     onTap: () => _handleLanguageTap(context, code, theme),
                   );
                 },

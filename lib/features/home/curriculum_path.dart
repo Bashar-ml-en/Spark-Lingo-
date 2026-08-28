@@ -295,7 +295,7 @@ class CurriculumPath extends ConsumerWidget {
                                   context,
                                   MaterialPageRoute(
                                     builder: (_) => ExamPrepScreen(
-                                      languageCode: langKey,
+                                      languageKey: langKey,
                                     ),
                                   ),
                                 );

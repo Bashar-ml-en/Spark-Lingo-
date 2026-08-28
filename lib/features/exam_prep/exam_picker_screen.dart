@@ -1,51 +1,83 @@
 import 'package:flutter/material.dart';
+import 'package:getwidget/getwidget.dart';
 
 import '../../core/constants/language_catalog.dart';
+import '../../core/design/getwidget_theme.dart';
 import 'exam_format_registry.dart';
 
-/// Exam preparation entry point — language-aware and fact-based.
+/// Exam preparation entry point — language-aware, fact-based, built on
+/// GetWidget components (GFCard / GFAccordion / GFBadge) themed globally
+/// via SparkGF for cross-screen consistency.
 ///
-/// Every format detail shown here comes from [officialExamFormats], which is
-/// sourced from official exam bodies (Workstream C, Phase 0 research pass).
-/// Languages without a verified official exam get an honest notice instead
-/// of invented content. No readiness percentages or score predictions are
-/// shown until official scoring rubrics are implemented.
+/// Honesty contract: every displayed fact was sourced from the official
+/// exam body (see ExamFormatRegistry). Nothing here is a readiness score,
+/// a predicted result, or an invented format detail.
 class ExamPrepScreen extends StatelessWidget {
-  final String languageCode;
+  final String languageKey;
 
-  const ExamPrepScreen({super.key, required this.languageCode});
+  const ExamPrepScreen({super.key, required this.languageKey});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final languageName = LanguageCatalog.displayName(languageCode);
-    final format = officialExamFormats[languageCode];
+    final format = officialExamFormats[languageKey];
+    final languageName = LanguageCatalog.displayName(languageKey);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Exam preparation — $languageName'),
-        backgroundColor: theme.colorScheme.surface,
-        foregroundColor: theme.colorScheme.onSurface,
-      ),
+      backgroundColor: theme.scaffoldBackgroundColor,
+      appBar: AppBar(title: Text('Exam preparation · $languageName')),
       body: ListView(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(16),
         children: [
-          if (format != null) ...[
-            _OfficialExamCard(format: format, theme: theme),
-            const SizedBox(height: 16),
-            _BuildStatusCard(theme: theme),
-          ] else ...[
-            _NoVerifiedExamCard(languageName: languageName, theme: theme),
-            const SizedBox(height: 16),
-            _BuildStatusCard(theme: theme),
+          if (format == null)
+            _UnmappedLanguageCard(languageName: languageName)
+          else ...[
+            _FormatHeaderCard(format: format),
+            const SizedBox(height: 12),
+            _ExamSectionAccordions(format: format),
+            const SizedBox(height: 12),
+            _HonestyNoticeCard(theme: theme),
           ],
-          const SizedBox(height: 16),
-          Center(
-            child: TextButton.icon(
-              onPressed: () => Navigator.of(context).pop(),
-              icon: const Icon(Icons.arrow_back),
-              label: const Text('Back to learning'),
-            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _UnmappedLanguageCard extends StatelessWidget {
+  final String languageName;
+
+  const _UnmappedLanguageCard({required this.languageName});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return SparkGF.card(
+      margin: EdgeInsets.zero,
+      content: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.verified_user_outlined),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Building the exam module',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'No official exam mapping has been verified for $languageName '
+            'yet. We refuse to show fabricated scores: mock exams ship only '
+            'after every format detail is sourced from the official body '
+            'for that exam.',
+            style: theme.textTheme.bodyMedium,
           ),
         ],
       ),
@@ -53,222 +85,177 @@ class ExamPrepScreen extends StatelessWidget {
   }
 }
 
-/// A verified official exam: name, organizer, levels, sections with real
-/// timings, scoring scale, and passing rule — all from the registry.
-class _OfficialExamCard extends StatelessWidget {
+class _FormatHeaderCard extends StatelessWidget {
   final OfficialExamFormat format;
-  final ThemeData theme;
 
-  const _OfficialExamCard({required this.format, required this.theme});
+  const _FormatHeaderCard({required this.format});
 
   @override
   Widget build(BuildContext context) {
-    final titleStyle = theme.textTheme.titleLarge?.copyWith(
-      fontWeight: FontWeight.w800,
-    );
-    final sectionTitle = theme.textTheme.titleSmall?.copyWith(
-      fontWeight: FontWeight.w700,
-    );
-    final body = theme.textTheme.bodyMedium;
-    final small = theme.textTheme.bodySmall?.copyWith(
-      color: theme.colorScheme.onSurfaceVariant,
-    );
-
-    return Card(
+    final theme = Theme.of(context);
+    return SparkGF.card(
       margin: EdgeInsets.zero,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: theme.colorScheme.primary.withAlpha(40)),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(format.examName, style: titleStyle),
-            const SizedBox(height: 4),
-            Text('Organizer: ${format.organizer}', style: small),
-            Text('Verified source: ${format.source}', style: small),
-            const SizedBox(height: 16),
-            Text('Official levels', style: sectionTitle),
-            const SizedBox(height: 6),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                for (final level in format.levels)
-                  Chip(
-                    label: Text(level),
-                    backgroundColor:
-                        theme.colorScheme.primary.withAlpha(22),
-                    side: BorderSide.none,
+      content: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  format.examName,
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w800,
                   ),
-              ],
+                ),
+              ),
+              SparkGF.badge('Verified format'),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Official organizer: ${format.organizer}',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
             ),
-            const SizedBox(height: 16),
-            Text('Exam sections', style: sectionTitle),
-            const SizedBox(height: 8),
-            for (final section in format.sections)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Icon(
-                      Icons.check_circle_outline,
-                      size: 18,
-                      color: theme.colorScheme.primary,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            format.scoringScale ?? format.formatNotes ?? '',
+            style: theme.textTheme.bodyMedium,
+          ),
+          if (format.passingRule != null) ...[
+            const SizedBox(height: 4),
+            Text(
+              'Passing: ${format.passingRule}',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 8,
+            runSpacing: 6,
+            children: [
+              for (final level in format.levels)
+                SparkGF.badge(level),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ExamSectionAccordions extends StatelessWidget {
+  final OfficialExamFormat format;
+
+  const _ExamSectionAccordions({required this.format});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Column(
+      children: [
+        for (final section in format.sections)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: GFAccordion(
+              title: section.name,
+              titleBorderRadius: const BorderRadius.vertical(
+                top: Radius.circular(16),
+              ),
+              contentBorderRadius: const BorderRadius.vertical(
+                bottom: Radius.circular(16),
+              ),
+              collapsedTitleBackgroundColor: theme.cardColor,
+              expandedTitleBackgroundColor: theme.cardColor,
+              contentBackgroundColor: theme.cardColor,
+              textStyle: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+              ) ?? const TextStyle(),
+              titlePadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 14,
+              ),
+              contentPadding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+              contentChild: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (section.minutes != null)
+                    _InfoRow(
+                      icon: Icons.timer_outlined,
+                      text: 'Time allotted: ${section.minutes}',
                     ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            section.code != null
-                                ? '${section.name} (paper ${section.code})'
-                                : section.name,
-                            style: body?.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          if (section.minutes != null)
-                            Text('Time: ${section.minutes}', style: small),
-                          if (section.note != null)
-                            Text(section.note!, style: small),
-                        ],
+                  if (section.code != null)
+                    _InfoRow(
+                      icon: Icons.confirmation_num_outlined,
+                      text: 'Official paper: ${section.code}',
+                    ),
+                  if (section.note != null) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      section.note!,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],
-                ),
+                ],
               ),
-            if (format.scoringScale != null) ...[
-              const SizedBox(height: 12),
-              Text('Scoring', style: sectionTitle),
-              const SizedBox(height: 6),
-              Text(format.scoringScale!, style: body),
-            ],
-            if (format.passingRule != null) ...[
-              const SizedBox(height: 12),
-              Text('Passing requirement', style: sectionTitle),
-              const SizedBox(height: 6),
-              Text(format.passingRule!, style: body),
-            ],
-            if (format.formatNotes != null) ...[
-              const SizedBox(height: 12),
-              Text('Notes', style: sectionTitle),
-              const SizedBox(height: 6),
-              Text(format.formatNotes!, style: body),
-            ],
-          ],
-        ),
-      ),
+            ),
+          ),
+      ],
     );
   }
 }
 
-/// Honest notice for languages whose official exam was not verified yet.
-class _NoVerifiedExamCard extends StatelessWidget {
-  final String languageName;
-  final ThemeData theme;
+class _InfoRow extends StatelessWidget {
+  final IconData icon;
+  final String text;
 
-  const _NoVerifiedExamCard({
-    required this.languageName,
-    required this.theme,
-  });
+  const _InfoRow({required this.icon, required this.text});
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: EdgeInsets.zero,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: theme.dividerColor),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'No official exam mapping yet',
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'We have not yet verified the official proficiency exam '
-              'format for $languageName from its official body. We refuse '
-              'to invent exam details, so this page shows real data only. '
-              'It will appear here as soon as the official format is '
-              'researched and confirmed.',
-              style: theme.textTheme.bodyMedium,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Transparent build status: what exists today vs. what ships next.
-class _BuildStatusCard extends StatelessWidget {
-  final ThemeData theme;
-
-  const _BuildStatusCard({required this.theme});
-
-  @override
-  Widget build(BuildContext context) {
-    final titleStyle = theme.textTheme.titleMedium?.copyWith(
-      fontWeight: FontWeight.w700,
-    );
-    final body = theme.textTheme.bodyMedium;
-
-    return Card(
-      margin: EdgeInsets.zero,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: theme.dividerColor),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Building the exam module', style: titleStyle),
-            const SizedBox(height: 8),
-            Text(
-              'We refuse to show fabricated scores. Mock exams ship only '
-              'after every format detail is sourced from the official body '
-              'for that exam.',
-              style: body,
-            ),
-            const SizedBox(height: 12),
-            _statusRow('✅', 'Exam data model — definition, level-mapping, '
-                'and mock-exam tables are live.'),
-            _statusRow('✅', 'Official format research — verified sections, '
-                'timings, and scoring scales above, sourced from official '
-                'bodies.'),
-            _statusRow('⚪', 'Timed mock exams — section-by-section practice '
-                'under real exam conditions.'),
-            _statusRow('⚪', 'Readiness scoring — level estimates with '
-                'disclosed methodology and sources.'),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _statusRow(String marker, String text) {
+    final theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 3),
+      padding: const EdgeInsets.only(top: 6),
       child: Row(
+        children: [
+          Icon(icon, size: 16, color: theme.colorScheme.primary),
+          const SizedBox(width: 8),
+          Expanded(child: Text(text, style: theme.textTheme.bodyMedium)),
+        ],
+      ),
+    );
+  }
+}
+
+class _HonestyNoticeCard extends StatelessWidget {
+  final ThemeData theme;
+
+  const _HonestyNoticeCard({required this.theme});
+
+  @override
+  Widget build(BuildContext context) {
+    return SparkGF.card(
+      margin: EdgeInsets.zero,
+      content: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('$marker  ', style: theme.textTheme.bodyMedium),
+          const Icon(Icons.info_outline, size: 18),
+          const SizedBox(width: 10),
           Expanded(
-            child: Text(text, style: theme.textTheme.bodySmall),
+            child: Text(
+              'Practice sections under real exam conditions come next. '
+              'Until a question bank is licensed or written from official '
+              'specs, this page shows the verified format only — no '
+              'fabricated scores.',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
           ),
         ],
       ),
