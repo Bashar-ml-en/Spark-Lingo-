@@ -179,25 +179,30 @@ class _FlagTileState extends State<FlagTile>
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
-                                IconButton(
-                                  tooltip: 'Hear the greeting',
-                                  visualDensity: VisualDensity.compact,
-                                  padding: EdgeInsets.zero,
-                                  constraints: const BoxConstraints(
-                                    minWidth: 28,
-                                    minHeight: 28,
+                                Semantics(
+                                  button: true,
+                                  label: 'Hear the greeting in '
+                                      '${widget.englishName}',
+                                  child: IconButton(
+                                    tooltip: 'Hear the greeting',
+                                    visualDensity: VisualDensity.compact,
+                                    padding: EdgeInsets.zero,
+                                    constraints: const BoxConstraints(
+                                      minWidth: 28,
+                                      minHeight: 28,
+                                    ),
+                                    icon: Icon(
+                                      Icons.volume_up_rounded,
+                                      size: 15,
+                                      color: theme.colorScheme.primary,
+                                    ),
+                                    onPressed: () {
+                                      _voice.toggle(
+                                        widget.greeting,
+                                        widget.languageKey,
+                                      );
+                                    },
                                   ),
-                                  icon: Icon(
-                                    Icons.volume_up_rounded,
-                                    size: 15,
-                                    color: theme.colorScheme.primary,
-                                  ),
-                                  onPressed: () {
-                                    _voice.toggle(
-                                      widget.greeting,
-                                      widget.languageKey,
-                                    );
-                                  },
                                 ),
                               ],
                             ),

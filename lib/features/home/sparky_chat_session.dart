@@ -212,6 +212,22 @@ class _SparkyChatSessionState
     await _generateRealAIResponse();
   }
 
+  /// UX rule #98 (feedback loop): lets the learner ask Sparky to try
+  /// again. Removes the last Sparky reply and regenerates from the same
+  /// conversation history — the user's message stays, so the retry is
+  /// grounded in what was actually asked.
+  Future<void> _handleRegenerate() async {
+    if (_isAiThinking || _isListening) return;
+    if (_messages.isEmpty) return;
+
+    setState(() {
+      if (_messages.isNotEmpty && _messages.last["sender"] == "sparky") {
+        _messages.removeLast();
+      }
+    });
+    await _generateRealAIResponse();
+  }
+
   /// Consent accepted earlier this app session. Re-checking the server
   /// ledger on every message adds latency and can re-prompt after transient
   /// failures; consent never expires mid-session, so cache it in memory.
@@ -761,37 +777,72 @@ class _SparkyChatSessionState
                               if (isSparky && text.isNotEmpty)
                                 Align(
                                   alignment: AlignmentDirectional.centerEnd,
-                                  child: IconButton(
-                                    tooltip: _speakingIndex == idx
-                                        ? 'Stop reading'
-                                        : 'Listen to this answer',
-                                    visualDensity: VisualDensity.compact,
-                                    padding: EdgeInsets.zero,
-                                    constraints: const BoxConstraints(
-                                      minWidth: 32,
-                                      minHeight: 32,
-                                    ),
-                                    icon: Icon(
-                                      _speakingIndex == idx
-                                          ? Icons.stop_circle
-                                          : Icons.volume_up_rounded,
-                                      size: 18,
-                                      color: _speakingIndex == idx
-                                          ? SparkStatus.danger
-                                          : theme.colorScheme.secondary,
-                                    ),
-                                    onPressed: () async {
-                                      await _voice.toggle(
-                                        text,
-                                        widget.language,
-                                      );
-                                      if (!mounted) return;
-                                      setState(() {
-                                        _speakingIndex = _voice.isSpeaking
-                                            ? idx
-                                            : null;
-                                      });
-                                    },
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Semantics(
+                                        button: true,
+                                        label: _speakingIndex == idx
+                                            ? 'Stop reading this answer aloud'
+                                            : 'Read this answer aloud',
+                                        child: IconButton(
+                                          tooltip: _speakingIndex == idx
+                                              ? 'Stop reading'
+                                              : 'Listen to this answer',
+                                          visualDensity: VisualDensity.compact,
+                                          padding: EdgeInsets.zero,
+                                          constraints: const BoxConstraints(
+                                            minWidth: 32,
+                                            minHeight: 32,
+                                          ),
+                                          icon: Icon(
+                                            _speakingIndex == idx
+                                                ? Icons.stop_circle
+                                                : Icons.volume_up_rounded,
+                                            size: 18,
+                                            color: _speakingIndex == idx
+                                                ? SparkStatus.danger
+                                                : theme.colorScheme.secondary,
+                                          ),
+                                          onPressed: () async {
+                                            await _voice.toggle(
+                                              text,
+                                              widget.language,
+                                            );
+                                            if (!mounted) return;
+                                            setState(() {
+                                              _speakingIndex = _voice.isSpeaking
+                                                  ? idx
+                                                  : null;
+                                            });
+                                          },
+                                        ),
+                                      ),
+                                      // Regenerate only on the most recent
+                                      // Sparky reply and never mid-stream.
+                                      if (idx == _messages.length - 1 &&
+                                          !_isAiThinking)
+                                        Semantics(
+                                          button: true,
+                                          label: 'Regenerate this answer',
+                                          child: IconButton(
+                                            tooltip: 'Regenerate',
+                                            visualDensity:
+                                                VisualDensity.compact,
+                                            padding: EdgeInsets.zero,
+                                            constraints: const BoxConstraints(
+                                              minWidth: 32,
+                                              minHeight: 32,
+                                            ),
+                                            icon: Icon(
+                                              Icons.refresh_rounded,
+                                              size: 18,
+                                              color: theme.colorScheme.primary,
+                                            ),
+                                            onPressed: _handleRegenerate,
+                                          ),
+                                        ),
+                                    ],
                                   ),
                                 ),
                             ],
@@ -863,9 +914,14 @@ class _SparkyChatSessionState
                     onSubmitted: (_) => _handleSendMessage(),
                   ),
                 ),
-                IconButton(
-                  icon: Icon(Icons.send, color: theme.colorScheme.primary),
-                  onPressed: _handleSendMessage,
+                Semantics(
+                  button: true,
+                  label: 'Send message to Sparky',
+                  child: IconButton(
+                    tooltip: 'Send',
+                    icon: Icon(Icons.send, color: theme.colorScheme.primary),
+                    onPressed: _handleSendMessage,
+                  ),
                 ),
               ],
             ),

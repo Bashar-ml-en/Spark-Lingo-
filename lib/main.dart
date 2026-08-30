@@ -176,11 +176,15 @@ class SparkLingoApp extends ConsumerWidget {
 
       // Responsive App Wrapper matching exact user specifications
       builder: (context, child) {
-        final isDark = Theme.of(context).brightness == Brightness.dark;
+        final theme = Theme.of(context);
+        // Frame backgrounds follow the active theme (SparkTheme indigo
+        // palette, or a per-language theme when one is selected) instead
+        // of hardcoded legacy colors — this keeps the outer frame aligned
+        // with whatever design system the screens use.
+        final frameCanvas = theme.scaffoldBackgroundColor;
+        final innerCanvas = theme.colorScheme.surface;
         return Scaffold(
-          // Outer web background: light grey in light mode, obsidian in dark.
-          backgroundColor:
-              isDark ? SparkTheme.obsidianBlack : const Color(0xFFF3F4F6),
+          backgroundColor: frameCanvas,
           body: Center(
             child: LayoutBuilder(
               builder: (context, constraints) {
@@ -207,11 +211,7 @@ class SparkLingoApp extends ConsumerWidget {
                     width: containerWidth,
                     height: constraints.maxHeight, // Use full available height
                     decoration: BoxDecoration(
-                      // Inner frame background: pure white in light mode
-                      // (as originally requested), obsidian in dark mode.
-                      color: isDark
-                          ? SparkTheme.obsidianBlack
-                          : const Color(0xFFFFFFFF),
+                      color: innerCanvas,
                       borderRadius: BorderRadius.zero, // Explicitly 0px radius
                     ),
                     child: Directionality(
