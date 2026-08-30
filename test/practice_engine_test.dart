@@ -56,15 +56,28 @@ void main() {
       expect(firstProduce, greaterThan(firstRecognize));
     });
 
-    test('learn phase is ordered easy to hard', () {
+    test('learn phase escalates: bands non-decreasing, complexity '
+        'non-decreasing within each band', () {
       final queue = engine.buildSession(cards);
       final learn = queue.where((e) => e.type == ExerciseType.learn).toList();
+      final n = cards.length;
+      int bandOf(PracticeCard c) {
+        final idx = cards.indexWhere((x) => x.id == c.id);
+        return (idx * 3) ~/ n;
+      }
+
       for (var i = 1; i < learn.length; i++) {
-        expect(
-          learn[i - 1].card.complexity <= learn[i].card.complexity,
-          isTrue,
-          reason: 'learn phase must escalate by complexity',
-        );
+        final prevBand = bandOf(learn[i - 1].card);
+        final currBand = bandOf(learn[i].card);
+        expect(currBand >= prevBand, isTrue,
+            reason: 'unit band must not regress');
+        if (currBand == prevBand) {
+          expect(
+            learn[i - 1].card.complexity <= learn[i].card.complexity,
+            isTrue,
+            reason: 'within a band, complexity must escalate',
+          );
+        }
       }
     });
 
@@ -161,6 +174,42 @@ void main() {
       expect(ex.type, ExerciseType.recall);
       expect(ex.card.id, 'x');
       expect(ex.frontToBack, isFalse, reason: 'recall targets production');
+    });
+
+    test('unit band dominates: early-course card precedes late-course card '
+        'even when complexity says otherwise', () {
+      final engine = PracticeEngine();
+      // 6 cards in syllabus order. The LAST card is a short simple word
+      // (lowest complexity), but it belongs to the late band, so the first
+      // card (early band, longer phrase) must still come first.
+      final orderedCards = [
+        card('c0', 'a long early phrase here', 'x0'),
+        card('c1', 'early item two', 'x1'),
+        card('c2', 'mid item one', 'x2'),
+        card('c3', 'mid item two now', 'x3'),
+        card('c4', 'late item one', 'x4'),
+        card('c5', 'hi', 'x5'), // shortest, but last in syllabus order
+      ];
+      final queue = engine.buildSession(orderedCards);
+      final learnOrder = queue
+          .where((e) => e.type == ExerciseType.learn)
+          .map((e) => e.card.id)
+          .toList();
+      expect(learnOrder.first, anyOf('c0', 'c1'),
+          reason: 'an early-band card comes first despite complexity');
+      expect(learnOrder.last, 'c4',
+          reason: 'highest-complexity card of the late band comes last; '
+              'c5 is in the same late band but simpler, so it precedes c4');
+      // Bands must be non-decreasing across the session.
+      final bandOf = {
+        for (var i = 0; i < orderedCards.length; i++)
+          orderedCards[i].id: (i * 3) ~/ orderedCards.length,
+      };
+      final bands = learnOrder.map((id) => bandOf[id]!).toList();
+      for (var i = 1; i < bands.length; i++) {
+        expect(bands[i] >= bands[i - 1], isTrue,
+            reason: 'band progression must not regress');
+      }
     });
   });
 }

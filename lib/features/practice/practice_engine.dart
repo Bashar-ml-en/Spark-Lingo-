@@ -79,14 +79,39 @@ class PracticeEngine {
 
   final Random _random;
 
+  /// Assigns each card a unit band (0/1/2 = early/mid/late course) from
+  /// its position in the session's card list, which preserves syllabus
+  /// order. Factual and transparent: band = index third, nothing invented.
+  Map<String, int> _bandOf(List<PracticeCard> cards) {
+    final n = cards.length;
+    final bands = <String, int>{};
+    for (var i = 0; i < n; i++) {
+      bands[cards[i].id] = (i * 3) ~/ n; // 0, 1, or 2
+    }
+    return bands;
+  }
+
   /// Builds the full escalating exercise queue for [cards].
   /// [maxRecallRounds] bounds Phase 4 re-tests per failed item.
+  ///
+  /// Ordering is genuinely progressive (easy → hard) on two factual axes:
+  ///  1. Unit band — cards are grouped into thirds by their syllabus
+  ///     position (early/mid/late course). The syllabus is authored in
+  ///     pedagogical order, so position is a real difficulty signal; no
+  ///     CEFR labels are invented.
+  ///  2. Complexity — within a band, shorter common-pattern items come
+  ///     before longer, richer ones.
   List<Exercise> buildSession(List<PracticeCard> cards, {int maxRecallRounds = 2}) {
     if (cards.isEmpty) return const [];
 
     // Easy → hard ordering.
+    final banded = _bandOf(cards);
     final ordered = List<PracticeCard>.from(cards)
-      ..sort((a, b) => a.complexity.compareTo(b.complexity));
+      ..sort((a, b) {
+        final bandCmp = banded[a.id]!.compareTo(banded[b.id]!);
+        if (bandCmp != 0) return bandCmp;
+        return a.complexity.compareTo(b.complexity);
+      });
 
     final queue = <Exercise>[];
 
