@@ -28,6 +28,16 @@ class ExamSection {
     this.minutes,
     this.note,
   });
+
+  /// Parses the published duration into whole minutes for drill pacing.
+  /// Returns null when the body publishes no timing (drills then use the
+  /// conservative training default and say so).
+  int? get minutesInt {
+    if (minutes == null) return null;
+    final match = RegExp(r'(\d+)\s*min').firstMatch(minutes!.toLowerCase());
+    if (match != null) return int.tryParse(match.group(1)!);
+    return int.tryParse(minutes!.replaceAll(RegExp(r'[^0-9]'), ''));
+  }
 }
 
 /// A verified official exam for one learning language.

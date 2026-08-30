@@ -3,6 +3,7 @@ import 'package:getwidget/getwidget.dart';
 
 import '../../core/constants/language_catalog.dart';
 import '../../core/design/getwidget_theme.dart';
+import 'exam_drill_screen.dart';
 import 'exam_format_registry.dart';
 
 /// Exam preparation entry point — language-aware, fact-based, built on
@@ -34,7 +35,7 @@ class ExamPrepScreen extends StatelessWidget {
           else ...[
             _FormatHeaderCard(format: format),
             const SizedBox(height: 12),
-            _ExamSectionAccordions(format: format),
+            _ExamSectionAccordions(format: format, languageKey: languageKey),
             const SizedBox(height: 12),
             _HonestyNoticeCard(theme: theme),
           ],
@@ -149,8 +150,12 @@ class _FormatHeaderCard extends StatelessWidget {
 
 class _ExamSectionAccordions extends StatelessWidget {
   final OfficialExamFormat format;
+  final String languageKey;
 
-  const _ExamSectionAccordions({required this.format});
+  const _ExamSectionAccordions({
+    required this.format,
+    required this.languageKey,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -201,6 +206,24 @@ class _ExamSectionAccordions extends StatelessWidget {
                       ),
                     ),
                   ],
+                  const SizedBox(height: 12),
+                  // Phase 1 timed drill: real curriculum questions, honest
+                  // training timer, no fabricated scoring.
+                  SparkGF.primaryButton(
+                    expanded: true,
+                    label: 'Start timed drill',
+                    icon: const Icon(Icons.play_arrow_rounded, size: 18),
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => ExamDrillScreen(
+                            languageKey: languageKey,
+                            section: section,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                 ],
               ),
             ),

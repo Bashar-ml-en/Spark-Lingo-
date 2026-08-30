@@ -384,7 +384,7 @@ Widget buildHomeEmptyState(
             "This release does not include reviewed curriculum for $displayName. Choose one of the available languages to start learning.",
             style: const TextStyle(
               fontSize: 14,
-              color: Color(0xFF6B7280),
+              color: Color(0xFF475569),
               height: 1.4,
             ),
             textAlign: TextAlign.center,

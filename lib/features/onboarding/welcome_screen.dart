@@ -348,7 +348,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen>
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
-                            color: Color(0xFF38BDF8),
+                            color: Color(0xFF4F46E5),
                           ),
                         ),
                 ),
@@ -364,7 +364,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen>
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
-                        color: Color(0xFF38BDF8),
+                        color: Color(0xFF4F46E5),
                         letterSpacing: 1.6,
                       ),
                       textAlign: TextAlign.center,
