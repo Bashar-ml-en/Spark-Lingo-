@@ -9,6 +9,7 @@ import '../../core/theme/language_theme_registry.dart';
 import '../../shared/models/user_profile.dart';
 import '../monetization/paywall_screen.dart';
 import '../academy/script_academy_screen.dart';
+import '../settings/help_center_screen.dart';
 import 'home_sheets.dart';
 
 /// The signed-in user's side drawer: language list, premium entry,
@@ -255,6 +256,26 @@ Widget buildHomeDrawer({
                               onTap: () {
                                 Navigator.pop(context);
                                 context.push(SparkRouter.settings);
+                              },
+                            ),
+                            ListTile(
+                              leading: Icon(
+                                Icons.help_outline_rounded,
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                              title: Text(
+                                'Help center',
+                                style: TextStyle(
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                              onTap: () {
+                                Navigator.pop(context);
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (_) => const HelpCenterScreen(),
+                                  ),
+                                );
                               },
                             ),
                             ListTile(

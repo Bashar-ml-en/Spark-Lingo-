@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'adaptive_goal.dart';
+
 /// Retention layer: XP ledger, streaks, and daily goals.
 ///
 /// All math happens server-side in the security-definer RPCs from migration
@@ -111,6 +113,33 @@ class RetentionService {
     }
   }
 
+  /// XP totals per active day (most recent last) for the adaptive goal.
+  /// Aggregates the recent xp_events ledger client-side; best-effort.
+  Future<List<int>> recentActiveDayXp() async {
+    try {
+      final user = _client.auth.currentUser;
+      if (user == null) return const [];
+      final rows = await _client
+          .from('xp_events')
+          .select('amount, created_at')
+          .eq('user_id', user.id)
+          .order('created_at', ascending: false)
+          .limit(300);
+      final perDay = <String, int>{};
+      for (final row in (rows as List<dynamic>)) {
+        final day = (row['created_at'] as String?)?.substring(0, 10);
+        final amount = row['amount'];
+        if (day == null || amount is! int) continue;
+        perDay[day] = (perDay[day] ?? 0) + amount;
+      }
+      final days = perDay.keys.toList()..sort();
+      return days.map((d) => perDay[d]!).toList();
+    } catch (e) {
+      debugPrint('XP history lookup failed: $e');
+      return const [];
+    }
+  }
+
   /// Learner sets their own daily XP goal (bounded 10..500 server-side).
   Future<void> setDailyGoal(int xp) async {
     try {
@@ -147,4 +176,13 @@ final retentionStatsProvider =
 /// XP earned today on the learner's local calendar.
 final xpTodayProvider = FutureProvider.autoDispose<int>((ref) async {
   return ref.watch(retentionServiceProvider).xpToday();
+});
+
+/// Adaptive daily-goal suggestion from the learner's real XP history
+/// (median of recent active days). Null when history is too thin.
+final adaptiveGoalSuggestionProvider =
+    FutureProvider.autoDispose<int?>((ref) async {
+  final history =
+      await ref.watch(retentionServiceProvider).recentActiveDayXp();
+  return AdaptiveGoal.suggest(history);
 });
