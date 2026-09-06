@@ -121,7 +121,7 @@ class SparkLingoApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authProvider);
-    ThemeData activeThemeData = SparkTheme.lightTheme;
+    final themeMode = ref.watch(themeModeProvider);
     LanguageTheme? activeTheme;
 
     final localLanguage = ref.watch(localActiveLanguageProvider);
@@ -142,11 +142,17 @@ class SparkLingoApp extends ConsumerWidget {
     if (activeLanguage != null) {
       try {
         activeTheme = LanguageThemeRegistry.themeFor(activeLanguage);
-        activeThemeData = LanguageThemeRegistry.buildTheme(activeTheme);
       } catch (e) {
         debugPrint("Error loading active language theme: $e");
       }
     }
+
+    final lightThemeData = activeTheme != null
+        ? LanguageThemeRegistry.buildTheme(activeTheme, brightness: Brightness.light)
+        : SparkTheme.lightTheme;
+    final darkThemeData = activeTheme != null
+        ? LanguageThemeRegistry.buildTheme(activeTheme, brightness: Brightness.dark)
+        : SparkTheme.darkTheme;
 
     final textDirection =
         activeTheme != null &&
@@ -158,21 +164,25 @@ class SparkLingoApp extends ConsumerWidget {
       title: 'Spark Lingo',
       debugShowCheckedModeBanner: false,
 
-      // Inject dynamic theme data
-      theme: activeThemeData,
+      // Inject dynamic theme mode (Dark / Light)
+      themeMode: themeMode,
+      theme: lightThemeData,
+      darkTheme: darkThemeData,
 
       // Inject GoRouter pathways reactively
       routerConfig: ref.watch(routerProvider),
 
-      // Responsive App Wrapper matching exact user specifications
+      // Responsive App Wrapper
       builder: (context, child) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        final canvasBg = isDark ? SparkTheme.surfaceCanvas : const Color(0xFFF8FAFC);
+        final outerBg = isDark ? const Color(0xFF020912) : const Color(0xFFE2E8F0);
+
         return Scaffold(
-          backgroundColor: const Color(0xFFF3F4F6), // Outer web background
+          backgroundColor: outerBg,
           body: Center(
             child: LayoutBuilder(
               builder: (context, constraints) {
-                // Keep the intended 390px mobile frame without overflowing
-                // small phones or split-screen viewports.
                 double containerWidth;
                 if (constraints.maxWidth <= 600) {
                   containerWidth = constraints.maxWidth
@@ -192,12 +202,10 @@ class SparkLingoApp extends ConsumerWidget {
                   clipBehavior: Clip.hardEdge,
                   child: Container(
                     width: containerWidth,
-                    height: constraints.maxHeight, // Use full available height
-                    decoration: const BoxDecoration(
-                      color: Color(
-                        0xFFFFFFFF,
-                      ), // Pure white inner background as requested
-                      borderRadius: BorderRadius.zero, // Explicitly 0px radius
+                    height: constraints.maxHeight,
+                    decoration: BoxDecoration(
+                      color: canvasBg,
+                      borderRadius: BorderRadius.zero,
                     ),
                     child: Directionality(
                       textDirection: textDirection,

@@ -1,10 +1,12 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import '../../../core/theme/theme.dart';
 
 class FlagTile extends StatefulWidget {
   final String nativeName;
   final String englishName;
   final String flagAsset;
+  final bool isSelected;
   final VoidCallback onTap;
 
   const FlagTile({
@@ -12,6 +14,7 @@ class FlagTile extends StatefulWidget {
     required this.nativeName,
     required this.englishName,
     required this.flagAsset,
+    this.isSelected = false,
     required this.onTap,
   });
 
@@ -23,22 +26,17 @@ class _FlagTileState extends State<FlagTile>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
-  late Animation<double> _fadeAnimation;
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 250),
+      duration: const Duration(milliseconds: 150),
     );
     _scaleAnimation = Tween<double>(
       begin: 1.0,
-      end: 0.92,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
-    _fadeAnimation = Tween<double>(
-      begin: 1.0,
-      end: 0.7,
+      end: 0.94,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
   }
 
@@ -49,97 +47,141 @@ class _FlagTileState extends State<FlagTile>
   }
 
   void _handleTap() {
-    // Run anim and reverse quickly
     _controller.forward().then((_) => _controller.reverse());
-    // Trigger navigation callback immediately without waiting/blocking
     widget.onTap();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: _handleTap,
-        borderRadius: BorderRadius.circular(16),
-        child: AnimatedBuilder(
-          animation: _controller,
-          builder: (context, child) {
-            return Transform.scale(
-              scale: _scaleAnimation.value,
-              child: Opacity(opacity: _fadeAnimation.value, child: child),
-            );
-          },
-          child: Container(
-            constraints: const BoxConstraints(minHeight: 120),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+    final isSelected = widget.isSelected;
+    final primaryCyan = SparkLingoTheme.electricCyan;
+
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return Transform.scale(
+          scale: _scaleAnimation.value,
+          child: child,
+        );
+      },
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: _handleTap,
+          borderRadius: BorderRadius.circular(18),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
             decoration: BoxDecoration(
-              color: const Color(0xFFFFFFFF),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: const Color(0xFFE5E7EB), width: 1.5),
+              color: isSelected
+                  ? primaryCyan.withValues(alpha: 0.12)
+                  : SparkLingoTheme.surfaceContainer,
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(
+                color: isSelected
+                    ? primaryCyan
+                    : SparkLingoTheme.surfaceContainerHighest,
+                width: isSelected ? 2.0 : 1.0,
+              ),
               boxShadow: [
-                BoxShadow(
-                  color: const Color(0x05000000),
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
-                ),
+                if (isSelected)
+                  BoxShadow(
+                    color: primaryCyan.withValues(alpha: 0.25),
+                    blurRadius: 16,
+                    spreadRadius: 1,
+                  )
+                else
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
               ],
             ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+            child: Stack(
               children: [
-                // Flag container ensuring 48dp+ tap targets
-                Container(
-                  width: 64,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: const Color(0xFFF3F4F6),
-                      width: 1,
-                    ),
-                  ),
-                  clipBehavior: Clip.antiAlias,
-                  child: SvgPicture.asset(
-                    widget.flagAsset,
-                    fit: BoxFit.cover,
-                    placeholderBuilder: (BuildContext context) => Container(
-                      color: const Color(0xFFE5E7EB),
-                      child: const Center(
-                        child: SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(strokeWidth: 2),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // Flag Container
+                    Container(
+                      width: 52,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: isSelected
+                              ? primaryCyan.withValues(alpha: 0.5)
+                              : Colors.white.withValues(alpha: 0.1),
+                          width: 1,
+                        ),
+                      ),
+                      clipBehavior: Clip.antiAlias,
+                      child: SvgPicture.asset(
+                        widget.flagAsset,
+                        fit: BoxFit.cover,
+                        placeholderBuilder: (context) => Container(
+                          color: SparkLingoTheme.surfaceContainerHighest,
+                          child: const Center(
+                            child: SizedBox(
+                              width: 14,
+                              height: 14,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                          ),
                         ),
                       ),
                     ),
-                  ),
+                    const SizedBox(height: 10),
+                    // English Name
+                    Text(
+                      widget.englishName,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: isSelected ? Colors.white : const Color(0xFFE2E8F0),
+                        fontFamily: 'Plus Jakarta Sans',
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 2),
+                    // Native script
+                    Text(
+                      widget.nativeName,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: isSelected
+                            ? primaryCyan
+                            : const Color(0xFF94A3B8),
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 12),
-                // Native name as the primary label
-                Text(
-                  widget.nativeName,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF1F2937),
+                if (isSelected)
+                  Positioned(
+                    top: 0,
+                    right: 0,
+                    child: Container(
+                      width: 18,
+                      height: 18,
+                      decoration: BoxDecoration(
+                        color: primaryCyan,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.check,
+                        size: 12,
+                        color: Colors.black,
+                      ),
+                    ),
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 4),
-                // English name as a smaller subtitle
-                Text(
-                  widget.englishName,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: Color(0xFF6B7280),
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
               ],
             ),
           ),

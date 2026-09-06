@@ -1,15 +1,20 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import '../../core/theme/theme.dart';
 import '../../core/theme/language_theme_registry.dart';
 import '../../core/constants/language_catalog.dart';
 import '../../shared/models/language_theme.dart';
 import '../../features/onboarding/widgets/flag_tile.dart';
 
 class FlagGrid extends StatefulWidget {
-  final void Function(String langCode, FlagInfo selectedFlag)
-  onLanguageSelected;
+  final String? selectedLanguageCode;
+  final void Function(String langCode, FlagInfo selectedFlag) onLanguageSelected;
 
-  const FlagGrid({super.key, required this.onLanguageSelected});
+  const FlagGrid({
+    super.key,
+    this.selectedLanguageCode,
+    required this.onLanguageSelected,
+  });
 
   @override
   State<FlagGrid> createState() => _FlagGridState();
@@ -18,6 +23,15 @@ class FlagGrid extends StatefulWidget {
 class _FlagGridState extends State<FlagGrid> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
+  String _selectedCategory = 'All';
+
+  static const List<String> _categories = [
+    'All',
+    'Popular',
+    'European',
+    'Asian',
+    'Middle Eastern',
+  ];
 
   static const Map<String, String> _englishNames = {
     'en': 'English',
@@ -26,7 +40,7 @@ class _FlagGridState extends State<FlagGrid> {
     'es': 'Spanish',
     'it': 'Italian',
     'pt': 'Portuguese',
-    'zh': 'Chinese (Mandarin)',
+    'zh': 'Chinese',
     'ja': 'Japanese',
     'ko': 'Korean',
     'ru': 'Russian',
@@ -35,6 +49,13 @@ class _FlagGridState extends State<FlagGrid> {
     'th': 'Thai',
     'tl': 'Tagalog',
     'ms': 'Malay',
+  };
+
+  static const Map<String, List<String>> _categoryMap = {
+    'Popular': ['es', 'ja', 'fr', 'de', 'zh', 'ms', 'ar'],
+    'European': ['es', 'fr', 'de', 'it', 'pt', 'ru', 'en'],
+    'Asian': ['ja', 'ko', 'zh', 'hi', 'th', 'tl', 'ms'],
+    'Middle Eastern': ['ar'],
   };
 
   @override
@@ -49,10 +70,9 @@ class _FlagGridState extends State<FlagGrid> {
     LanguageTheme theme,
   ) {
     if (theme.flags.length > 1) {
-      // Open bottom sheet for regional variants
       showModalBottomSheet(
         context: context,
-        backgroundColor: const Color(0xFFFFFFFF),
+        backgroundColor: SparkLingoTheme.surfaceContainer,
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
@@ -69,7 +89,8 @@ class _FlagGridState extends State<FlagGrid> {
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF1F2937),
+                      color: Colors.white,
+                      fontFamily: 'Plus Jakarta Sans',
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -78,7 +99,7 @@ class _FlagGridState extends State<FlagGrid> {
                       shrinkWrap: true,
                       itemCount: theme.flags.length,
                       separatorBuilder: (context, index) =>
-                          const Divider(color: Color(0xFFF3F4F6), height: 1),
+                          Divider(color: SparkLingoTheme.surfaceContainerHighest, height: 1),
                       itemBuilder: (context, index) {
                         final flag = theme.flags[index];
                         return ListTile(
@@ -88,11 +109,11 @@ class _FlagGridState extends State<FlagGrid> {
                           ),
                           leading: Container(
                             width: 44,
-                            height: 32,
+                            height: 30,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(6),
                               border: Border.all(
-                                color: const Color(0xFFE5E7EB),
+                                color: SparkLingoTheme.surfaceContainerHighest,
                               ),
                             ),
                             clipBehavior: Clip.antiAlias,
@@ -104,16 +125,16 @@ class _FlagGridState extends State<FlagGrid> {
                           title: Text(
                             flag.countryName,
                             style: const TextStyle(
-                              fontSize: 16,
+                              fontSize: 15,
                               fontWeight: FontWeight.w600,
-                              color: Color(0xFF1F2937),
+                              color: Colors.white,
                             ),
                           ),
                           subtitle: Text(
                             flag.locale,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 12,
-                              color: Color(0xFF9CA3AF),
+                              color: Colors.white.withValues(alpha: 0.5),
                             ),
                           ),
                           onTap: () {
@@ -131,27 +152,28 @@ class _FlagGridState extends State<FlagGrid> {
         },
       );
     } else {
-      // Single flag option, resolve immediately
       widget.onLanguageSelected(langCode, theme.flags.first);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // The visual registry intentionally contains future language themes. Only
-    // expose a language for selection once this release contains curriculum for
-    // it; otherwise users would land in an empty course after onboarding.
     final List<String> allCodes = LanguageThemeRegistry.availableLanguageCodes
         .where(LanguageCatalog.hasBundledCurriculum)
         .toList(growable: false);
 
-    // Parse language data
     final List<MapEntry<String, LanguageTheme>> list = allCodes.map((code) {
       return MapEntry(code, LanguageThemeRegistry.themeFor(code));
     }).toList();
 
-    // Apply query filters on English and native-script display names
-    final filteredList = list.where((entry) {
+    // Category filter
+    final categoryFiltered = _selectedCategory == 'All'
+        ? list
+        : list.where((entry) =>
+            _categoryMap[_selectedCategory]?.contains(entry.key) ?? false).toList();
+
+    // Search query filter
+    final filteredList = categoryFiltered.where((entry) {
       final code = entry.key;
       final theme = entry.value;
       final english = _englishNames[code]?.toLowerCase() ?? '';
@@ -161,63 +183,119 @@ class _FlagGridState extends State<FlagGrid> {
     }).toList();
 
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // Premium minimal search bar
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        // Search Input Field
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+          decoration: BoxDecoration(
+            color: SparkLingoTheme.surfaceContainer,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: SparkLingoTheme.surfaceContainerHighest,
+              width: 1,
+            ),
+          ),
           child: TextField(
             controller: _searchController,
+            style: const TextStyle(color: Colors.white, fontSize: 14),
             onChanged: (val) {
               setState(() {
                 _searchQuery = val;
               });
             },
             decoration: InputDecoration(
-              hintText: 'Search languages...',
-              prefixIcon: const Icon(Icons.search, color: Color(0xFF9CA3AF)),
-              filled: true,
-              fillColor: const Color(0xFFF3F4F6),
-              contentPadding: const EdgeInsets.symmetric(
-                vertical: 0,
-                horizontal: 16,
+              hintText: 'Search 15+ languages...',
+              hintStyle: TextStyle(
+                color: Colors.white.withValues(alpha: 0.4),
+                fontSize: 14,
               ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide.none,
+              prefixIcon: Icon(
+                Icons.search_rounded,
+                color: Colors.white.withValues(alpha: 0.5),
+                size: 20,
+              ),
+              border: InputBorder.none,
+              contentPadding: const EdgeInsets.symmetric(
+                vertical: 14,
+                horizontal: 16,
               ),
             ),
           ),
         ),
 
-        // Responsive flag grid using LayoutBuilder
+        // Category Filter Chips
+        SizedBox(
+          height: 44,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+            itemCount: _categories.length,
+            separatorBuilder: (_, _) => const SizedBox(width: 8),
+            itemBuilder: (context, i) {
+              final cat = _categories[i];
+              final isCatSelected = cat == _selectedCategory;
+              return GestureDetector(
+                onTap: () => setState(() => _selectedCategory = cat),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: isCatSelected
+                        ? SparkLingoTheme.electricCyan.withValues(alpha: 0.2)
+                        : SparkLingoTheme.surfaceContainer,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: isCatSelected
+                          ? SparkLingoTheme.electricCyan
+                          : SparkLingoTheme.surfaceContainerHighest,
+                      width: 1,
+                    ),
+                  ),
+                  child: Center(
+                    child: Text(
+                      cat,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: isCatSelected ? FontWeight.w700 : FontWeight.w500,
+                        color: isCatSelected
+                            ? SparkLingoTheme.electricCyan
+                            : Colors.white.withValues(alpha: 0.7),
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+
+        const SizedBox(height: 8),
+
+        // 2-Column Responsive Flag Grid
         Expanded(
           child: LayoutBuilder(
             builder: (context, constraints) {
-              int columns;
-              if (constraints.maxWidth <= 600) {
-                columns = 2; // Mobile
-              } else if (constraints.maxWidth <= 1000) {
-                columns = 3; // Tablet
-              } else {
-                columns = 4; // Desktop
-              }
+              int columns = constraints.maxWidth > 700 ? 3 : 2;
 
               if (filteredList.isEmpty) {
-                return const Center(
+                return Center(
                   child: Text(
                     'No languages found',
-                    style: TextStyle(fontSize: 16, color: Color(0xFF9CA3AF)),
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.white.withValues(alpha: 0.5),
+                    ),
                   ),
                 );
               }
 
               return GridView.builder(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: columns,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                  childAspectRatio: 0.95,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                  childAspectRatio: 1.1,
                 ),
                 itemCount: filteredList.length,
                 itemBuilder: (context, index) {
@@ -225,6 +303,7 @@ class _FlagGridState extends State<FlagGrid> {
                   final code = entry.key;
                   final theme = entry.value;
                   final englishName = _englishNames[code] ?? theme.displayName;
+                  final isSelected = widget.selectedLanguageCode == code;
 
                   return FlagTile(
                     nativeName: theme.displayName,
@@ -232,6 +311,7 @@ class _FlagGridState extends State<FlagGrid> {
                     flagAsset: theme.flags.isNotEmpty
                         ? theme.flags.first.flagAsset
                         : 'assets/flags/en_us.svg',
+                    isSelected: isSelected,
                     onTap: () => _handleLanguageTap(context, code, theme),
                   );
                 },

@@ -88,11 +88,20 @@ class LanguageThemeRegistry {
       ? Colors.white
       : Colors.black;
 
-  /// Build a ThemeData extending SparkTheme.lightTheme for a given LanguageTheme.
-  static ThemeData buildTheme(LanguageTheme langTheme) {
-    final baseTheme = SparkTheme.lightTheme;
-    final primary = _accessibleOnLightSurface(langTheme.primaryColor);
-    final secondary = _accessibleOnLightSurface(langTheme.accentColor);
+  /// Build a ThemeData extending SparkTheme for a given LanguageTheme.
+  static ThemeData buildTheme(
+    LanguageTheme langTheme, {
+    Brightness brightness = Brightness.dark,
+  }) {
+    final baseTheme = brightness == Brightness.dark
+        ? SparkTheme.darkTheme
+        : SparkTheme.lightTheme;
+    final primary = brightness == Brightness.dark
+        ? langTheme.primaryColor
+        : _accessibleOnLightSurface(langTheme.primaryColor);
+    final secondary = brightness == Brightness.dark
+        ? langTheme.accentColor
+        : _accessibleOnLightSurface(langTheme.accentColor);
     final onPrimary = _bestForeground(primary);
     final onSecondary = _bestForeground(secondary);
 

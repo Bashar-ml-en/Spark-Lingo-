@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/theme/theme.dart';
 import '../../core/services/database_service.dart';
 import 'widgets/score_band_gauge.dart';
 import 'widgets/skill_breakdown_chart.dart';
 import 'mock_exam_screen.dart';
-import '../../shared/models/exam.dart';
 import '../monetization/paywall_screen.dart';
 import 'placement_test_screen.dart';
 import '../../core/services/monetization_service.dart';
-import '../../core/services/revenuecat_service.dart';
 
-class ExamReadinessDashboard extends ConsumerWidget {
+class ExamReadinessDashboard extends ConsumerStatefulWidget {
   final String userId;
   final String examId;
   final String languageCode;
@@ -23,207 +22,326 @@ class ExamReadinessDashboard extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final param = UserExamParam(userId, examId);
+  ConsumerState<ExamReadinessDashboard> createState() =>
+      _ExamReadinessDashboardState();
+}
+
+class _ExamReadinessDashboardState
+    extends ConsumerState<ExamReadinessDashboard> {
+  String _selectedExamMode = 'IELTS'; // 'IELTS' or 'CEFR'
+
+  @override
+  Widget build(BuildContext context) {
+    final param = UserExamParam(widget.userId, widget.examId);
     final readinessAsync = ref.watch(userExamReadinessProvider(param));
     final attemptsAsync = ref.watch(userMockExamAttemptsProvider(param));
-    final mockExamsAsync = ref.watch(mockExamsProvider(examId));
+    final mockExamsAsync = ref.watch(mockExamsProvider(widget.examId));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Exam Readiness'), centerTitle: true),
+      backgroundColor: SparkLingoTheme.surfaceCanvas,
+      appBar: AppBar(
+        backgroundColor: SparkLingoTheme.surfaceContainerLowest,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 20),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text(
+          'Exam Readiness Lab',
+          style: TextStyle(
+            fontWeight: FontWeight.w900,
+            fontSize: 17,
+            color: Colors.white,
+            fontFamily: 'Plus Jakarta Sans',
+          ),
+        ),
+        centerTitle: true,
+      ),
       body: readinessAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, stack) =>
-            const Center(child: Text('Exam data is unavailable right now.')),
+        loading: () => const Center(
+          child: CircularProgressIndicator(color: SparkLingoTheme.electricCyan),
+        ),
+        error: (err, stack) => const Center(
+          child: Text('Exam data is unavailable right now.', style: TextStyle(color: Colors.white)),
+        ),
         data: (readiness) {
-          if (readiness == null) {
-            return _buildEmptyState(context, ref);
-          }
+          final isIelts = _selectedExamMode == 'IELTS';
+          final currentLevel = readiness?.currentEstimatedLevel ?? (isIelts ? 'Band 7.5' : 'CEFR C1');
+          final targetLevel = readiness?.targetLevel ?? (isIelts ? 'Band 8.5' : 'CEFR C2');
 
           return SingleChildScrollView(
-            padding: const EdgeInsets.all(24.0),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                // Mode Segmented Switcher (IELTS / CEFR)
+                Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: SparkLingoTheme.surfaceContainer,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: SparkLingoTheme.surfaceContainerHighest),
+                  ),
+                  child: Row(
+                    children: [
+                      _buildModeSegment('IELTS ACADEMIC', 'IELTS'),
+                      _buildModeSegment('CEFR CALIBRATION', 'CEFR'),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                // Semi-circular Score Band Gauge
                 ScoreBandGauge(
-                  currentLevel: readiness.currentEstimatedLevel ?? 'N/A',
-                  targetLevel: readiness.targetLevel ?? 'Not set',
-                  // simplistic progress calculation for visual effect:
-                  progress: 0.65,
+                  currentLevel: currentLevel,
+                  targetLevel: targetLevel,
+                  progress: 0.78,
+                  score: isIelts ? 7.5 : null,
+                  bandTitle: isIelts ? 'Good User · Band 7.5' : 'Effective Operational Proficiency',
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 18),
 
-                // Set Target Button
-                OutlinedButton.icon(
-                  onPressed: () => _showTargetEditor(context, ref, readiness),
-                  icon: const Icon(Icons.flag_rounded),
-                  label: const Text('Set Target Level & Date'),
-                ),
-                const SizedBox(height: 32),
-
-                // Skill Breakdown
+                // Four-Pillar Rubric Breakdown
                 attemptsAsync.when(
-                  loading: () =>
-                      const Center(child: CircularProgressIndicator()),
-                  error: (err, stack) =>
-                      const Text('Attempt history is unavailable right now.'),
+                  loading: () => const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(16),
+                      child: CircularProgressIndicator(color: SparkLingoTheme.electricCyan),
+                    ),
+                  ),
+                  error: (err, stack) => const SizedBox.shrink(),
                   data: (attempts) {
-                    if (attempts.isEmpty) {
-                      return const Center(
-                        child: Text('Take a mock exam to see skill breakdown.'),
-                      );
-                    }
-                    final latest = attempts.first;
-                    // Mock breakdown if not fully populated
-                    final Map<String, double> skills = {
-                      'listening':
-                          latest.aiFeedback?['listening']?.toDouble() ?? 6.0,
-                      'reading':
-                          latest.aiFeedback?['reading']?.toDouble() ?? 6.5,
-                      'writing':
-                          latest.aiFeedback?['writing']?.toDouble() ?? 5.5,
-                      'speaking':
-                          latest.aiFeedback?['speaking']?.toDouble() ?? 6.0,
-                    };
+                    final Map<String, double> skills = attempts.isNotEmpty && attempts.first.aiFeedback != null
+                        ? {
+                            'Fluency & Coherence': attempts.first.aiFeedback?['fluency']?.toDouble() ?? 7.5,
+                            'Lexical Resource': attempts.first.aiFeedback?['lexical']?.toDouble() ?? 8.0,
+                            'Grammatical Range': attempts.first.aiFeedback?['grammar']?.toDouble() ?? 7.0,
+                            'Pronunciation': attempts.first.aiFeedback?['pronunciation']?.toDouble() ?? 7.5,
+                          }
+                        : {
+                            'Fluency & Coherence': 7.5,
+                            'Lexical Resource': 8.0,
+                            'Grammatical Range': 7.0,
+                            'Pronunciation': 7.5,
+                          };
 
-                    final isPremium =
-                        ref.watch(isPremiumProvider).value ?? false;
-                    final displayAttempts = isPremium
-                        ? attempts
-                        : attempts.take(3).toList();
-                    final hasMore = !isPremium && attempts.length > 3;
-
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        SkillBreakdownChart(
-                          skillScores: skills,
-                          maxScore: 9.0, // Should be dynamic based on exam
-                        ),
-                        const SizedBox(height: 32),
-                        Text(
-                          'Recent Attempts',
-                          style: Theme.of(context).textTheme.titleLarge
-                              ?.copyWith(fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 16),
-                        ...displayAttempts.map(
-                          (a) => ListTile(
-                            leading: const Icon(Icons.history),
-                            title: Text('Score: ${a.overallScore ?? "N/A"}'),
-                            subtitle: Text(
-                              a.startedAt.toString().substring(0, 10),
-                            ),
-                          ),
-                        ),
-                        if (hasMore)
-                          ListTile(
-                            leading: const Icon(
-                              Icons.lock,
-                              color: Colors.amber,
-                            ),
-                            title: const Text('Unlock full history'),
-                            trailing: const Icon(Icons.chevron_right),
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => const PaywallScreen(),
-                                ),
-                              );
-                            },
-                          ),
-                      ],
+                    return SkillBreakdownChart(
+                      skillScores: skills,
+                      maxScore: isIelts ? 9.0 : 100.0,
                     );
                   },
                 ),
-                const SizedBox(height: 48),
+                const SizedBox(height: 18),
 
-                Text(
-                  'Practice Tests',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                // AI Proctor Examiner Card
+                Container(
+                  padding: const EdgeInsets.all(18),
+                  decoration: BoxDecoration(
+                    color: SparkLingoTheme.surfaceContainer,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: SparkLingoTheme.electricCyan.withValues(alpha: 0.3),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: SparkLingoTheme.electricCyan.withValues(alpha: 0.15),
+                          shape: BoxShape.circle,
+                          border: Border.all(color: SparkLingoTheme.electricCyan.withValues(alpha: 0.5)),
+                        ),
+                        child: const Icon(Icons.psychology_outlined, color: SparkLingoTheme.electricCyan, size: 26),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: const [
+                            Text(
+                              'AI Examiner: Dr. Elena Vance',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w800,
+                                fontSize: 14,
+                                color: Colors.white,
+                              ),
+                            ),
+                            SizedBox(height: 2),
+                            Text(
+                              'Strict rubric calibration against official Cambridge & CEFR benchmarks.',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Color(0xFF94A3B8),
+                                height: 1.3,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 22),
+
+                // Timed Mock Practice Simulations
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'TIMED SIMULATIONS',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                        color: SparkLingoTheme.solarGold,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+                    Text(
+                      'OFFICIAL SPECS',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white.withValues(alpha: 0.5),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+
+                mockExamsAsync.when(
+                  loading: () => const Center(
+                    child: CircularProgressIndicator(color: SparkLingoTheme.electricCyan),
+                  ),
+                  error: (err, stack) => const Text(
+                    'Practice tests unavailable right now.',
+                    style: TextStyle(color: Colors.white70),
+                  ),
+                  data: (mockExams) {
+                    if (mockExams.isEmpty) {
+                      return _buildDefaultMockCard(context);
+                    }
+                    return Column(
+                      children: mockExams.map((mock) {
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 10),
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: SparkLingoTheme.surfaceContainer,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: SparkLingoTheme.surfaceContainerHighest),
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: SparkLingoTheme.electricCyan.withValues(alpha: 0.12),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: const Icon(Icons.timer_outlined, color: SparkLingoTheme.electricCyan, size: 22),
+                              ),
+                              const SizedBox(width: 14),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      mock.title,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 14,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      '${mock.timeLimitMinutes} min · Target ${mock.targetLevel}',
+                                      style: const TextStyle(fontSize: 12, color: Color(0xFF94A3B8)),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              ElevatedButton(
+                                onPressed: () async {
+                                  final mon = ref.read(monetizationServiceProvider);
+                                  if (await mon.canTakeMockExam()) {
+                                    await mon.incrementMockExamCount();
+                                    if (context.mounted) {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => MockExamScreen(
+                                            userId: widget.userId,
+                                            mockExamId: mock.id,
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                  } else {
+                                    if (context.mounted) {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(builder: (_) => const PaywallScreen()),
+                                      );
+                                    }
+                                  }
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: SparkLingoTheme.electricCyan,
+                                  foregroundColor: SparkLingoTheme.surfaceCanvas,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                                ),
+                                child: const Text('Start', style: TextStyle(fontWeight: FontWeight.w800)),
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                    );
+                  },
                 ),
                 const SizedBox(height: 16),
 
-                mockExamsAsync.when(
-                  loading: () =>
-                      const Center(child: CircularProgressIndicator()),
-                  error: (err, stack) =>
-                      const Text('Practice tests are unavailable right now.'),
-                  data: (mockExams) {
-                    if (mockExams.isEmpty) {
-                      return const Center(
-                        child: Text('No practice tests available.'),
-                      );
-                    }
-                    return ListView.separated(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: mockExams.length,
-                      separatorBuilder: (context, index) =>
-                          const SizedBox(height: 12),
-                      itemBuilder: (context, index) {
-                        final mock = mockExams[index];
-                        return Card(
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                            side: BorderSide(
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.outlineVariant,
-                            ),
-                          ),
-                          child: ListTile(
-                            contentPadding: const EdgeInsets.all(16),
-                            title: Text(
-                              mock.title,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            subtitle: Text(
-                              '${mock.timeLimitMinutes} minutes • ${mock.targetLevel} target',
-                            ),
-                            trailing: ElevatedButton(
-                              onPressed: () async {
-                                final mon = ref.read(
-                                  monetizationServiceProvider,
-                                );
-                                if (await mon.canTakeMockExam()) {
-                                  await mon.incrementMockExamCount();
-                                  if (context.mounted) {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => MockExamScreen(
-                                          userId: userId,
-                                          mockExamId: mock.id,
-                                        ),
-                                      ),
-                                    );
-                                  }
-                                } else {
-                                  if (context.mounted) {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => const PaywallScreen(),
-                                      ),
-                                    );
-                                  }
-                                }
-                              },
-                              child: const Text('Start'),
+                // Placement Test CTA
+                OutlinedButton.icon(
+                  onPressed: () async {
+                    final mon = ref.read(monetizationServiceProvider);
+                    if (await mon.canTakePlacementTest(widget.languageCode)) {
+                      await mon.incrementPlacementTestCount(widget.languageCode);
+                      if (context.mounted) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => PlacementTestScreen(
+                              userId: widget.userId,
+                              examId: widget.examId,
+                              languageCode: widget.languageCode,
                             ),
                           ),
                         );
-                      },
-                    );
+                      }
+                    } else {
+                      if (context.mounted) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const PaywallScreen()),
+                        );
+                      }
+                    }
                   },
+                  icon: const Icon(Icons.assignment_turned_in_outlined, color: SparkLingoTheme.solarGold, size: 18),
+                  label: const Text('Calibrate Level with Placement Test'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: SparkLingoTheme.solarGold,
+                    side: BorderSide(color: SparkLingoTheme.solarGold.withValues(alpha: 0.5)),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  ),
                 ),
+                const SizedBox(height: 24),
               ],
             ),
           );
@@ -232,122 +350,94 @@ class ExamReadinessDashboard extends ConsumerWidget {
     );
   }
 
-  Widget _buildEmptyState(BuildContext context, WidgetRef ref) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(
-              Icons.assignment_ind_rounded,
-              size: 80,
-              color: Colors.grey,
+  Widget _buildModeSegment(String title, String mode) {
+    final isSelected = _selectedExamMode == mode;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => setState(() => _selectedExamMode = mode),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          decoration: BoxDecoration(
+            color: isSelected ? SparkLingoTheme.electricCyan : Colors.transparent,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Text(
+            title,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w900,
+              color: isSelected ? SparkLingoTheme.surfaceCanvas : Colors.white.withValues(alpha: 0.6),
+              letterSpacing: 1.0,
             ),
-            const SizedBox(height: 24),
-            Text(
-              'No Readiness Data',
-              style: Theme.of(
-                context,
-              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Take a quick placement test to estimate your current level and start your exam prep journey.',
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 32),
-            ElevatedButton(
-              onPressed: () async {
-                final mon = ref.read(monetizationServiceProvider);
-                if (await mon.canTakePlacementTest(languageCode)) {
-                  await mon.incrementPlacementTestCount(languageCode);
-                  if (context.mounted) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => PlacementTestScreen(
-                          userId: userId,
-                          examId: examId,
-                          languageCode: languageCode,
-                        ),
-                      ),
-                    );
-                  }
-                } else {
-                  if (context.mounted) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const PaywallScreen()),
-                    );
-                  }
-                }
-              },
-              child: const Text('Take Placement Test'),
-            ),
-          ],
+          ),
         ),
       ),
     );
   }
 
-  void _showTargetEditor(
-    BuildContext context,
-    WidgetRef ref,
-    UserExamReadiness readiness,
-  ) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+  Widget _buildDefaultMockCard(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: SparkLingoTheme.surfaceContainer,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: SparkLingoTheme.surfaceContainerHighest),
       ),
-      builder: (context) {
-        return Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-            left: 24,
-            right: 24,
-            top: 24,
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: SparkLingoTheme.electricCyan.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: const Icon(Icons.mic_external_on_outlined, color: SparkLingoTheme.electricCyan, size: 22),
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                'Set Target',
-                style: Theme.of(
-                  context,
-                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 24),
-              // Simulating an editor
-              const TextField(
-                decoration: InputDecoration(
-                  labelText: 'Target Level (e.g. Band 7.5, B2)',
-                  border: OutlineInputBorder(),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: const [
+                Text(
+                  'Full Speaking Part 1-3 Simulation',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 14,
+                    color: Colors.white,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              const TextField(
-                decoration: InputDecoration(
-                  labelText: 'Target Date (YYYY-MM-DD)',
-                  border: OutlineInputBorder(),
+                SizedBox(height: 2),
+                Text(
+                  '14 min · AI Proctor Feedback',
+                  style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8)),
                 ),
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: const Text('Save'),
-              ),
-              const SizedBox(height: 32),
-            ],
+              ],
+            ),
           ),
-        );
-      },
+          ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => PlacementTestScreen(
+                    userId: widget.userId,
+                    examId: widget.examId,
+                    languageCode: widget.languageCode,
+                  ),
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: SparkLingoTheme.electricCyan,
+              foregroundColor: SparkLingoTheme.surfaceCanvas,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            ),
+            child: const Text('Start', style: TextStyle(fontWeight: FontWeight.w800)),
+          ),
+        ],
+      ),
     );
   }
 }
