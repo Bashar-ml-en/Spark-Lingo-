@@ -8,6 +8,7 @@ import 'mock_exam_screen.dart';
 import '../monetization/paywall_screen.dart';
 import 'placement_test_screen.dart';
 import '../../core/services/monetization_service.dart';
+import '../../shared/widgets/stitch_top_bar.dart';
 
 class ExamReadinessDashboard extends ConsumerStatefulWidget {
   final String userId;
@@ -38,26 +39,17 @@ class _ExamReadinessDashboardState
     final mockExamsAsync = ref.watch(mockExamsProvider(widget.examId));
 
     return Scaffold(
-      backgroundColor: SparkLingoTheme.surfaceCanvas,
-      appBar: AppBar(
-        backgroundColor: SparkLingoTheme.surfaceContainerLowest,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 20),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: const Text(
-          'Exam Readiness Lab',
-          style: TextStyle(
-            fontWeight: FontWeight.w900,
-            fontSize: 17,
-            color: Colors.white,
-            fontFamily: 'Plus Jakarta Sans',
+      backgroundColor: SparkTheme.bg(context),
+      body: Column(
+        children: [
+          StitchTopBar(
+            activeLanguage: widget.languageCode,
+            streakDays: 21,
+            totalXP: 1480,
+            onLogoTap: () => Navigator.pop(context),
           ),
-        ),
-        centerTitle: true,
-      ),
-      body: readinessAsync.when(
+          Expanded(
+            child: readinessAsync.when(
         loading: () => const Center(
           child: CircularProgressIndicator(color: SparkLingoTheme.electricCyan),
         ),
@@ -347,8 +339,11 @@ class _ExamReadinessDashboardState
           );
         },
       ),
-    );
-  }
+    ),
+  ],
+),
+);
+}
 
   Widget _buildModeSegment(String title, String mode) {
     final isSelected = _selectedExamMode == mode;

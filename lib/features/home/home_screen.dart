@@ -15,8 +15,12 @@ import '../../core/theme/theme.dart';
 import '../../core/theme/language_theme_registry.dart';
 import '../../shared/models/language_theme.dart';
 import '../../shared/widgets/language_symbol_badge.dart';
+import '../../shared/widgets/flag_grid.dart';
+import '../../shared/widgets/ai_score_disclaimer.dart';
+import '../../shared/widgets/consent_request_dialog.dart';
 import '../../shared/widgets/phase_sidebar.dart';
 import '../../shared/widgets/audio_wave_visualizer.dart';
+import '../../shared/widgets/stitch_top_bar.dart';
 import '../exam_prep/exam_readiness_dashboard.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -30,6 +34,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   final ScrollController _curriculumScrollController = ScrollController();
   final List<GlobalKey> _unitKeys = [];
   int _selectedUnitIndex = 0;
+  String _activeNavTab = 'pathway';
 
   @override
   void dispose() {
@@ -438,140 +443,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           : Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Top Stitch Cyber Navigation Bar
-                Container(
-                  decoration: BoxDecoration(
-                    color: SparkLingoTheme.surfaceContainerLowest,
-                    border: Border(
-                      bottom: BorderSide(
-                        color: SparkLingoTheme.surfaceContainerHighest,
-                        width: 1,
-                      ),
-                    ),
-                  ),
-                  child: SafeArea(
-                    bottom: false,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Builder(
-                            builder: (context) => IconButton(
-                              icon: Icon(
-                                Icons.menu_rounded,
-                                color: SparkTheme.text(context),
-                                size: 24,
-                              ),
-                              onPressed: () => Scaffold.of(context).openDrawer(),
-                            ),
-                          ),
-                          // Center Brand & Language Pill
-                          GestureDetector(
-                            onTap: () {
-                              if (profileAsync != null) {
-                                profileAsync.maybeWhen(
-                                  data: (profile) {
-                                    if (profile != null) {
-                                      _openLanguageSwitcher(context, ref, profile.id);
-                                    }
-                                  },
-                                  orElse: () {},
-                                );
-                              }
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                              decoration: BoxDecoration(
-                                color: SparkTheme.cardBg(context),
-                                borderRadius: BorderRadius.circular(20),
-                                border: Border.all(
-                                  color: SparkTheme.border(context),
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  if (activeLanguage != null)
-                                    LanguageSymbolBadge(langCode: activeLanguage),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    activeLanguage != null
-                                        ? LanguageCatalog.displayName(activeLanguage)
-                                        : 'Spark Lingo',
-                                    style: TextStyle(
-                                      color: SparkTheme.text(context),
-                                      fontWeight: FontWeight.w800,
-                                      fontSize: 14,
-                                      fontFamily: 'Plus Jakarta Sans',
-                                    ),
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Icon(
-                                    Icons.keyboard_arrow_down_rounded,
-                                    color: SparkTheme.subtext(context),
-                                    size: 18,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          // Right Theme Switcher + Streak pill
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              // Sun / Moon Custom Theme Switcher
-                              IconButton(
-                                icon: Icon(
-                                  ref.watch(themeModeProvider) == ThemeMode.dark
-                                      ? Icons.wb_sunny_rounded
-                                      : Icons.dark_mode_rounded,
-                                  color: ref.watch(themeModeProvider) == ThemeMode.dark
-                                      ? SparkLingoTheme.solarGold
-                                      : const Color(0xFF0284C7),
-                                  size: 22,
-                                ),
-                                tooltip: ref.watch(themeModeProvider) == ThemeMode.dark
-                                    ? 'Switch to Light Mode'
-                                    : 'Switch to Dark Mode',
-                                onPressed: () {
-                                  final current = ref.read(themeModeProvider);
-                                  ref.read(themeModeProvider.notifier).state =
-                                      current == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
-                                },
-                              ),
-                              const SizedBox(width: 4),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                                decoration: BoxDecoration(
-                                  color: SparkLingoTheme.solarGold.withValues(alpha: 0.15),
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(
-                                    color: SparkLingoTheme.solarGold.withValues(alpha: 0.4),
-                                  ),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: const [
-                                    Icon(Icons.local_fire_department, color: SparkLingoTheme.solarGold, size: 16),
-                                    SizedBox(width: 4),
-                                    Text(
-                                      '14',
-                                      style: TextStyle(
-                                        color: SparkLingoTheme.solarGold,
-                                        fontWeight: FontWeight.w900,
-                                        fontSize: 12,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                // Top Stitch Cyber Navigation Bar with Logo Alignment & Sub-tabs
+                StitchTopBar(
+                  activeLanguage: activeLanguage,
+                  streakDays: 21,
+                  totalXP: 1480,
+                  showSubTabs: true,
+                  activeSubTab: _activeNavTab,
+                  onSubTabSelected: (tabId) {
+                    setState(() => _activeNavTab = tabId);
+                  },
+                  onLanguageTap: () {
+                    if (profileAsync != null) {
+                      profileAsync.maybeWhen(
+                        data: (profile) {
+                          if (profile != null) {
+                            _openLanguageSwitcher(context, ref, profile.id);
+                          }
+                        },
+                        orElse: () {},
+                      );
+                    }
+                  },
                 ),
                 // Main Content Body
                 Expanded(
