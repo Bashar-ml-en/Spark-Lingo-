@@ -142,7 +142,7 @@ class _PhaseSidebarState extends ConsumerState<PhaseSidebar> {
                         '${widget.units.length} phases',
                         style: const TextStyle(
                           fontSize: 11.5,
-                          color: Color(0xFF6B7280),
+                          color: Color(0xFF475569),
                         ),
                       ),
                     ],
@@ -159,7 +159,7 @@ class _PhaseSidebarState extends ConsumerState<PhaseSidebar> {
                 fontSize: 11,
                 fontWeight: FontWeight.w800,
                 letterSpacing: 1.2,
-                color: Color(0xFF9CA3AF),
+                color: Color(0xFF475569),
               ),
             ),
           ),
@@ -269,7 +269,7 @@ class _PhaseSidebarState extends ConsumerState<PhaseSidebar> {
                                   'Lessons unavailable right now.',
                                   style: TextStyle(
                                     fontSize: 11.5,
-                                    color: Color(0xFF9CA3AF),
+                                    color: Color(0xFF475569),
                                   ),
                                 ),
                               ),

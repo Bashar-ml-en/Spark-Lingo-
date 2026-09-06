@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/constants/auth_config.dart';
 import '../../core/constants/language_catalog.dart';
+import '../../core/design/motion_tokens.dart';
+import '../../core/design/neumorph.dart';
 import '../../core/router/router.dart';
 import '../../core/services/auth_service.dart';
 import '../../core/theme/theme.dart';
@@ -28,15 +30,28 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen>
   @override
   void initState() {
     super.initState();
+    // SparkMotion.standard (500ms, easeOutCubic = power2.out per the
+    // ui-ux-pro-max motion database). Reduced motion is handled in
+    // didChangeDependencies where MediaQuery is available.
     _entrance = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 900),
+      duration: SparkMotion.standard,
     )..forward();
-    _fade = CurvedAnimation(parent: _entrance, curve: Curves.easeOutCubic);
+    _fade = CurvedAnimation(parent: _entrance, curve: SparkMotion.arrive);
     _slide = Tween<Offset>(
       begin: const Offset(0, 0.05),
       end: Offset.zero,
     ).animate(_fade);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Rule #9/#99: if the OS asks for reduced motion, snap to the final
+    // readable state instead of animating.
+    if (SparkMotion.reduced(context) && !_entrance.isCompleted) {
+      _entrance.value = 1.0;
+    }
   }
 
   @override
@@ -430,11 +445,17 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen>
   }
 }
 
-class _StatChip extends StatelessWidget {
-  final String value;
-  final String label;
+/// One row of the welcome value-proposition card: icon + title + detail.
+class _ValueRow extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String detail;
 
-  const _StatChip({required this.value, required this.label});
+  const _ValueRow({
+    required this.icon,
+    required this.title,
+    required this.detail,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -466,8 +487,8 @@ class _StatChip extends StatelessWidget {
               fontWeight: FontWeight.w600,
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
@@ -503,7 +524,7 @@ class _LanguageChip extends StatelessWidget {
             label,
             style: const TextStyle(
               fontSize: 12,
-              color: Color(0xFFE2E8F0),
+              color: SparkNeumorph.ink,
               fontWeight: FontWeight.w600,
             ),
           ),

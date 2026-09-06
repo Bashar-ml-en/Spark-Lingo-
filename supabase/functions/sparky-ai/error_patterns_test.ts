@@ -12,6 +12,7 @@ import { assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import {
   classifyCriterion,
   ERROR_CLASSES,
+  extractFocusMarker,
   focusPromptSentence,
 } from "./error_patterns.ts";
 
@@ -58,4 +59,46 @@ Deno.test("error class list is the closed allow-list", () => {
   for (const cls of ERROR_CLASSES) {
     assertEquals(/^[a-z_]+$/.test(cls), true);
   }
+});
+
+Deno.test("extractFocusMarker strips a valid trailing marker", () => {
+  const reply = "Nice try! Use 'sudah' for completed actions.\nSPARKY_FOCUS: grammar_accuracy";
+  const result = extractFocusMarker(reply);
+  assertEquals(result.classes, ["grammar_accuracy"]);
+  assertEquals(result.stripped, "Nice try! Use 'sudah' for completed actions.");
+});
+
+Deno.test("extractFocusMarker dedupes and drops non-allow-listed tokens", () => {
+  const reply = "Fix the tense.\nSPARKY_FOCUS: grammar_accuracy, evil_token, grammar_accuracy";
+  const result = extractFocusMarker(reply);
+  assertEquals(result.classes, ["grammar_accuracy"]);
+});
+
+Deno.test("extractFocusMarker returns content unchanged without a marker", () => {
+  const reply = "Great job, keep going!";
+  const result = extractFocusMarker(reply);
+  assertEquals(result.classes, []);
+  assertEquals(result.stripped, reply);
+});
+
+Deno.test("extractFocusMarker ignores a marker that is not the last line", () => {
+  const reply = "SPARKY_FOCUS: grammar_accuracy\nMore text after.";
+  const result = extractFocusMarker(reply);
+  assertEquals(result.classes, []);
+  assertEquals(result.stripped, reply);
+});
+
+Deno.test("extractFocusMarker strips a marker with only invalid tokens silently", () => {
+  const reply = "Try again.\nSPARKY_FOCUS: not_a_class, also_not";
+  const result = extractFocusMarker(reply);
+  assertEquals(result.classes, []);
+  assertEquals(result.stripped, "Try again.");
+});
+
+Deno.test("extractFocusMarker rejects injected marker content in learner text", () => {
+  // A marker embedded mid-reply (e.g. quoted from learner input) is not
+  // at the very end, so it must not be treated as a focus signal.
+  const reply = "You wrote: SPARKY_FOCUS: grammar_accuracy — let's continue.";
+  const result = extractFocusMarker(reply);
+  assertEquals(result.classes, []);
 });

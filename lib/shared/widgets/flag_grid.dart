@@ -69,6 +69,7 @@ class _FlagGridState extends State<FlagGrid> {
     String langCode,
     LanguageTheme theme,
   ) {
+    final baseTheme = Theme.of(context);
     if (theme.flags.length > 1) {
       showModalBottomSheet(
         context: context,
@@ -77,6 +78,7 @@ class _FlagGridState extends State<FlagGrid> {
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
         builder: (context) {
+          final sheetTheme = Theme.of(context);
           return SafeArea(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
@@ -86,8 +88,7 @@ class _FlagGridState extends State<FlagGrid> {
                 children: [
                   Text(
                     'Select region for ${theme.displayName}',
-                    style: const TextStyle(
-                      fontSize: 18,
+                    style: sheetTheme.textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                       fontFamily: 'Plus Jakarta Sans',

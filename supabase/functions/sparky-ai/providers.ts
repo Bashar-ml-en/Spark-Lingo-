@@ -192,3 +192,36 @@ export function providerHeaders(config: ProviderConfig): Record<string, string> 
   }
   return headers;
 }
+
+/**
+ * Optional fallback provider for chat completions (the score action rides the
+ * same wire path). Configured with AI_FALLBACK_BASE_URL / AI_FALLBACK_API_KEY /
+ * AI_FALLBACK_CHAT_MODEL. The chain degrades gracefully: any missing or
+ * malformed fallback value returns null and the system runs single-provider,
+ * so an unset fallback never becomes a configuration fault.
+ *
+ * Quota invariant: the fallback attempt runs inside the SAME reservation —
+ * markProviderSubmission is idempotent once submitted, so the request
+ * consumes exactly one quota slot no matter how many providers were tried.
+ * This is learner-safe (a failed primary never costs the learner an extra
+ * slot) at the price of one upstream call per fallback; operators accept
+ * that cost in exchange for availability. Fail-closed URL rules are
+ * identical to the primary.
+ */
+export function resolveFallbackChatProvider(): ProviderConfig | null {
+  const baseUrl = optionalValue("AI_FALLBACK_BASE_URL");
+  const apiKey = optionalValue("AI_FALLBACK_API_KEY");
+  const model = optionalValue("AI_FALLBACK_CHAT_MODEL");
+  if (!baseUrl || !apiKey || !model) return null;
+  try {
+    return {
+      kind: "openai_compatible",
+      baseUrl: assertSafeBaseUrl(baseUrl),
+      apiKey,
+      model,
+    };
+  } catch {
+    // A malformed fallback configuration must never break the primary path.
+    return null;
+  }
+}

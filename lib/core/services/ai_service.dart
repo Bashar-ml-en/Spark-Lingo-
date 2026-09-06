@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -21,6 +22,15 @@ class AIService {
   static const _maxHistoryCharacters = 12000;
   // Keep client feedback requests aligned with the server-enforced cap.
   static const _maxPracticeResponseCharacters = 6000;
+
+  /// Server-validated conversation modes (must match the Edge Function enum).
+  /// The client sends only these tokens; the server composes all prompts.
+  static const List<String> chatModes = <String>[
+    'free_chat',
+    'roleplay',
+    'correction_focus',
+    'grammar_drill',
+  ];
 
   static String get _edgeFunctionBaseUrl =>
       '${SupabaseConfig.url}/functions/v1/sparky-ai';
@@ -93,15 +103,20 @@ class AIService {
     }
 
     switch (statusCode) {
+      case 400:
+        return 'Sparky couldn’t start that request. Please try sending your message again.';
       case 401:
       case 403:
         return 'Please sign in again before using AI practice.';
       case 413:
         return 'That practice response is too large. Please shorten it and try again.';
       case 429:
-        return 'You have reached your current AI practice limit. Please try again later.';
+        return 'You have reached your current AI practice limit. Please try again in a little while.';
+      case 503:
+        return 'Sparky’s service is briefly unavailable. Please try again in a moment.';
       default:
-        return 'AI practice is temporarily unavailable. Please try again.';
+        // Keep the HTTP status visible so support can pinpoint the cause.
+        return 'AI practice is temporarily unavailable (error $statusCode). Please try again.';
     }
   }
 
@@ -151,6 +166,181 @@ class AIService {
       throw const AIServiceException(
         'Voice transcription is temporarily unavailable.',
       );
+    }
+  }
+
+  /// Loads the learner's persisted Sparky conversation for a language,
+  /// oldest first. Returns an empty list when nothing is stored or the
+  /// request fails — history is an enhancement, never a launch blocker.
+  Future<List<Map<String, String>>> loadChatHistory(String targetLanguage) async {
+    try {
+      final response = await http
+          .post(
+            Uri.parse('$_edgeFunctionBaseUrl?action=history'),
+            headers: _headers(_accessToken()),
+            body: jsonEncode(<String, dynamic>{
+              'targetLanguage': targetLanguage.trim(),
+            }),
+          )
+          .timeout(_requestTimeout);
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        return const [];
+      }
+      final decoded = jsonDecode(response.body);
+      if (decoded is! Map<String, dynamic>) return const [];
+      final messages = decoded['messages'];
+      if (messages is! List) return const [];
+      final restored = <Map<String, String>>[];
+      for (final message in messages) {
+        if (message is! Map) continue;
+        final sender = message['sender'];
+        final text = message['text'];
+        if ((sender == 'user' || sender == 'assistant') && text is String) {
+          restored.add(<String, String>{
+            'sender': sender == 'assistant' ? 'sparky' : 'user',
+            'text': text,
+          });
+        }
+      }
+      return restored;
+    } catch (_) {
+      return const [];
+    }
+  }
+
+  /// Streams a chat response as Server-Sent Events, yielding text deltas in
+  /// arrival order. The caller appends deltas to build the reply. Throws
+  /// [AIServiceException] for any server-reported failure, including errors
+  /// delivered mid-stream as SSE error events. [mode] must be one of
+  /// [chatModes] (server-validated); null means free_chat.
+  Stream<String> streamChatResponse(
+    List<Map<String, String>> history,
+    String targetLanguage, {
+    String? mode,
+  }) async* {
+    final language = targetLanguage.trim();
+    if (language.isEmpty) {
+      throw const AIServiceException(
+        'Choose a language before starting practice.',
+      );
+    }
+    if (mode != null && !chatModes.contains(mode)) {
+      throw const AIServiceException(
+        'Unsupported conversation mode.',
+      );
+    }
+
+    final messages = <Map<String, String>>[];
+    for (final message in history) {
+      final sender = message['sender'];
+      final role = sender == 'user'
+          ? 'user'
+          : sender == 'sparky'
+          ? 'assistant'
+          : null;
+      final content = (message['text'] ?? '').trim();
+      if (role != null && content.isNotEmpty) {
+        messages.add(<String, String>{
+          'role': role,
+          'content': _truncate(content, _maxMessageCharacters),
+        });
+      }
+    }
+
+    if (messages.isEmpty) {
+      throw const AIServiceException(
+        'Send a practice message before asking Sparky.',
+      );
+    }
+
+    final messageCountLimited = messages.length > _maxClientMessages
+        ? messages.sublist(messages.length - _maxClientMessages)
+        : messages;
+    final recentMessages = _retainNewestWithinCharacterBudget(
+      messageCountLimited,
+      _maxHistoryCharacters,
+    );
+
+    final request = http.Request(
+      'POST',
+      Uri.parse('$_edgeFunctionBaseUrl?action=chat&stream=1'),
+    );
+    request.headers.addAll(_headers(_accessToken()));
+    request.body = jsonEncode(<String, dynamic>{
+      'targetLanguage': language,
+      'messages': recentMessages,
+      if (mode != null) 'mode': mode, // ignore: use_null_aware_elements
+    });
+
+    final client = http.Client();
+    try {
+      final streamedResponse = await client
+          .send(request)
+          .timeout(_requestTimeout);
+
+      if (streamedResponse.statusCode < 200 ||
+          streamedResponse.statusCode >= 300) {
+        final responseBody = await streamedResponse.stream
+            .bytesToString()
+            .timeout(_requestTimeout);
+        throw AIServiceException(
+          _messageForStatus(streamedResponse.statusCode, responseBody),
+        );
+      }
+
+      var buffer = '';
+      await for (final chunk
+          in streamedResponse.stream.transform(utf8.decoder)) {
+        buffer += chunk;
+        var newlineIndex = buffer.indexOf('\n');
+        while (newlineIndex >= 0) {
+          final line = buffer.substring(0, newlineIndex).trim();
+          buffer = buffer.substring(newlineIndex + 1);
+          newlineIndex = buffer.indexOf('\n');
+          if (!line.startsWith('data:')) continue;
+          final data = line.substring(5).trim();
+          if (data == '[DONE]') return;
+          Map<String, dynamic>? decoded;
+          try {
+            final parsed = jsonDecode(data);
+            if (parsed is Map<String, dynamic>) decoded = parsed;
+          } on FormatException {
+            // Malformed or keep-alive lines are skipped, never surfaced.
+            continue;
+          }
+          if (decoded == null) continue;
+          final error = decoded['error'];
+          if (error is Map) {
+            final message = error['message'];
+            throw AIServiceException(
+              message is String && message.trim().isNotEmpty
+                  ? message
+                  : 'AI practice is temporarily unavailable. Please try again.',
+            );
+          }
+          final delta = decoded['delta'];
+          if (delta is String && delta.isNotEmpty) {
+            yield delta;
+          }
+          if (decoded['done'] == true) return;
+        }
+      }
+    } on AIServiceException {
+      rethrow;
+    } on TimeoutException {
+      throw const AIServiceException(
+        'AI practice timed out. Please try again.',
+      );
+    } catch (e, stack) {
+      // Log the real cause for diagnostics. In release web builds runtimeType
+      // is minified and meaningless to the learner, so keep the message
+      // actionable and short.
+      debugPrint('Sparky chat failed: $e\n$stack');
+      throw const AIServiceException(
+        'Sparky could not connect. Please check your internet connection and try again.',
+      );
+    } finally {
+      client.close();
     }
   }
 

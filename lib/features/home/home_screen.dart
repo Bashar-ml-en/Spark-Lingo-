@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:record/record.dart' as rec;
 import 'package:go_router/go_router.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import '../../core/router/router.dart';
 import '../../core/constants/language_catalog.dart';
-import '../../core/services/revenuecat_service.dart';
 import '../../core/services/auth_service.dart';
 import '../../core/services/database_service.dart';
 import '../../core/services/spaced_repetition_service.dart';
@@ -17,10 +14,7 @@ import '../../shared/models/curriculum.dart';
 import '../../core/theme/theme.dart';
 import '../../core/theme/language_theme_registry.dart';
 import '../../shared/models/language_theme.dart';
-import '../../shared/widgets/flag_grid.dart';
 import '../../shared/widgets/language_symbol_badge.dart';
-import '../../shared/widgets/ai_score_disclaimer.dart';
-import '../../shared/widgets/consent_request_dialog.dart';
 import '../../shared/widgets/phase_sidebar.dart';
 import '../../shared/widgets/audio_wave_visualizer.dart';
 import '../exam_prep/exam_readiness_dashboard.dart';
@@ -1340,7 +1334,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               topLeft: Radius.circular(28),
               topRight: Radius.circular(28),
             ),
-            child: _AISpeechPracticeSession(language: langKey, lesson: lesson),
+            child: SparkyChatSession(language: langKey, lesson: lesson),
           ),
         );
       },

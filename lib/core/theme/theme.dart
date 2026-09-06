@@ -84,7 +84,17 @@ class SparkTheme {
     'sans-serif',
   ];
 
+  /// Dark theme — dark-mode equivalent of the ui-ux-pro-max indigo
+  /// palette (same hue family, contrast-checked for dark surfaces):
+  /// light indigo #A5B4FC on #0F1024 ≈ 8.6:1; body #CBD5E1 ≈ 12:1.
   static ThemeData get darkTheme {
+    const Color nightCanvas = Color(0xFF0F1024);
+    const Color nightSurface = Color(0xFF1B1D3A);
+    const Color primaryIndigo = Color(0xFFA5B4FC);
+    const Color accentGreen = Color(0xFF4ADE80);
+    const Color bodyInk = Color(0xFFCBD5E1);
+    const Color mutedInk = Color(0xFF94A3B8);
+    const Color borderIndigo = Color(0xFF373A63);
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
@@ -118,14 +128,14 @@ class SparkTheme {
         backgroundColor: surfaceCanvas,
         elevation: 0,
         centerTitle: true,
+        iconTheme: IconThemeData(color: primaryIndigo),
         titleTextStyle: TextStyle(
-          color: textPrimary,
+          color: bodyInk,
           fontSize: 20,
           fontWeight: FontWeight.bold,
           fontFamily: 'Plus Jakarta Sans',
           fontFamilyFallback: fontFallbacks,
         ),
-        iconTheme: IconThemeData(color: electricCyan),
       ),
 
       cardTheme: CardThemeData(
@@ -217,6 +227,10 @@ class SparkTheme {
     );
   }
 
+  /// Light theme — SparkLingo design system (ui-ux-pro-max generated,
+  /// 2026-08): learning-indigo primary, progress-green success accent,
+  /// soft indigo-tinted canvas, Nunito display + DM Sans body.
+  /// Contrast checked: #4F46E5 on #EEF2FF ≈ 5.3:1, #312E81 body ≈ 10.5:1.
   static ThemeData get lightTheme {
     const Color lightScaffold = Color(0xFFF8FAFC);
     const Color lightSurface = Color(0xFFFFFFFF);
@@ -227,9 +241,9 @@ class SparkTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
-      primaryColor: accessibleCyan,
-      scaffoldBackgroundColor: lightScaffold,
-      cardColor: lightSurface,
+      primaryColor: learningIndigo,
+      scaffoldBackgroundColor: canvas,
+      cardColor: cardSurface,
 
       colorScheme: const ColorScheme.light(
         primary: accessibleCyan,
@@ -239,16 +253,18 @@ class SparkTheme {
         error: errorRed,
         onPrimary: Colors.white,
         onSecondary: Colors.white,
-        onSurface: darkText,
+        onSurface: ink,
+        onSurfaceVariant: mutedInk,
+        outline: borderIndigo,
       ),
 
       appBarTheme: const AppBarTheme(
         backgroundColor: lightSurface,
         elevation: 0,
         centerTitle: true,
-        iconTheme: IconThemeData(color: accessibleCyan),
+        iconTheme: IconThemeData(color: learningIndigo),
         titleTextStyle: TextStyle(
-          color: darkText,
+          color: ink,
           fontSize: 20,
           fontWeight: FontWeight.bold,
           fontFamily: 'Plus Jakarta Sans',
@@ -257,7 +273,7 @@ class SparkTheme {
       ),
 
       cardTheme: CardThemeData(
-        color: lightSurface,
+        color: cardSurface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
           side: const BorderSide(color: lightBorder, width: 1),
@@ -267,7 +283,7 @@ class SparkTheme {
 
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: accessibleCyan,
+          backgroundColor: learningIndigo,
           foregroundColor: Colors.white,
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),

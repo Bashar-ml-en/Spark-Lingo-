@@ -1,8 +1,6 @@
-import 'dart:convert';
 import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:spark_lingo/shared/models/language_theme.dart';
 import 'package:spark_lingo/core/theme/language_theme_registry.dart';
@@ -21,47 +19,9 @@ double _contrastRatio(Color first, Color second) {
 
 void main() {
   setUpAll(() {
-    // Disable HTTP runtime fetching of google_fonts during tests
+    // Fonts (Nunito, DM Sans) are bundled in assets/google_fonts/, so tests
+    // run hermetically with runtime fetching disabled and no mocking needed.
     GoogleFonts.config.allowRuntimeFetching = false;
-
-    // Set up mock asset channel to bypass Google Fonts loading exceptions
-    final manifestMap = {
-      'google_fonts/Lexend-Bold.ttf': ['google_fonts/Lexend-Bold.ttf'],
-      'google_fonts/Inter-Regular.ttf': ['google_fonts/Inter-Regular.ttf'],
-      'google_fonts/Inter-Bold.ttf': ['google_fonts/Inter-Bold.ttf'],
-    };
-
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMessageHandler('flutter/assets', (ByteData? message) async {
-          if (message == null) return null;
-          final String key = utf8.decode(
-            message.buffer.asUint8List(
-              message.offsetInBytes,
-              message.lengthInBytes,
-            ),
-          );
-
-          // Handle binary manifest (used by newer Flutter versions) encoded with StandardMessageCodec
-          if (key.endsWith('.bin') ||
-              key.contains('manifest.bin') ||
-              key.contains('Manifest.bin')) {
-            return const StandardMessageCodec().encodeMessage(manifestMap);
-          }
-
-          // Handle text JSON manifest (used as fallback or older versions)
-          if (key == 'AssetManifest.json' || key == 'AssetManifest.bin.json') {
-            final Uint8List encoded = utf8.encoder.convert(
-              json.encode(manifestMap),
-            );
-            return ByteData.view(encoded.buffer);
-          }
-
-          // If it's a font, return 0 bytes to simulate successful local loading of empty font data
-          if (key.endsWith('.ttf') || key.endsWith('.otf')) {
-            return ByteData(0);
-          }
-          return null;
-        });
 
     // Load tokens synchronously from the assets file for the test environment
     final file = File('assets/language_design_tokens.json');
