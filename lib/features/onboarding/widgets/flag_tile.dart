@@ -2,9 +2,6 @@
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../../core/theme/theme.dart';
 
-import '../../../core/design/getwidget_theme.dart';
-import '../../../core/design/motion_tokens.dart';
-import '../../../core/services/voice_controller.dart';
 
 class FlagTile extends StatefulWidget {
   final String nativeName;
@@ -14,12 +11,10 @@ class FlagTile extends StatefulWidget {
   final VoidCallback onTap;
 
   /// Native greeting displayed on the card and spoken on demand.
-  final String greeting;
-
-  /// Language key used for TTS of the greeting.
-  final String languageKey;
-
-  /// Shows a "Popular" GFBadge on the card (Malay-first highlights).
+  final String? greeting;
+/// Language key used for TTS of the greeting.
+  final String? languageKey;
+/// Shows a "Popular" GFBadge on the card (Malay-first highlights).
   final bool popular;
 
   const FlagTile({
@@ -29,9 +24,9 @@ class FlagTile extends StatefulWidget {
     required this.flagAsset,
     this.isSelected = false,
     required this.onTap,
-    required this.greeting,
-    required this.languageKey,
-    this.popular = false,
+    this.greeting,
+this.languageKey,
+this.popular = false,
   });
 
   @override
@@ -44,8 +39,7 @@ class _FlagTileState extends State<FlagTile>
   late Animation<double> _scaleAnimation;
 
   /// Shared voice controller (one utterance at a time across the grid).
-  static final VoiceController _voice = VoiceController();
-
+  
   @override
   void initState() {
     super.initState();

@@ -446,15 +446,13 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen>
 }
 
 /// One row of the welcome value-proposition card: icon + title + detail.
-class _ValueRow extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String detail;
+class _StatChip extends StatelessWidget {
+  final String value;
+  final String label;
 
-  const _ValueRow({
-    required this.icon,
-    required this.title,
-    required this.detail,
+  const _StatChip({
+    required this.value,
+    required this.label,
   });
 
   @override
@@ -487,8 +485,8 @@ class _ValueRow extends StatelessWidget {
               fontWeight: FontWeight.w600,
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

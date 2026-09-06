@@ -6,7 +6,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'core/theme/theme.dart';
-import 'core/theme/theme_mode_provider.dart';
 import 'core/theme/language_theme_registry.dart';
 import 'shared/models/language_theme.dart';
 import 'core/services/database_service.dart';

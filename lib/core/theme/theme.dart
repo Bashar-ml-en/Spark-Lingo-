@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+export 'theme_mode_provider.dart';
 
 typedef SparkLingoTheme = SparkTheme;
-
-/// Riverpod provider for active application ThemeMode (Dark, Light, System)
-final themeModeProvider = StateProvider<ThemeMode>((ref) => ThemeMode.dark);
 
 class SparkTheme {
   // Brand Color Tokens (Stitch World-Class System - Dark Mode)
@@ -88,13 +86,6 @@ class SparkTheme {
   /// palette (same hue family, contrast-checked for dark surfaces):
   /// light indigo #A5B4FC on #0F1024 ≈ 8.6:1; body #CBD5E1 ≈ 12:1.
   static ThemeData get darkTheme {
-    const Color nightCanvas = Color(0xFF0F1024);
-    const Color nightSurface = Color(0xFF1B1D3A);
-    const Color primaryIndigo = Color(0xFFA5B4FC);
-    const Color accentGreen = Color(0xFF4ADE80);
-    const Color bodyInk = Color(0xFFCBD5E1);
-    const Color mutedInk = Color(0xFF94A3B8);
-    const Color borderIndigo = Color(0xFF373A63);
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
@@ -128,9 +119,9 @@ class SparkTheme {
         backgroundColor: surfaceCanvas,
         elevation: 0,
         centerTitle: true,
-        iconTheme: IconThemeData(color: primaryIndigo),
+        iconTheme: IconThemeData(color: electricCyan),
         titleTextStyle: TextStyle(
-          color: bodyInk,
+          color: textPrimary,
           fontSize: 20,
           fontWeight: FontWeight.bold,
           fontFamily: 'Plus Jakarta Sans',
@@ -232,39 +223,33 @@ class SparkTheme {
   /// soft indigo-tinted canvas, Nunito display + DM Sans body.
   /// Contrast checked: #4F46E5 on #EEF2FF ≈ 5.3:1, #312E81 body ≈ 10.5:1.
   static ThemeData get lightTheme {
-    const Color lightScaffold = Color(0xFFF8FAFC);
-    const Color lightSurface = Color(0xFFFFFFFF);
-    const Color lightBorder = Color(0xFFE2E8F0);
-    const Color darkText = Color(0xFF0F172A);
-    const Color greyText = Color(0xFF64748B);
-
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
-      primaryColor: learningIndigo,
-      scaffoldBackgroundColor: canvas,
-      cardColor: cardSurface,
+      primaryColor: accessibleCyan,
+      scaffoldBackgroundColor: lightCanvas,
+      cardColor: lightContainer,
 
       colorScheme: const ColorScheme.light(
         primary: accessibleCyan,
         secondary: solarGoldContainer,
-        surface: lightSurface,
+        surface: lightContainer,
         surfaceContainerHighest: Color(0xFFF1F5F9),
         error: errorRed,
         onPrimary: Colors.white,
         onSecondary: Colors.white,
-        onSurface: ink,
-        onSurfaceVariant: mutedInk,
-        outline: borderIndigo,
+        onSurface: lightTextPrimary,
+        onSurfaceVariant: lightTextSecondary,
+        outline: lightBorder,
       ),
 
       appBarTheme: const AppBarTheme(
-        backgroundColor: lightSurface,
+        backgroundColor: lightContainer,
         elevation: 0,
         centerTitle: true,
-        iconTheme: IconThemeData(color: learningIndigo),
+        iconTheme: IconThemeData(color: accessibleCyan),
         titleTextStyle: TextStyle(
-          color: ink,
+          color: lightTextPrimary,
           fontSize: 20,
           fontWeight: FontWeight.bold,
           fontFamily: 'Plus Jakarta Sans',
@@ -273,7 +258,7 @@ class SparkTheme {
       ),
 
       cardTheme: CardThemeData(
-        color: cardSurface,
+        color: lightContainer,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
           side: const BorderSide(color: lightBorder, width: 1),
@@ -283,7 +268,7 @@ class SparkTheme {
 
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: learningIndigo,
+          backgroundColor: accessibleCyan,
           foregroundColor: Colors.white,
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
@@ -313,7 +298,7 @@ class SparkTheme {
       ),
 
       bottomSheetTheme: const BottomSheetThemeData(
-        backgroundColor: lightSurface,
+        backgroundColor: lightContainer,
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
@@ -324,28 +309,28 @@ class SparkTheme {
         displayLarge: TextStyle(
           fontSize: 32,
           fontWeight: FontWeight.w800,
-          color: darkText,
+          color: lightTextPrimary,
           fontFamily: 'Plus Jakarta Sans',
           fontFamilyFallback: fontFallbacks,
         ),
         titleLarge: TextStyle(
           fontSize: 20,
           fontWeight: FontWeight.bold,
-          color: darkText,
+          color: lightTextPrimary,
           fontFamily: 'Plus Jakarta Sans',
           fontFamilyFallback: fontFallbacks,
         ),
         bodyLarge: TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.normal,
-          color: darkText,
+          color: lightTextPrimary,
           fontFamily: 'Inter',
           fontFamilyFallback: fontFallbacks,
         ),
         bodyMedium: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.normal,
-          color: greyText,
+          color: lightTextSecondary,
           fontFamily: 'Inter',
           fontFamilyFallback: fontFallbacks,
         ),

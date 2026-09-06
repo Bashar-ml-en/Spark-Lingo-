@@ -69,8 +69,7 @@ class _FlagGridState extends State<FlagGrid> {
     String langCode,
     LanguageTheme theme,
   ) {
-    final baseTheme = Theme.of(context);
-    if (theme.flags.length > 1) {
+        if (theme.flags.length > 1) {
       showModalBottomSheet(
         context: context,
         backgroundColor: SparkLingoTheme.surfaceContainer,

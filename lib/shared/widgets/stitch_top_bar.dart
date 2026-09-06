@@ -262,8 +262,7 @@ class StitchTopBar extends ConsumerWidget {
                         ? 'Switch to Light Mode'
                         : 'Switch to Dark Mode',
                     onPressed: () {
-                      ref.read(themeModeProvider.notifier).state =
-                          themeMode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
+                      ref.read(themeModeProvider.notifier).setMode(themeMode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark);
                     },
                   ),
                   const SizedBox(width: 4),

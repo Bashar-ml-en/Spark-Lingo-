@@ -10,7 +10,6 @@ import '../../core/services/database_service.dart';
 import '../../core/services/tts_service.dart';
 import '../../core/theme/theme.dart';
 import '../../core/theme/language_theme_registry.dart';
-import '../../core/theme/theme_mode_provider.dart';
 import '../../shared/widgets/analytics_consent_tile.dart';
 
 /// World-class Settings and Preferences screen aligned with Stitch specifications.
@@ -414,7 +413,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         icon: Icons.dark_mode_rounded,
                         label: 'Dark Mode',
                         isSelected: currentThemeMode == ThemeMode.dark,
-                        onSelect: () => ref.read(themeModeProvider.notifier).state = ThemeMode.dark,
+                        onSelect: () => ref.read(themeModeProvider.notifier).setMode(ThemeMode.dark),
                       ),
                       const SizedBox(width: 8),
                       _buildThemeOption(
@@ -423,7 +422,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         icon: Icons.wb_sunny_rounded,
                         label: 'Light Mode',
                         isSelected: currentThemeMode == ThemeMode.light,
-                        onSelect: () => ref.read(themeModeProvider.notifier).state = ThemeMode.light,
+                        onSelect: () => ref.read(themeModeProvider.notifier).setMode(ThemeMode.light),
                       ),
                       const SizedBox(width: 8),
                       _buildThemeOption(
@@ -432,7 +431,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         icon: Icons.settings_brightness_rounded,
                         label: 'System',
                         isSelected: currentThemeMode == ThemeMode.system,
-                        onSelect: () => ref.read(themeModeProvider.notifier).state = ThemeMode.system,
+                        onSelect: () => ref.read(themeModeProvider.notifier).setMode(ThemeMode.system),
                       ),
                     ],
                   ),
@@ -882,68 +881,6 @@ class _SettingsSectionLabel extends StatelessWidget {
           letterSpacing: 1.2,
         ),
       ),
-    );
-  }
-}
-
-/// Brightness picker: Light / Dark / System, persisted via SharedPreferences.
-class _ThemeModeTile extends ConsumerWidget {
-  const _ThemeModeTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final mode = ref.watch(themeModeProvider);
-    final label = switch (mode) {
-      ThemeMode.light => 'Light',
-      ThemeMode.dark => 'Dark',
-      ThemeMode.system => 'System',
-    };
-    return ListTile(
-      leading: const Icon(Icons.brightness_6_outlined),
-      title: const Text('Theme'),
-      subtitle: Text(label),
-      trailing: const Icon(Icons.chevron_right),
-      onTap: () => _pickThemeMode(context, ref, mode),
-    );
-  }
-
-  void _pickThemeMode(
-    BuildContext context,
-    WidgetRef ref,
-    ThemeMode current,
-  ) {
-    showModalBottomSheet<void>(
-      context: context,
-      builder: (sheetContext) {
-        return SafeArea(
-          child: RadioGroup<ThemeMode>(
-            groupValue: current,
-            onChanged: (value) {
-              if (value != null) {
-                ref.read(themeModeProvider.notifier).setMode(value);
-              }
-              Navigator.of(sheetContext).pop();
-            },
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: const [
-                RadioListTile<ThemeMode>(
-                  value: ThemeMode.light,
-                  title: Text('Light'),
-                ),
-                RadioListTile<ThemeMode>(
-                  value: ThemeMode.dark,
-                  title: Text('Dark'),
-                ),
-                RadioListTile<ThemeMode>(
-                  value: ThemeMode.system,
-                  title: Text('System'),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
     );
   }
 }

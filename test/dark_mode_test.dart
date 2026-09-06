@@ -4,7 +4,6 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:spark_lingo/core/theme/theme_mode_provider.dart';
 import 'package:spark_lingo/core/theme/theme.dart';
 import 'package:spark_lingo/shared/models/language_theme.dart';
 import 'package:spark_lingo/core/theme/language_theme_registry.dart';

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:record/record.dart' as rec;
 import '../../core/constants/language_catalog.dart';
 import '../../core/services/auth_service.dart';
 import '../../core/services/database_service.dart';
@@ -14,7 +15,6 @@ import '../../shared/models/curriculum.dart';
 import '../../core/theme/theme.dart';
 import '../../core/theme/language_theme_registry.dart';
 import '../../shared/models/language_theme.dart';
-import '../../shared/widgets/language_symbol_badge.dart';
 import '../../shared/widgets/flag_grid.dart';
 import '../../shared/widgets/ai_score_disclaimer.dart';
 import '../../shared/widgets/consent_request_dialog.dart';
@@ -22,6 +22,8 @@ import '../../shared/widgets/phase_sidebar.dart';
 import '../../shared/widgets/audio_wave_visualizer.dart';
 import '../../shared/widgets/stitch_top_bar.dart';
 import '../exam_prep/exam_readiness_dashboard.dart';
+import '../../core/router/router.dart';
+import '../../core/services/revenuecat_service.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -1227,7 +1229,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               topLeft: Radius.circular(28),
               topRight: Radius.circular(28),
             ),
-            child: SparkyChatSession(language: langKey, lesson: lesson),
+            child: _AISpeechPracticeSession(language: langKey, lesson: lesson),
           ),
         );
       },
@@ -2213,14 +2215,7 @@ class _AISpeechPracticeSessionState extends ConsumerState<_AISpeechPracticeSessi
   }
 
   void _addSparkyGreeting() {
-    if (widget.lesson != null && widget.lesson!.sparkyPromptTemplate != null) {
-      _messages.add({
-        "sender": "sparky",
-        "text":
-            "Task: ${widget.lesson!.sparkyPromptTemplate!}\n\nHello! I am Sparky. Whenever you are ready, please complete this task. Speak or type your answer!",
-      });
-      return;
-    }
+    
     String greeting;
     switch (LanguageCatalog.canonicalCode(widget.language)) {
       case 'es':

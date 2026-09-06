@@ -91,11 +91,12 @@ class LanguageThemeRegistry {
   /// Build a ThemeData extending SparkTheme for a given LanguageTheme.
   static ThemeData buildTheme(
     LanguageTheme langTheme, {
-    Brightness brightness = Brightness.dark,
+    Brightness brightness = Brightness.light,
   }) {
-    final baseTheme = brightness == Brightness.dark
-        ? SparkTheme.darkTheme
-        : SparkTheme.lightTheme;
+    if (brightness == Brightness.dark) {
+      return _buildDark(langTheme);
+    }
+    final baseTheme = SparkTheme.lightTheme;
     final primary = brightness == Brightness.dark
         ? langTheme.primaryColor
         : _accessibleOnLightSurface(langTheme.primaryColor);
@@ -219,8 +220,7 @@ class LanguageThemeRegistry {
   static Color _accessibleOnDarkSurface(Color color) {
     var candidate = color;
     var guard = 0;
-    while (_contrastRatio(candidate, SparkTheme.obsidianBlack) < 4.5 &&
-        guard < 10) {
+    while (_contrastRatio(candidate, SparkTheme.obsidianBlack) < 4.5 && guard < 25) {
       candidate = Color.lerp(candidate, Colors.white, 0.15)!;
       guard++;
     }
