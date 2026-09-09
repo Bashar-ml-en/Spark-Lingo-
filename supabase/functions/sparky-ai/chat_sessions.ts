@@ -150,7 +150,7 @@ export async function recentChatMessages(
     return rows
       .reverse()
       .filter(
-        (row): row is { sender: "user" | "assistant"; content: string } =>
+        (row): row is { sender: "user" | "assistant"; content: string; created_at: string } =>
           typeof row.content === "string" && row.content.trim().length > 0 &&
           (row.sender === "user" || row.sender === "assistant"),
       )

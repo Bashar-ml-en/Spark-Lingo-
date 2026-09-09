@@ -1321,7 +1321,11 @@ serve(async (req) => {
           // stream closes, not when the handler returns: finalize on a
           // completed stream, release only when the provider boundary was
           // never marked.
-          await reserveQuota(quotaClient, authenticated.userId, action, requestId);
+          // Narrowed copy: getAction() throws for anything else, so inside
+          // this branch the action is always defined; the closures below
+          // need a non-optional Action for the quota helpers.
+          const streamAction: Action = action ?? "chat";
+          await reserveQuota(quotaClient, authenticated.userId, streamAction, requestId);
           let submissionState: ProviderSubmissionState = "not_started";
           const markProviderSubmission = async (): Promise<void> => {
             if (submissionState === "submitted") return;
@@ -1329,14 +1333,14 @@ serve(async (req) => {
               throw new HttpError(503, "quota_unavailable", "AI practice is temporarily unavailable.");
             }
             submissionState = "marking";
-            await markQuotaProviderSubmission(quotaClient, authenticated.userId, action, requestId);
+            await markQuotaProviderSubmission(quotaClient, authenticated.userId, streamAction, requestId);
             submissionState = "submitted";
           };
           const onStreamSettled = async (): Promise<void> => {
             if (submissionState === "submitted") {
-              await finalizeQuota(quotaClient, authenticated.userId, action, requestId);
+              await finalizeQuota(quotaClient, authenticated.userId, streamAction, requestId);
             } else {
-              await releasePreSendQuota(quotaClient, authenticated.userId, action, requestId);
+              await releasePreSendQuota(quotaClient, authenticated.userId, streamAction, requestId);
             }
           };
           const streamUserTurn = [...history].reverse()
