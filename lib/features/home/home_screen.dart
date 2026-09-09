@@ -22,6 +22,7 @@ import '../../shared/widgets/phase_sidebar.dart';
 import '../../shared/widgets/audio_wave_visualizer.dart';
 import '../../shared/widgets/stitch_top_bar.dart';
 import '../exam_prep/exam_readiness_dashboard.dart';
+import 'session_report_screen.dart';
 import '../../core/router/router.dart';
 import '../../core/services/revenuecat_service.dart';
 
@@ -2825,6 +2826,19 @@ class _AISpeechPracticeSessionState extends ConsumerState<_AISpeechPracticeSessi
           ],
         ),
         actions: [
+          IconButton(
+            tooltip: 'Session report',
+            icon: Icon(Icons.insights_outlined, color: SparkTheme.text(context)),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      SessionReportScreen(languageCode: widget.language),
+                ),
+              );
+            },
+          ),
           if (widget.lesson != null && widget.lesson!.rubricRef != null)
             Padding(
               padding: const EdgeInsets.only(right: 8.0),
