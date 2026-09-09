@@ -17,6 +17,10 @@ import {
   persistErrorPatterns,
   topErrorPatterns,
 } from "./error_patterns.ts";
+import {
+  persistCorrectionItem,
+  recentCorrectionItems,
+} from "./correction_items.ts";
 
 const JSON_CONTENT_TYPE = "application/json; charset=utf-8";
 const MAX_JSON_BODY_BYTES = 64 * 1024;
@@ -27,7 +31,7 @@ const MAX_MESSAGE_CHARACTERS = 2_000;
 const MAX_HISTORY_CHARACTERS = 16_000;
 const MAX_SCORE_RESPONSE_CHARACTERS = 6_000;
 
-type Action = "chat" | "score" | "transcribe" | "history";
+type Action = "chat" | "score" | "transcribe" | "history" | "report";
 type ChatRole = "user" | "assistant";
 type ChatMessage = { role: ChatRole; content: string };
 type OpenAIMessage = { role: "system" | ChatRole; content: string };
@@ -327,7 +331,8 @@ function getAction(req: Request): Action {
   const value = new URL(req.url).searchParams.get("action");
   if (
     value === "chat" || value === "score" ||
-    value === "transcribe" || value === "history"
+    value === "transcribe" || value === "history" ||
+    value === "report"
   ) {
     return value;
   }
@@ -1194,25 +1199,57 @@ serve(async (req) => {
     }
     const client = authenticated.client;
 
-    if (action === "history") {
-      // Pure owner-read of persisted chat turns: no provider, quota, or
-      // consent gate (no new processing occurs). RLS plus the service-role
-      // read bound to the authenticated user id enforce isolation. The body
-      // is still bounded against oversized uploads.
+    if (action === "history" || action === "report") {
+      // Pure owner-read of persisted data: no provider, quota, or consent
+      // gate (no new processing occurs). RLS plus the service-role read
+      // bound to the authenticated user id enforce isolation. The body is
+      // still bounded against oversized uploads.
       const bounded = await boundedRequest(req, MAX_JSON_BODY_BYTES);
       const body = await parseJsonBody(bounded);
       const language = targetLanguage(body);
       const quotaClient = createServerQuotaClient();
-      const messages = await recentChatMessages(
-        quotaClient,
-        authenticated.userId,
-        language,
-        40,
-      );
-      const historyPayload: JsonRecord = {
-        messages: messages.map((message) => ({
-          sender: message.sender,
-          text: message.content,
+      if (action === "history") {
+        const messages = await recentChatMessages(
+          quotaClient,
+          authenticated.userId,
+          language,
+          40,
+        );
+        const historyPayload: JsonRecord = {
+          messages: messages.map((message) => ({
+            sender: message.sender,
+            text: message.content,
+          })),
+        };
+        emitOperationalEvent({
+          event: "ai_request_completed",
+          request_id: requestId,
+          action,
+          outcome: "success",
+          status: 200,
+          latency_ms: Date.now() - startedAt,
+        });
+        return jsonResponse(historyPayload, 200, corsHeaders(req));
+      }
+      // Session error report: recurring classes + recent AI corrections,
+      // both allow-listed server-side. The client offers "Add to review"
+      // which converts items into on-device SM-2 cards.
+      const [focusPatterns, corrections] = await Promise.all([
+        topErrorPatterns(quotaClient, authenticated.userId, language, requestId, emitOperationalEvent),
+        recentCorrectionItems(quotaClient, authenticated.userId, language, requestId, emitOperationalEvent),
+      ]);
+      const reportPayload: JsonRecord = {
+        language: language,
+        focus_areas: focusPatterns.map((pattern) => ({
+          error_class: pattern.error_class,
+          occurrences: pattern.occurrences,
+        })),
+        corrections: corrections.map((item) => ({
+          error_class: item.error_class,
+          criterion_name: item.criterion_name,
+          corrected_form: item.corrected_form,
+          occurrences: item.occurrences,
+          last_seen_at: item.last_seen_at,
         })),
       };
       emitOperationalEvent({
@@ -1223,7 +1260,7 @@ serve(async (req) => {
         status: 200,
         latency_ms: Date.now() - startedAt,
       });
-      return jsonResponse(historyPayload, 200, corsHeaders(req));
+      return jsonResponse(reportPayload, 200, corsHeaders(req));
     }
 
     await assertAiRuntimeEnabled(client, action, requestId);
@@ -1479,6 +1516,16 @@ serve(async (req) => {
           authenticated.userId,
           targetLanguage(body),
           requiredText(body.rubricRef, "rubricRef", 120),
+          scored,
+          requestId,
+          emitOperationalEvent,
+        );
+        // Session report loop: persist the short top correction for the
+        // `report` action. Degrades silently; never mutates the payload.
+        await persistCorrectionItem(
+          quotaClient,
+          authenticated.userId,
+          targetLanguage(body),
           scored,
           requestId,
           emitOperationalEvent,

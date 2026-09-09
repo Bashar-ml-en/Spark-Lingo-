@@ -208,6 +208,32 @@ class AIService {
     }
   }
 
+  /// Fetches the post-session error report: recurring focus areas plus the
+  /// server's recent short AI corrections. Mirrors the [loadChatHistory]
+  /// contract — degrades to an empty report on any failure so the UI can
+  /// hide the entry point rather than crash.
+  Future<SessionReport> fetchSessionReport(String targetLanguage) async {
+    try {
+      final response = await http
+          .post(
+            Uri.parse('$_edgeFunctionBaseUrl?action=report'),
+            headers: _headers(_accessToken()),
+            body: jsonEncode(<String, dynamic>{
+              'targetLanguage': targetLanguage.trim(),
+            }),
+          )
+          .timeout(_requestTimeout);
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        return const SessionReport();
+      }
+      final decoded = jsonDecode(response.body);
+      if (decoded is! Map<String, dynamic>) return const SessionReport();
+      return SessionReport.fromMap(decoded);
+    } catch (_) {
+      return const SessionReport();
+    }
+  }
+
   /// Streams a chat response as Server-Sent Events, yielding text deltas in
   /// arrival order. The caller appends deltas to build the reply. Throws
   /// [AIServiceException] for any server-reported failure, including errors
@@ -536,4 +562,90 @@ class AIServiceException implements Exception {
 
   @override
   String toString() => message;
+}
+
+/// One allow-listed error class with its occurrence count, from the
+/// server-side learner_error_patterns ledger.
+class FocusArea {
+  const FocusArea({required this.errorClass, required this.occurrences});
+
+  final String errorClass;
+  final int occurrences;
+
+  bool get isEmpty => errorClass.isEmpty;
+
+  static FocusArea? fromMap(dynamic value) {
+    if (value is! Map) return null;
+    final errorClass = value['error_class'];
+    final occurrences = value['occurrences'];
+    if (errorClass is! String || errorClass.isEmpty) return null;
+    return FocusArea(
+      errorClass: errorClass,
+      occurrences: occurrences is int ? occurrences : 1,
+    );
+  }
+}
+
+/// One short AI-generated correction the learner can convert into a
+/// review card. Server-truncated (<=200 chars); never learner input.
+class CorrectionItem {
+  const CorrectionItem({
+    required this.errorClass,
+    required this.criterionName,
+    required this.correctedForm,
+    required this.occurrences,
+  });
+
+  final String errorClass;
+  final String criterionName;
+  final String correctedForm;
+  final int occurrences;
+
+  static CorrectionItem? fromMap(dynamic value) {
+    if (value is! Map) return null;
+    final errorClass = value['error_class'];
+    final correctedForm = value['corrected_form'];
+    if (errorClass is! String || errorClass.isEmpty) return null;
+    if (correctedForm is! String || correctedForm.trim().isEmpty) return null;
+    final occurrences = value['occurrences'];
+    return CorrectionItem(
+      errorClass: errorClass,
+      criterionName: value['criterion_name'] is String
+          ? value['criterion_name'] as String
+          : '',
+      correctedForm: correctedForm.trim(),
+      occurrences: occurrences is int ? occurrences : 1,
+    );
+  }
+}
+
+/// Post-session error report (sparky-ai `report` action). An empty report
+/// means "no data yet or request failed" — the UI hides the section.
+class SessionReport {
+  const SessionReport({this.focusAreas = const [], this.corrections = const []});
+
+  final List<FocusArea> focusAreas;
+  final List<CorrectionItem> corrections;
+
+  bool get isEmpty => focusAreas.isEmpty && corrections.isEmpty;
+
+  factory SessionReport.fromMap(Map<String, dynamic> map) {
+    final focusRaw = map['focus_areas'];
+    final correctionsRaw = map['corrections'];
+    final focusAreas = <FocusArea>[];
+    final corrections = <CorrectionItem>[];
+    if (focusRaw is List) {
+      for (final item in focusRaw) {
+        final parsed = FocusArea.fromMap(item);
+        if (parsed != null) focusAreas.add(parsed);
+      }
+    }
+    if (correctionsRaw is List) {
+      for (final item in correctionsRaw) {
+        final parsed = CorrectionItem.fromMap(item);
+        if (parsed != null) corrections.add(parsed);
+      }
+    }
+    return SessionReport(focusAreas: focusAreas, corrections: corrections);
+  }
 }

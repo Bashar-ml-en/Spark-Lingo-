@@ -12,6 +12,7 @@ import '../../core/services/voice_controller.dart';
 import '../../shared/models/curriculum.dart';
 import '../../shared/widgets/consent_request_dialog.dart';
 import 'sparky_scorecard.dart';
+import 'session_report_screen.dart';
 
 class _ChatModeMeta {
   final String label;
@@ -627,6 +628,22 @@ class _SparkyChatSessionState
           ],
         ),
         actions: [
+          IconButton(
+            tooltip: 'Session report',
+            icon: Icon(
+              Icons.insights_outlined,
+              color: theme.colorScheme.onSecondary,
+            ),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      SessionReportScreen(languageCode: widget.language),
+                ),
+              );
+            },
+          ),
           if (widget.lesson != null && widget.lesson!.rubricRef != null)
             Padding(
               padding: const EdgeInsetsDirectional.only(end: 8.0),
