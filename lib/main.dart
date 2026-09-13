@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+import 'l10n/app_localizations.dart';
 import 'core/theme/theme.dart';
 import 'core/theme/language_theme_registry.dart';
 import 'shared/models/language_theme.dart';
@@ -148,10 +149,16 @@ class SparkLingoApp extends ConsumerWidget {
     }
 
     final lightThemeData = activeTheme != null
-        ? LanguageThemeRegistry.buildTheme(activeTheme, brightness: Brightness.light)
+        ? LanguageThemeRegistry.buildTheme(
+            activeTheme,
+            brightness: Brightness.light,
+          )
         : SparkTheme.lightTheme;
     final darkThemeData = activeTheme != null
-        ? LanguageThemeRegistry.buildTheme(activeTheme, brightness: Brightness.dark)
+        ? LanguageThemeRegistry.buildTheme(
+            activeTheme,
+            brightness: Brightness.dark,
+          )
         : SparkTheme.darkTheme;
 
     final textDirection =
@@ -168,6 +175,8 @@ class SparkLingoApp extends ConsumerWidget {
       themeMode: themeMode,
       theme: lightThemeData,
       darkTheme: darkThemeData,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
 
       // Inject GoRouter pathways reactively
       routerConfig: ref.watch(routerProvider),
@@ -175,8 +184,12 @@ class SparkLingoApp extends ConsumerWidget {
       // Responsive App Wrapper
       builder: (context, child) {
         final isDark = Theme.of(context).brightness == Brightness.dark;
-        final canvasBg = isDark ? SparkTheme.surfaceCanvas : const Color(0xFFF8FAFC);
-        final outerBg = isDark ? const Color(0xFF020912) : const Color(0xFFE2E8F0);
+        final canvasBg = isDark
+            ? SparkTheme.surfaceCanvas
+            : const Color(0xFFF8FAFC);
+        final outerBg = isDark
+            ? const Color(0xFF020912)
+            : const Color(0xFFE2E8F0);
 
         return Scaffold(
           backgroundColor: outerBg,

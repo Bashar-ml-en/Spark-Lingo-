@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../shared/models/user_profile.dart';
 import '../../shared/models/curriculum.dart';
+import 'correction_review_service.dart';
 import '../../shared/models/exam.dart';
 import '../constants/language_catalog.dart';
 import '../constants/supabase_config.dart';
@@ -158,7 +159,11 @@ class DatabaseService {
         body: const {'confirmation': 'DELETE'},
       );
       final data = response.data;
-      return data is Map && data['deleted'] == true;
+      final deleted = data is Map && data['deleted'] == true;
+      if (deleted) {
+        await CorrectionReviewService().clearDeck(session.user.id);
+      }
+      return deleted;
     } catch (_) {
       debugPrint('Account deletion request failed.');
       rethrow;
@@ -169,10 +174,13 @@ class DatabaseService {
   // (migration 015). Completion can only be written server-side.
   Future<void> completeLesson(String lessonId, String languageCode) async {
     try {
-      await _client.rpc('complete_lesson', params: {
-        'p_lesson_id': lessonId,
-        'p_language_code': LanguageCatalog.canonicalCode(languageCode),
-      });
+      await _client.rpc(
+        'complete_lesson',
+        params: {
+          'p_lesson_id': lessonId,
+          'p_language_code': LanguageCatalog.canonicalCode(languageCode),
+        },
+      );
     } catch (_) {
       debugPrint('Lesson-completion record failed.');
       rethrow;

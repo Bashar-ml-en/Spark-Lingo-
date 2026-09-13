@@ -172,7 +172,9 @@ class AIService {
   /// Loads the learner's persisted Sparky conversation for a language,
   /// oldest first. Returns an empty list when nothing is stored or the
   /// request fails — history is an enhancement, never a launch blocker.
-  Future<List<Map<String, String>>> loadChatHistory(String targetLanguage) async {
+  Future<List<Map<String, String>>> loadChatHistory(
+    String targetLanguage,
+  ) async {
     try {
       final response = await http
           .post(
@@ -208,6 +210,42 @@ class AIService {
     }
   }
 
+  /// Fetches the post-session error report: recurring focus areas plus the
+  /// server's recent short AI corrections. A valid empty report means there
+  /// is no saved data; transport, authorization, or malformed-response
+  /// failures remain visible to the caller.
+  Future<SessionReport> fetchSessionReport(String targetLanguage) async {
+    try {
+      final response = await http
+          .post(
+            Uri.parse('$_edgeFunctionBaseUrl?action=report'),
+            headers: _headers(_accessToken()),
+            body: jsonEncode(<String, dynamic>{
+              'targetLanguage': targetLanguage.trim(),
+            }),
+          )
+          .timeout(_requestTimeout);
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        throw const AIServiceException(
+          'Session report is temporarily unavailable.',
+        );
+      }
+      final decoded = jsonDecode(response.body);
+      if (decoded is! Map<String, dynamic>) {
+        throw const AIServiceException(
+          'Session report returned an invalid response.',
+        );
+      }
+      return SessionReport.fromMap(decoded);
+    } on AIServiceException {
+      rethrow;
+    } catch (_) {
+      throw const AIServiceException(
+        'Session report is temporarily unavailable.',
+      );
+    }
+  }
+
   /// Streams a chat response as Server-Sent Events, yielding text deltas in
   /// arrival order. The caller appends deltas to build the reply. Throws
   /// [AIServiceException] for any server-reported failure, including errors
@@ -225,9 +263,7 @@ class AIService {
       );
     }
     if (mode != null && !chatModes.contains(mode)) {
-      throw const AIServiceException(
-        'Unsupported conversation mode.',
-      );
+      throw const AIServiceException('Unsupported conversation mode.');
     }
 
     final messages = <Map<String, String>>[];
@@ -289,8 +325,9 @@ class AIService {
       }
 
       var buffer = '';
-      await for (final chunk
-          in streamedResponse.stream.transform(utf8.decoder)) {
+      await for (final chunk in streamedResponse.stream.transform(
+        utf8.decoder,
+      )) {
         buffer += chunk;
         var newlineIndex = buffer.indexOf('\n');
         while (newlineIndex >= 0) {
@@ -536,4 +573,93 @@ class AIServiceException implements Exception {
 
   @override
   String toString() => message;
+}
+
+/// One allow-listed error class with its occurrence count, from the
+/// server-side learner_error_patterns ledger.
+class FocusArea {
+  const FocusArea({required this.errorClass, required this.occurrences});
+
+  final String errorClass;
+  final int occurrences;
+
+  bool get isEmpty => errorClass.isEmpty;
+
+  static FocusArea? fromMap(dynamic value) {
+    if (value is! Map) return null;
+    final errorClass = value['error_class'];
+    final occurrences = value['occurrences'];
+    if (errorClass is! String || errorClass.isEmpty) return null;
+    return FocusArea(
+      errorClass: errorClass,
+      occurrences: occurrences is int ? occurrences : 1,
+    );
+  }
+}
+
+/// One short AI-generated correction the learner can convert into a
+/// review card. Server-truncated (<=200 chars); never learner input.
+class CorrectionItem {
+  const CorrectionItem({
+    required this.errorClass,
+    required this.criterionName,
+    required this.correctedForm,
+    required this.occurrences,
+  });
+
+  final String errorClass;
+  final String criterionName;
+  final String correctedForm;
+  final int occurrences;
+
+  static CorrectionItem? fromMap(dynamic value) {
+    if (value is! Map) return null;
+    final errorClass = value['error_class'];
+    final correctedForm = value['corrected_form'];
+    if (errorClass is! String || errorClass.isEmpty) return null;
+    if (correctedForm is! String || correctedForm.trim().isEmpty) return null;
+    final occurrences = value['occurrences'];
+    return CorrectionItem(
+      errorClass: errorClass,
+      criterionName: value['criterion_name'] is String
+          ? value['criterion_name'] as String
+          : '',
+      correctedForm: correctedForm.trim(),
+      occurrences: occurrences is int ? occurrences : 1,
+    );
+  }
+}
+
+/// Post-session error report (sparky-ai `report` action). An empty report
+/// means the server returned no saved correction data.
+class SessionReport {
+  const SessionReport({
+    this.focusAreas = const [],
+    this.corrections = const [],
+  });
+
+  final List<FocusArea> focusAreas;
+  final List<CorrectionItem> corrections;
+
+  bool get isEmpty => focusAreas.isEmpty && corrections.isEmpty;
+
+  factory SessionReport.fromMap(Map<String, dynamic> map) {
+    final focusRaw = map['focus_areas'];
+    final correctionsRaw = map['corrections'];
+    final focusAreas = <FocusArea>[];
+    final corrections = <CorrectionItem>[];
+    if (focusRaw is List) {
+      for (final item in focusRaw) {
+        final parsed = FocusArea.fromMap(item);
+        if (parsed != null) focusAreas.add(parsed);
+      }
+    }
+    if (correctionsRaw is List) {
+      for (final item in correctionsRaw) {
+        final parsed = CorrectionItem.fromMap(item);
+        if (parsed != null) corrections.add(parsed);
+      }
+    }
+    return SessionReport(focusAreas: focusAreas, corrections: corrections);
+  }
 }

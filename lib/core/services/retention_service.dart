@@ -143,12 +143,10 @@ class RetentionService {
   /// Learner sets their own daily XP goal (bounded 10..500 server-side).
   Future<void> setDailyGoal(int xp) async {
     try {
-      final user = _client.auth.currentUser;
-      if (user == null) return;
-      await _client.from('user_retention_stats').upsert({
-        'user_id': user.id,
-        'daily_goal_xp': xp.clamp(10, 500),
-      });
+      await _client.rpc(
+        'set_daily_goal',
+        params: {'p_daily_goal_xp': xp.clamp(10, 500)},
+      );
     } catch (e) {
       debugPrint('Daily goal update failed: $e');
     }

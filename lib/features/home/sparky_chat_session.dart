@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:record/record.dart' as rec;
 import '../../core/constants/language_catalog.dart';
 import '../../core/design/tokens.dart';
 import '../../core/services/ai_service.dart';
+import '../../core/services/audio_file_cleanup.dart';
 import '../../core/services/auth_service.dart';
 import '../../core/services/consent_service.dart';
 import '../../core/services/retention_service.dart';
@@ -12,6 +15,7 @@ import '../../core/services/voice_controller.dart';
 import '../../shared/models/curriculum.dart';
 import '../../shared/widgets/consent_request_dialog.dart';
 import 'sparky_scorecard.dart';
+import 'session_report_screen.dart';
 
 class _ChatModeMeta {
   final String label;
@@ -38,12 +42,9 @@ class _TypingDotState extends State<_TypingDot>
   @override
   void initState() {
     super.initState();
-    Future.delayed(
-      Duration(milliseconds: widget.delayIndex * 180),
-      () {
-        if (mounted) _controller.repeat(reverse: true);
-      },
-    );
+    Future.delayed(Duration(milliseconds: widget.delayIndex * 180), () {
+      if (mounted) _controller.repeat(reverse: true);
+    });
   }
 
   @override
@@ -81,12 +82,10 @@ class SparkyChatSession extends ConsumerStatefulWidget {
   const SparkyChatSession({super.key, required this.language, this.lesson});
 
   @override
-  ConsumerState<SparkyChatSession> createState() =>
-      _SparkyChatSessionState();
+  ConsumerState<SparkyChatSession> createState() => _SparkyChatSessionState();
 }
 
-class _SparkyChatSessionState
-    extends ConsumerState<SparkyChatSession> {
+class _SparkyChatSessionState extends ConsumerState<SparkyChatSession> {
   final List<Map<String, String>> _messages = [];
   final TextEditingController _textController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
@@ -145,11 +144,22 @@ class _SparkyChatSessionState
 
   @override
   void dispose() {
+    if (_isListening) unawaited(_discardActiveRecording());
     _audioRecorder.dispose();
     _voice.stop();
     _textController.dispose();
     _scrollController.dispose();
     super.dispose();
+  }
+
+  Future<void> _discardActiveRecording() async {
+    try {
+      final path = await _audioRecorder.stop();
+      if (path != null) await deleteTemporaryAudioFile(path);
+    } catch (_) {
+      // The recorder may already have been disposed by the platform. Avoid
+      // logging a local path or interrupting screen disposal.
+    }
   }
 
   void _addSparkyGreeting() {
@@ -240,9 +250,7 @@ class _SparkyChatSessionState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text(
-              'Please sign in before using AI practice.',
-            ),
+            content: Text('Please sign in before using AI practice.'),
           ),
         );
       }
@@ -250,13 +258,11 @@ class _SparkyChatSessionState
     }
 
     if (purpose.document == null) {
-      // Test-deployment fallback: web test builds compiled with
-      // ENABLE_TEST_CONSENT=true show a clearly-labelled draft notice and
-      // record the choice so QA can exercise Sparky AI before approved
-      // policy URLs exist (LEG-001). The server ledger is tried first: once
-      // an operator registers an active consent document row, consent is
-      // recorded server-side exactly like the launch flow. Store builds
-      // never compile the flag, so this whole path stays off for them.
+      // Development-only fallback: an explicitly compiled development build
+      // can show a clearly labelled draft notice. Staging and production
+      // ignore the flag. The server ledger is tried first: once an operator
+      // registers an active consent document row, consent is recorded
+      // server-side exactly like the launch flow.
       if (TestConsentService.active) {
         final consentService = ref.read(consentServiceProvider);
         var serverLedgerUsable = true;
@@ -271,9 +277,7 @@ class _SparkyChatSessionState
 
         // Device ledger check: an accepted choice recorded on this device
         // in an earlier session must NOT re-prompt the learner.
-        if (await TestConsentService.hasCurrentConsent(
-          purpose.documentKey,
-        )) {
+        if (await TestConsentService.hasCurrentConsent(purpose.documentKey)) {
           _sessionConsents.add(purpose);
           return true;
         }
@@ -425,11 +429,13 @@ class _SparkyChatSessionState
         // session (not per turn, to keep the economy honest).
         if (!_xpAwardedThisSession) {
           _xpAwardedThisSession = true;
-          ref.read(retentionServiceProvider).awardXp(
-            source: 'ai_chat',
-            amount: XpAmounts.aiChatTurn,
-            languageCode: widget.language,
-          );
+          ref
+              .read(retentionServiceProvider)
+              .awardXp(
+                source: 'ai_chat',
+                amount: XpAmounts.aiChatTurn,
+                languageCode: widget.language,
+              );
         }
       }
       _scrollToBottom();
@@ -462,9 +468,7 @@ class _SparkyChatSessionState
         setState(() {
           _isListening = false;
         });
-        if (path != null) {
-          debugPrint("Audio recorded successfully to target: $path");
-
+        if (path != null && path.isNotEmpty) {
           setState(() {
             _isAiThinking = true;
             _loadingMessage = "Transcribing...";
@@ -495,6 +499,8 @@ class _SparkyChatSessionState
               _isAiThinking = false;
             });
             _scrollToBottom();
+          } finally {
+            await deleteTemporaryAudioFile(path);
           }
         }
       } else {
@@ -627,6 +633,22 @@ class _SparkyChatSessionState
           ],
         ),
         actions: [
+          IconButton(
+            tooltip: 'Session report',
+            icon: Icon(
+              Icons.insights_outlined,
+              color: theme.colorScheme.onSecondary,
+            ),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      SessionReportScreen(languageCode: widget.language),
+                ),
+              );
+            },
+          ),
           if (widget.lesson != null && widget.lesson!.rubricRef != null)
             Padding(
               padding: const EdgeInsetsDirectional.only(end: 8.0),
@@ -931,4 +953,3 @@ class _SparkyChatSessionState
     );
   }
 }
-

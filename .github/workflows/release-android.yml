@@ -1,74 +1,137 @@
-name: Android Release Build
+name: Android Production Release
 
+# This workflow is reusable only. `quality.yml` calls it after every mandatory
+# quality job has passed for an immutable protected version tag. Keeping the
+# signing job out of workflow_dispatch prevents a mutable branch from gaining
+# production credentials by convention alone.
 on:
-  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
 
 jobs:
-  build-android:
-    name: Build Signed Android APK
+  verify-release-source:
+    name: Verify immutable protected release tag
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Set up Java
-        uses: actions/setup-java@v4
+      - name: Check out the exact caller revision
+        # actions/checkout v6.0.2
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
-          distribution: 'zulu'
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Reject mutable or unprotected release sources
+        env:
+          EXPECTED_REF_TYPE: ${{ github.ref_type }}
+          EXPECTED_TAG: ${{ github.ref_name }}
+          EXPECTED_PROTECTED: ${{ github.ref_protected }}
+        run: |-
+          test "$EXPECTED_REF_TYPE" = "tag"
+          test "$EXPECTED_PROTECTED" = "true"
+          case "$EXPECTED_TAG" in v*) ;; *) exit 1 ;; esac
+          test "$(git describe --exact-match --tags HEAD)" = "$EXPECTED_TAG"
+
+  build-android-app-bundle:
+    name: Build signed Android App Bundle
+    needs: verify-release-source
+    runs-on: ubuntu-latest
+    # Configure this Environment with required reviewers and the protected
+    # secrets listed below. Do not add fallback values to this workflow.
+    environment: production
+    timeout-minutes: 30
+    env:
+      FLUTTER_SDK_ARCHIVE_URL: ${{ vars.FLUTTER_SDK_ARCHIVE_URL }}
+      FLUTTER_SDK_SHA256: ${{ vars.FLUTTER_SDK_SHA256 }}
+      ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+      ANDROID_STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
+      ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+      ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+      SUPABASE_URL: ${{ secrets.SUPABASE_PRODUCTION_URL }}
+      SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PRODUCTION_PUBLISHABLE_KEY }}
+      SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PRODUCTION_PROJECT_REF }}
+      SPARK_LINGO_PRODUCTION_PROJECT_REF: ${{ secrets.SPARK_LINGO_PRODUCTION_PROJECT_REF }}
+      TERMS_OF_SERVICE_URL: ${{ secrets.TERMS_OF_SERVICE_URL }}
+      PRIVACY_POLICY_URL: ${{ secrets.PRIVACY_POLICY_URL }}
+      REVENUECAT_GOOGLE_KEY: ${{ secrets.REVENUECAT_GOOGLE_KEY }}
+      ENABLE_GOOGLE_OAUTH: ${{ secrets.ENABLE_GOOGLE_OAUTH }}
+    steps:
+      - name: Check out the exact caller revision
+        # actions/checkout v6.0.2
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Verify protected production configuration is complete
+        run: |-
+          required=(
+            FLUTTER_SDK_ARCHIVE_URL
+            FLUTTER_SDK_SHA256
+            ANDROID_KEYSTORE_BASE64
+            ANDROID_STORE_PASSWORD
+            ANDROID_KEY_PASSWORD
+            ANDROID_KEY_ALIAS
+            SUPABASE_URL
+            SUPABASE_PUBLISHABLE_KEY
+            SUPABASE_PROJECT_REF
+            SPARK_LINGO_PRODUCTION_PROJECT_REF
+            TERMS_OF_SERVICE_URL
+            PRIVACY_POLICY_URL
+            REVENUECAT_GOOGLE_KEY
+            ENABLE_GOOGLE_OAUTH
+          )
+          for name in "${required[@]}"; do
+            test -n "${!name}" || { echo "Missing protected production configuration: $name"; exit 1; }
+          done
+          case "$ENABLE_GOOGLE_OAUTH" in true|false) ;; *) exit 1 ;; esac
+          case "$TERMS_OF_SERVICE_URL" in https://*) ;; *) exit 1 ;; esac
+          case "$PRIVACY_POLICY_URL" in https://*) ;; *) exit 1 ;; esac
+          case "$SUPABASE_URL" in https://*) ;; *) exit 1 ;; esac
+          printf '%s  %s\n' "$FLUTTER_SDK_SHA256" "$RUNNER_TEMP/flutter-sdk.zip" > "$RUNNER_TEMP/flutter-sdk.sha256"
+      - name: Install the reviewed Flutter SDK archive
+        run: |-
+          curl --fail --location --proto '=https' --tlsv1.2 --retry 3 \
+            "$FLUTTER_SDK_ARCHIVE_URL" --output "$RUNNER_TEMP/flutter-sdk.zip"
+          sha256sum --check "$RUNNER_TEMP/flutter-sdk.sha256"
+          unzip -q "$RUNNER_TEMP/flutter-sdk.zip" -d "$RUNNER_TEMP"
+          test -x "$RUNNER_TEMP/flutter/bin/flutter"
+          echo "$RUNNER_TEMP/flutter/bin" >> "$GITHUB_PATH"
+      - name: Set up Java 17
+        # actions/setup-java v4.7.1; pinned commit, not a mutable tag.
+        uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9
+        with:
+          distribution: zulu
           java-version: '17'
-
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.44.4'
-          cache: true
-
-      - name: Decode Keystore
-        env:
-          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-        run: |
-          mkdir -p android/app
-          echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android/app/upload-keystore.jks
-
-      - name: Create key.properties
-        env:
-          ANDROID_STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
-          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-        run: |
-          cat <<EOF > android/key.properties
+      - name: Create temporary Android signing configuration
+        run: |-
+          umask 077
+          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android/app/upload-keystore.jks
+          cat > android/key.properties <<EOF
           storePassword=$ANDROID_STORE_PASSWORD
           keyPassword=$ANDROID_KEY_PASSWORD
           keyAlias=$ANDROID_KEY_ALIAS
           storeFile=upload-keystore.jks
           EOF
-
-      - name: Get Dependencies
-        run: flutter pub get
-
-      - name: Generate Native Icons & Splash
-        run: |
-          flutter pub run flutter_launcher_icons
-          flutter pub run flutter_native_splash:create
-
-      - name: Build Signed APK
-        env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
-        run: |
-          flutter build apk --release \
-            --dart-define=SPARK_LINGO_ENV=production \
-            --dart-define=SUPABASE_DEPLOYMENT=hosted \
-            --dart-define=SUPABASE_URL="${SUPABASE_URL:-https://dioisitgohusggmwowft.supabase.co}" \
-            --dart-define=SUPABASE_PUBLISHABLE_KEY="${SUPABASE_PUBLISHABLE_KEY:-sb_publishable_XqDkETO6pkYyUohtsR2sow_QLMYA-t7}" \
-            --dart-define=SUPABASE_PROJECT_REF=dioisitgohusggmwowft \
-            --dart-define=SPARK_LINGO_PRODUCTION_PROJECT_REF=dioisitgohusggmwowft \
-            --dart-define=ENABLE_GOOGLE_OAUTH=true
-
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
+      - name: Get locked dependencies
+        run: flutter pub get --enforce-lockfile
+      - name: Build signed production Android App Bundle
+        run: >-
+          flutter build appbundle --release
+          --dart-define=SPARK_LINGO_ENV=production
+          --dart-define=SUPABASE_DEPLOYMENT=hosted
+          --dart-define=SUPABASE_URL="$SUPABASE_URL"
+          --dart-define=SUPABASE_PUBLISHABLE_KEY="$SUPABASE_PUBLISHABLE_KEY"
+          --dart-define=SUPABASE_PROJECT_REF="$SUPABASE_PROJECT_REF"
+          --dart-define=SPARK_LINGO_PRODUCTION_PROJECT_REF="$SPARK_LINGO_PRODUCTION_PROJECT_REF"
+          --dart-define=TERMS_OF_SERVICE_URL="$TERMS_OF_SERVICE_URL"
+          --dart-define=PRIVACY_POLICY_URL="$PRIVACY_POLICY_URL"
+          --dart-define=REVENUECAT_GOOGLE_KEY="$REVENUECAT_GOOGLE_KEY"
+          --dart-define=ENABLE_GOOGLE_OAUTH="$ENABLE_GOOGLE_OAUTH"
+      - name: Upload signed store bundle
+        # actions/upload-artifact v4.6.2
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: app-release.apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          name: spark-lingo-android-${{ github.ref_name }}.aab
+          path: build/app/outputs/bundle/release/app-release.aab
+          if-no-files-found: error
           retention-days: 7

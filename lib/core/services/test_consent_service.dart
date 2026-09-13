@@ -6,8 +6,8 @@ import '../constants/auth_config.dart';
 /// Device-local consent fallback for pre-store test deployments only.
 ///
 /// Production and store builds never reach this code path: it is gated on
-/// [AuthConfig.testConsentEnabled], which defaults to `false` and is only
-/// compiled in for web test deployments (`--dart-define=ENABLE_TEST_CONSENT=true`).
+/// [AuthConfig.testConsentEnabled], which is enabled only by an explicit
+/// development-build flag. Staging and production ignore that flag.
 ///
 /// The real launch flow requires a server-recorded, versioned consent
 /// document (LEG-001). Until approved HTTPS policy URLs exist, this fallback

@@ -7,9 +7,14 @@
 class AuthConfig {
   AuthConfig._();
 
+  static const environment = String.fromEnvironment(
+    'SPARK_LINGO_ENV',
+    defaultValue: 'development',
+  );
+
   static const googleOAuthEnabled = bool.fromEnvironment(
     'ENABLE_GOOGLE_OAUTH',
-    defaultValue: true,
+    defaultValue: false,
   );
   static const appleOAuthEnabled = bool.fromEnvironment(
     'ENABLE_APPLE_OAUTH',
@@ -21,12 +26,13 @@ class AuthConfig {
   /// Sparky AI chat/score/voice is normally locked behind a server-recorded,
   /// versioned consent document (LEG-001). Pre-store web test deployments do
   /// not have approved HTTPS policy URLs yet, so compiling with
-  /// `--dart-define=ENABLE_TEST_CONSENT=true` switches the consent flow to a
-  /// clearly-labelled local draft notice recorded on-device. Store and
-  /// production builds must never pass this flag: release pipelines omit it,
-  /// and the default is `false`.
-  static const testConsentEnabled = bool.fromEnvironment(
+  /// A local draft-consent path is permitted only for an explicitly compiled
+  /// development build. Staging and production ignore the flag even if it is
+  /// mistakenly supplied, so a release cannot weaken consent by configuration.
+  static const _testConsentRequested = bool.fromEnvironment(
     'ENABLE_TEST_CONSENT',
     defaultValue: false,
   );
+  static const testConsentEnabled =
+      environment == 'development' && _testConsentRequested;
 }

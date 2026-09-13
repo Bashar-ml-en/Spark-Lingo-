@@ -1,64 +1,56 @@
-# Spark Lingo web test deployment (Vercel)
+# Spark Lingo web staging deployment (Vercel)
 
-Deploys the compiled Flutter web app to Vercel for pre-store testing.
+This procedure is for an isolated, protected **staging** deployment only. It
+does not authorize a public production deployment, consent bypass, anonymous
+AI, or use of a production Supabase project.
 
-## Why this is not `vercel deploy .`
+## Preconditions
 
-`build/` is gitignored by design. `vercel deploy` from the repo root uploads
-the git tree (source files, no compiled output) and produces a deployment
-that serves nothing (404). The compiled output must be deployed directly.
+- The source is a protected immutable tag with a green Quality workflow.
+- The Vercel project/environment is designated as staging and has no
+  production domain alias, data, secrets, billing products, or credentials.
+- The protected staging Environment supplies approved, non-production public
+  build configuration. Do not place values in source, scripts, shell history,
+  screenshots, issues, or chat.
+- Legal, privacy, and AI owners approve the test cohort and access controls.
 
-## Deploy commands (run from the repo root)
+## Build and deploy sequence
 
-```text
-1. flutter pub get
-2. flutter build web --release \
-     --dart-define=SPARK_LINGO_ENV=production \
-     --dart-define=SUPABASE_DEPLOYMENT=hosted \
-     --dart-define=SUPABASE_URL=https://<project-ref>.supabase.co \
-     --dart-define=SUPABASE_PUBLISHABLE_KEY=<public client key> \
-     --dart-define=SUPABASE_PROJECT_REF=<project-ref> \
-     --dart-define=SPARK_LINGO_PRODUCTION_PROJECT_REF=<project-ref> \
-     --dart-define=ENABLE_TEST_CONSENT=true
-3. copy vercel.json build\web\vercel.json
-4. vercel deploy build/web --prod --name spark-lingo
-```
+1. Use the protected CI environment to build Flutter web with explicitly
+   validated **staging** configuration. The build must not receive a test
+   consent flag or an anonymous-AI bypass.
+2. Verify the generated artifact comes from the tagged commit and record its
+   hash with the release manifest/SBOM.
+3. Copy `vercel.json` into the compiled web artifact only when the reviewed
+   Vercel project requires its static/SPA configuration.
+4. Deploy the compiled artifact to the staging Vercel project using a
+   staging-scoped Vercel token released by the protected CI environment.
+5. Keep deployment protection enabled unless the release manager, legal, and
+   security owners explicitly approve a controlled external test cohort.
 
-`ENABLE_TEST_CONSENT=true` unlocks Sparky AI chat/score/voice in this web
-test deployment: approved policy URLs do not exist yet (LEG-001), so the
-consent flow shows a clearly-labelled draft notice and records the choice
-(server ledger first, on-device fallback). Remove the flag for any store or
-production build — the default is `false` and release pipelines must not set
-it.
+## Required checks
 
-The client flag alone is not enough: the `sparky-ai` edge function enforces
-the same gate server-side. For AI to respond in this test deployment, an
-operator must also (HUMAN-ONLY):
+- The deployed app rejects missing/mismatched configuration before backend
+  initialization.
+- The staging URL and Supabase project reference match the protected staging
+  Environment and differ from production.
+- AI remains unavailable without a current server-backed consent record; an
+  anonymous account remains denied unless a separately approved server policy
+  and abuse controls are in place.
+- Browser zoom, keyboard navigation, legal links, sign-in, sign-out, account
+  deletion failure, AI failure, and offline states are tested with staging
+  accounts only.
 
-1. Deploy the updated `sparky-ai` function (adds a default-off
-   `TEST_CONSENT_MODE` bypass, audit-logged via operational events):
-   `supabase functions deploy sparky-ai --project-ref dioisitgohusggmwowft`
-2. Set the hosted secret: `TEST_CONSENT_MODE=true`
-   (Dashboard → Edge Functions → sparky-ai → Secrets, or
-   `supabase secrets set TEST_CONSENT_MODE=true --project-ref dioisitgohusggmwowft`)
-3. Guest testing additionally requires `ALLOW_ANONYMOUS_AI=true`
-   (anonymous users are denied by default; see `.env.example`).
+## Prohibited shortcuts
 
-Unset all three before any production or store release; the function fails
-closed when they are absent.
+- Never deploy a staging build under a production alias or with production
+  public configuration.
+- Never enable `ENABLE_TEST_CONSENT`, `TEST_CONSENT_MODE`, or anonymous-AI
+  bypasses in a shared or production environment.
+- Never store a project reference, client key, access token, or deployment URL
+  in this document as current evidence.
 
-`vercel.json` configures `@vercel/static` over `**` plus an SPA fallback
-rewrite to `/index.html` for Flutter's URL-strategy routes.
-
-## Deployment Protection
-
-Vercel Hobby projects enable "Vercel Authentication" by default: the test
-URL redirects to vercel.com/login for anyone without a Vercel account.
-To make the test URL publicly open:
-
-Dashboard -> spark-lingo -> Settings -> Deployment Protection ->
-"Vercel Authentication" -> Disabled.
-
-## Current production alias
-
-https://spark-lingo.vercel.app
+Attach only sanitized build hashes, CI/deployment URLs, target-confirmation
+results, and owner approvals to the release tracker. Follow
+`STAGING_DEPLOYMENT_RUNBOOK.md` and `PRE_RN_OPERATOR_HANDOFF.md` for the
+broader release gate.
