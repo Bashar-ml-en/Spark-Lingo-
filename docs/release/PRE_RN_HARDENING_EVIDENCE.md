@@ -28,8 +28,9 @@ Supabase, RevenueCat, Firebase, store, or GitHub Environment action occurred.
 | `node scripts/validate_ai_quota_boundary.js` | PASS | Existing server-only quota regression check. |
 | `node scripts/validate_canonical_learning_flows.js` | PASS | Prevents the retired private speech/flashcard implementations from returning to the home entry points. |
 | `node scripts/validate_learning_progress_boundary.js` | PASS | Protects the lesson/XP/daily-goal server-authoritative RPC boundary from direct client-write regressions. |
+| `node scripts/validate_correction_report_boundary.js` | PASS | Ensures server-only correction reporting, user-scoped local review cards, truthful report failures, and fail-closed OAuth/test-consent defaults. |
 | Full `flutter analyze` | PASS | `No issues found!` after the final source changes. |
-| Full Flutter suite | PASS | `flutter test --reporter compact` completed with `106` tests passed. Test-host `MissingPluginException` messages from existing SharedPreferences persistence tests were emitted but did not fail the suite. |
+| Full Flutter suite | PASS | `flutter test --reporter compact` completed with `111` tests passed after merging the current remote source. Test-host `MissingPluginException` messages from existing SharedPreferences persistence tests were emitted but did not fail the suite. |
 | Android debug APK build | INCOMPLETE | Started with non-production development defines, but no APK was produced after several minutes of local Gradle work. The build process was stopped; rerun it in a normal Android-capable developer/CI environment and retain the result. |
 | Web release build | INCOMPLETE | Started with non-production development defines, but did not produce a fresh `main.dart.js` before the local compiler stopped making progress. The process was stopped; retain a clean CI/developer build result instead of relying on the pre-existing artifact. |
 | Deno Edge Function checks/tests | NOT RUN | Deno is absent locally. CI now invokes the existing Edge Function unit tests. |
@@ -38,6 +39,10 @@ Supabase, RevenueCat, Firebase, store, or GitHub Environment action occurred.
 
 ## Repository-controlled evidence added in this hardening pass
 
+- The workspace was verified against remote `main` at `017a599`; its three
+  newer commits were merged into the review branch. The correction-report
+  feature is retained through the canonical chat, while unsafe hard-coded
+  production deployment and legacy-session changes are excluded.
 - Incomplete exam and mock-exam screens are truthful previews. Regression tests
   ensure a fresh user does not see a fabricated band/CEFR score and cannot
   start/submit a scored mock exam.
