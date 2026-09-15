@@ -67,7 +67,12 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     userInterfaceStyle: 'automatic',
     scheme,
     icon: './assets/icon.png',
-    plugins: ['expo-router', 'expo-dev-client', 'expo-secure-store'],
+    plugins: [
+      'expo-router',
+      'expo-dev-client',
+      'expo-secure-store',
+      ['expo-web-browser', { experimentalLauncherActivity: false }],
+    ],
     ios: {
       supportsTablet: true,
       bundleIdentifier: iosBundleIdentifier,
@@ -87,11 +92,23 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     },
     extra: {
       appEnvironment: environment,
+      appScheme: scheme,
       // These are intentionally empty unless build/runtime configuration
       // supplies public values. There is no production fallback in source.
       supabaseUrl: process.env.EXPO_PUBLIC_SUPABASE_URL ?? '',
       supabasePublishableKey:
         process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? '',
+      oauth: {
+        googleEnabled: process.env.EXPO_PUBLIC_GOOGLE_OAUTH_ENABLED === 'true',
+        appleEnabled: process.env.EXPO_PUBLIC_APPLE_OAUTH_ENABLED === 'true',
+      },
+      legalNotices: {
+        analyticsUrl: process.env.EXPO_PUBLIC_ANALYTICS_NOTICE_URL ?? '',
+        analyticsVersion: process.env.EXPO_PUBLIC_ANALYTICS_NOTICE_VERSION ?? '',
+        aiAndVoiceUrl: process.env.EXPO_PUBLIC_AI_AND_VOICE_NOTICE_URL ?? '',
+        aiAndVoiceVersion:
+          process.env.EXPO_PUBLIC_AI_AND_VOICE_NOTICE_VERSION ?? '',
+      },
     },
   };
 };

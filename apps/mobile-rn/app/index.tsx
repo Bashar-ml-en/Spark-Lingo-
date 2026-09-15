@@ -1,6 +1,6 @@
 import { Redirect } from 'expo-router';
 
-import { useAuthSession } from '../src/app/auth-session';
+import { useAuthSession } from '../src/application/auth-session';
 import { StateBody, StateScreen, StateTitle } from '../src/components/state-screen';
 
 export default function IndexRoute() {
@@ -11,18 +11,6 @@ export default function IndexRoute() {
       <StateScreen>
         <StateTitle>Opening Spark Lingo</StateTitle>
         <StateBody>Restoring your secure session.</StateBody>
-      </StateScreen>
-    );
-  }
-
-  if (status === 'error') {
-    return (
-      <StateScreen>
-        <StateTitle>Session unavailable</StateTitle>
-        <StateBody>
-          Your session could not be restored. Sign in again when authentication
-          is ported.
-        </StateBody>
       </StateScreen>
     );
   }

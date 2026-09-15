@@ -1,6 +1,6 @@
 import { Redirect, useLocalSearchParams } from 'expo-router';
 
-import { useAuthSession } from '../../src/app/auth-session';
+import { useAuthSession } from '../../src/application/auth-session';
 import { StateBody, StateScreen, StateTitle } from '../../src/components/state-screen';
 
 const canonicalLanguageCode = /^[a-z]{2,3}(?:-[A-Z]{2})?$/;
@@ -9,7 +9,7 @@ export default function HomeRoute() {
   const { langCode } = useLocalSearchParams<{ langCode: string }>();
   const { session, status } = useAuthSession();
 
-  if (status === 'ready' && !session) {
+  if (status !== 'loading' && !session) {
     return <Redirect href="/welcome" />;
   }
 

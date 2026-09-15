@@ -1,11 +1,30 @@
 import { z } from 'zod';
 
 const environmentSchema = z.enum(['development', 'staging', 'production']);
+const deepLinkSchemeSchema = z
+  .string()
+  .trim()
+  .regex(/^[a-z][a-z0-9+.-]*$/, 'must be a valid lowercase URL scheme');
 
 const baseRuntimeConfigSchema = z.object({
   environment: environmentSchema,
+  appScheme: deepLinkSchemeSchema,
   supabaseUrl: z.string().trim().url(),
   supabasePublishableKey: z.string().trim().min(16).max(4096),
+  oauth: z
+    .object({
+      googleEnabled: z.boolean().optional(),
+      appleEnabled: z.boolean().optional(),
+    })
+    .optional(),
+  legalNotices: z
+    .object({
+      analyticsUrl: z.string().optional(),
+      analyticsVersion: z.string().optional(),
+      aiAndVoiceUrl: z.string().optional(),
+      aiAndVoiceVersion: z.string().optional(),
+    })
+    .optional(),
 });
 
 export type PublicRuntimeConfig = z.infer<typeof baseRuntimeConfigSchema>;

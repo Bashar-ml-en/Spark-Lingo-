@@ -1,11 +1,11 @@
-# React Native implementation RFC: foundation
+# React Native implementation RFC: foundation and identity slice
 
 ## Status and scope
 
-This RFC authorizes only the React Native **foundation** in
+This RFC authorizes the React Native foundation and its first identity slice in
 `apps/mobile-rn`. Flutter remains the production client and rollback target.
 This change neither releases React Native to users nor ports a learner-facing
-feature.
+course feature.
 
 ## Decisions
 
@@ -20,6 +20,13 @@ feature.
 - Keep public Supabase URL/publishable-key values in protected build
   environment configuration. Never put service-role, provider, billing, or
   webhook credentials in the client or `EXPO_PUBLIC_*` values.
+- Keep OAuth providers disabled unless their native callback URI is registered
+  for that build. Accept only the exact `scheme://auth/callback` callback and
+  complete it through the native browser session.
+- Treat consent as a server-authoritative, versioned capability. Missing notice
+  configuration or unexpected RPC output means the governed action is denied.
+- Clear all user-owned client state before displaying a sign-out or new-account
+  session. Each future owner must register with the cleanup boundary.
 
 ## Build identity policy
 
@@ -42,11 +49,21 @@ unrelated public app.
 
 ## Explicitly not included
 
-- authentication UI or OAuth redirect handling;
-- consent, telemetry, billing, microphone, chat, scoring, or exam flows;
+- telemetry, billing, microphone, chat, scoring, or exam flows;
 - profile/language/curriculum writes;
 - generated database types or a linked EAS/Supabase production project.
 
-The first feature slice is Auth + consent + session transition cleanup, with
-staging-only integration tests for anonymous denial, consent withdrawal, deep
-links, and account-switch cache clearing before any AI, voice, or billing UI.
+## Implemented identity slice
+
+- email registration/sign-in, anonymous session creation, and secure native
+  OAuth initiation when a provider is explicitly enabled;
+- deep-link validation and PKCE/token-session completion for auth callbacks;
+- a protected privacy-permission screen backed by the existing authenticated
+  consent RPCs, with versioned notice validation and fail-closed behavior;
+- centralized query-cache and registered user-state cleanup on sign-out or
+  identity change.
+
+Before release, run staging-only integration tests for anonymous denial,
+consent withdrawal, email-confirmation and OAuth redirects, and account-switch
+cache clearing. No AI, voice, billing, or telemetry UI may ship until those
+features enforce this slice's consent and identity boundaries.

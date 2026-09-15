@@ -4,6 +4,7 @@ import { parsePublicRuntimeConfig } from './runtime-config';
 
 const validDevelopmentConfig = {
   environment: 'development',
+  appScheme: 'sparklingo-development',
   supabaseUrl: 'http://127.0.0.1:54321',
   supabasePublishableKey: 'sb_publishable_local_testing_key',
 };
@@ -47,5 +48,17 @@ describe('parsePublicRuntimeConfig', () => {
       ok: false,
       errors: ['Only a Supabase publishable key may be supplied to the mobile client.'],
     });
+  });
+
+  it('requires a lowercase native deep-link scheme', () => {
+    const result = parsePublicRuntimeConfig({
+      ...validDevelopmentConfig,
+      appScheme: 'Spark Lingo',
+    });
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.errors).toContainEqual(expect.stringContaining('appScheme'));
+    }
   });
 });

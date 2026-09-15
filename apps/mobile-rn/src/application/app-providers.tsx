@@ -14,14 +14,15 @@ import {
   createSupabaseClient,
 } from '../lib/supabase-client';
 import { AuthSessionProvider } from './auth-session';
+import { UserScopeCleanupProvider } from './user-scope-cleanup';
 
 const SupabaseContext = createContext<SupabaseClient | undefined>(undefined);
+const RuntimeConfigContext = createContext<PublicRuntimeConfig | undefined>(undefined);
 
 export function AppProviders({
   config,
   children,
 }: PropsWithChildren<{ config: PublicRuntimeConfig }>) {
-  // Client construction occurs only after runtime configuration is valid.
   const [client] = useState(() => createSupabaseClient(config));
   const [queryClient] = useState(
     () =>
@@ -39,9 +40,15 @@ export function AppProviders({
 
   return (
     <QueryClientProvider client={queryClient}>
-      <SupabaseContext.Provider value={client}>
-        <AuthSessionProvider client={client}>{children}</AuthSessionProvider>
-      </SupabaseContext.Provider>
+      <RuntimeConfigContext.Provider value={config}>
+        <SupabaseContext.Provider value={client}>
+          <UserScopeCleanupProvider queryClient={queryClient}>
+            <AuthSessionProvider client={client} config={config}>
+              {children}
+            </AuthSessionProvider>
+          </UserScopeCleanupProvider>
+        </SupabaseContext.Provider>
+      </RuntimeConfigContext.Provider>
     </QueryClientProvider>
   );
 }
@@ -52,4 +59,12 @@ export function useSupabaseClient(): SupabaseClient {
     throw new Error('useSupabaseClient must be used inside AppProviders.');
   }
   return client;
+}
+
+export function useRuntimeConfig(): PublicRuntimeConfig {
+  const config = useContext(RuntimeConfigContext);
+  if (!config) {
+    throw new Error('useRuntimeConfig must be used inside AppProviders.');
+  }
+  return config;
 }

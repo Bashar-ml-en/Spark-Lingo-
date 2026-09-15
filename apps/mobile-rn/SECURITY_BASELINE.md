@@ -14,6 +14,15 @@ Checked: 2026-09-15
   parity and security approval.
 - Staging/production build identifiers and deep-link scheme are mandatory
   protected build inputs, not source defaults.
+- OAuth is opt-in per build. It opens authorization only in the native browser,
+  verifies the exact configured scheme/host/path callback, and exchanges a PKCE
+  code (or a complete token pair) without logging callback material.
+- Authenticated consent uses the existing server RPCs only. The client never
+  supplies a user ID or acceptance timestamp, and malformed/failed responses
+  deny processing.
+- All user-scoped query data is cleared before a sign-out or account-switch
+  session is displayed. Future drafts, billing UI, telemetry, and modal state
+  must register the same cleanup boundary.
 
 ## Dependency review
 

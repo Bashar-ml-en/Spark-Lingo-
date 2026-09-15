@@ -22,7 +22,10 @@ export function loadExpoRuntimeConfig(): RuntimeConfigResult {
   const extra = Constants.expoConfig?.extra;
   return parsePublicRuntimeConfig({
     environment: extra?.appEnvironment,
+    appScheme: extra?.appScheme,
     supabaseUrl: extra?.supabaseUrl,
     supabasePublishableKey: extra?.supabasePublishableKey,
+    oauth: extra?.oauth,
+    legalNotices: extra?.legalNotices,
   });
 }
