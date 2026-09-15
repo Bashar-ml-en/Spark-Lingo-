@@ -30,6 +30,8 @@ export default function RootLayout() {
           name="onboarding/select-language"
           options={{ title: 'Choose a language' }}
         />
+        <Stack.Screen name="learn/[courseKey]" options={{ title: 'Course' }} />
+        <Stack.Screen name="learn/[courseKey]/lesson/[lessonId]" options={{ title: 'Lesson' }} />
         <Stack.Screen name="home/[langCode]" options={{ title: 'Spark Lingo' }} />
       </Stack>
     </AppProviders>

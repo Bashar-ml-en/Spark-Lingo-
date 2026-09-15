@@ -211,6 +211,17 @@ owner.
 
 ## What can be done now
 
+### Source implementation status (2026-09-16)
+
+The repository now contains the technical portion of the first content and
+learning slice: a draft-only manifest contract, deterministic validation,
+versioned course-release migration, server-verified practice/completion, and
+React Native catalogue/course/lesson screens with truthful unavailable states.
+The pilot package is deliberately unpublishable because its rights and reviewer
+approvals are pending. This does **not** close Stage 1, Stage 2, or any cohort
+gate; it prepares their implementation evidence. The remaining release work is
+recorded in `CONTENT_RELEASE_IMPLEMENTATION.md`.
+
 | Workstream | Start now | Requires external owner first |
 | --- | --- | --- |
 | RN learning core | Repository architecture, validated repositories, study/SRS UI, tests, and error states. | Reviewed launch-course manifest and a verified staging schema. |

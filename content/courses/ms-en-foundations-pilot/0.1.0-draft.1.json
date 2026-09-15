@@ -1,0 +1,155 @@
+{
+  "schemaVersion": "1.0",
+  "courseKey": "ms-en-foundations-pilot",
+  "contentVersion": "0.1.0-draft.1",
+  "interfaceLocale": "ms-MY",
+  "targetLanguageCode": "en",
+  "title": "English foundations pilot (draft)",
+  "learnerEntryAssumption": "A Malay-interface learner who has not yet completed a reviewed Spark Lingo English course.",
+  "purpose": "Internal engineering and editorial-review pilot only. It is not a published course, CEFR level, exam-preparation product, or evidence of learning outcomes.",
+  "capabilities": {
+    "audioCoverage": "none",
+    "aiRequired": false,
+    "voiceRequired": false
+  },
+  "publication": {
+    "state": "draft",
+    "releaseApprovals": {
+      "learningDesigner": { "status": "pending" },
+      "nativeLanguageReviewer": { "status": "pending" }
+    },
+    "rollbackVersion": null
+  },
+  "objectives": [
+    {
+      "id": "greet-someone",
+      "canDo": "Use a basic English greeting in a supported practice prompt.",
+      "skill": "interaction",
+      "evidence": "Select and type an accepted greeting in the reviewed exercise."
+    },
+    {
+      "id": "introduce-name",
+      "canDo": "Give a short English name introduction using the provided pattern.",
+      "skill": "speaking",
+      "evidence": "Produce the approved model sentence in typed recall."
+    },
+    {
+      "id": "respond-to-greeting",
+      "canDo": "Recognise an appropriate response to a basic greeting.",
+      "skill": "reading",
+      "evidence": "Choose the accepted response from supplied alternatives."
+    },
+    {
+      "id": "close-short-exchange",
+      "canDo": "Use a basic English closing in a supported practice prompt.",
+      "skill": "interaction",
+      "evidence": "Type an accepted closing in the reviewed exercise."
+    }
+  ],
+  "units": [
+    {
+      "id": "greetings-and-introductions",
+      "title": "Greetings and introductions",
+      "description": "A text-only, internal draft slice for the first review workflow.",
+      "prerequisiteUnitIds": [],
+      "lessons": [
+        {
+          "id": "say-hello",
+          "title": "Say hello",
+          "description": "Recognise and recall a basic greeting. No pronunciation or fluency score is produced.",
+          "prerequisiteLessonIds": [],
+          "review": {
+            "learningDesigner": { "status": "pending" },
+            "nativeLanguageReviewer": { "status": "pending" }
+          },
+          "exercises": [
+            {
+              "id": "recognise-hello",
+              "kind": "recognition",
+              "prompt": "Pilih sapaan bahasa Inggeris untuk 'Hai'.",
+              "acceptedAnswers": ["Hello", "Hi"],
+              "distractors": ["Goodbye", "Thank you"],
+              "hint": "Cari perkataan yang digunakan apabila memulakan perbualan.",
+              "outcomeRefs": ["greet-someone"],
+              "remediation": "Baca semula: Hello atau Hi digunakan untuk memulakan sapaan.",
+              "flashcardId": "hello-card",
+              "source": {
+                "provider": "Spark Lingo editorial draft",
+                "sourceReference": "ms-en-foundations-pilot/0.1.0-draft.1",
+                "licence": "Internal review only",
+                "attribution": "Not for publication; rights and editorial review are pending.",
+                "rightsStatus": "pending"
+              }
+            },
+            {
+              "id": "recall-hello",
+              "kind": "typed_recall",
+              "prompt": "Taipkan satu sapaan bahasa Inggeris untuk 'Hai'.",
+              "acceptedAnswers": ["Hello", "Hi"],
+              "distractors": [],
+              "hint": "Jawapannya bermula dengan H.",
+              "outcomeRefs": ["greet-someone"],
+              "remediation": "Cuba lagi dengan 'Hello' atau 'Hi'.",
+              "flashcardId": "hello-card",
+              "source": {
+                "provider": "Spark Lingo editorial draft",
+                "sourceReference": "ms-en-foundations-pilot/0.1.0-draft.1",
+                "licence": "Internal review only",
+                "attribution": "Not for publication; rights and editorial review are pending.",
+                "rightsStatus": "pending"
+              }
+            }
+          ]
+        },
+        {
+          "id": "share-your-name",
+          "title": "Share your name",
+          "description": "Use a model sentence for a short introduction and closing.",
+          "prerequisiteLessonIds": ["say-hello"],
+          "review": {
+            "learningDesigner": { "status": "pending" },
+            "nativeLanguageReviewer": { "status": "pending" }
+          },
+          "exercises": [
+            {
+              "id": "recall-name-pattern",
+              "kind": "guided_writing",
+              "prompt": "Taip model ini: My name is Ana.",
+              "acceptedAnswers": ["My name is Ana."],
+              "distractors": [],
+              "hint": "Gunakan perkataan My, name, is, dan Ana.",
+              "outcomeRefs": ["introduce-name"],
+              "remediation": "Salin model dengan tanda noktah: My name is Ana.",
+              "flashcardId": "my-name-is-ana-card",
+              "source": {
+                "provider": "Spark Lingo editorial draft",
+                "sourceReference": "ms-en-foundations-pilot/0.1.0-draft.1",
+                "licence": "Internal review only",
+                "attribution": "Not for publication; rights and editorial review are pending.",
+                "rightsStatus": "pending"
+              }
+            },
+            {
+              "id": "recognise-goodbye",
+              "kind": "recognition",
+              "prompt": "Pilih perkataan untuk menutup perbualan.",
+              "acceptedAnswers": ["Goodbye", "Bye"],
+              "distractors": ["Hello", "Please"],
+              "hint": "Ia digunakan apabila anda hendak beredar.",
+              "outcomeRefs": ["close-short-exchange", "respond-to-greeting"],
+              "remediation": "Baca semula: Goodbye atau Bye menutup perbualan.",
+              "flashcardId": "goodbye-card",
+              "source": {
+                "provider": "Spark Lingo editorial draft",
+                "sourceReference": "ms-en-foundations-pilot/0.1.0-draft.1",
+                "licence": "Internal review only",
+                "attribution": "Not for publication; rights and editorial review are pending.",
+                "rightsStatus": "pending"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

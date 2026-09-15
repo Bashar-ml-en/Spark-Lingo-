@@ -36,6 +36,7 @@
     "web": "expo start --web",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "validate:content": "vitest run src/features/learning/content-contract.test.ts",
     "test:watch": "vitest",
     "export:web": "expo export --platform web --output-dir dist"
   },

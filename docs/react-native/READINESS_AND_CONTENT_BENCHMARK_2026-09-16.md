@@ -9,6 +9,13 @@ world-class language-learning claim. The only safe current positioning remains
 the one already approved in the content-and-claims register: an invite-only,
 English-interface beginner phrase-practice beta for selected target languages.
 
+**Implementation update (2026-09-16):** the source tree now contains a
+draft-only content-manifest contract, release-gated course schema, typed RN
+catalogue/course/lesson repository, server-verified exercise completion, and
+server SRS RPC client. This improves the technical baseline only. No reviewed
+course is published, no staging migration has been verified, and no human or
+device gate in this assessment is thereby closed.
+
 This is a capability benchmark, not a claim that any external product is
 uniformly better in every area. "World class" here means a transparent
 curriculum, credible evidence of learning, reliable multimodal practice,
@@ -19,7 +26,7 @@ accessible delivery, and safe product operations.
 | Area | Current state | Release interpretation |
 | --- | --- | --- |
 | React Native identity and privacy | Email/anonymous auth, guarded OAuth callbacks, server-authoritative consent, secure session storage, and account-transition cache clearing are implemented. | Strong foundation; retain it as the required boundary for every later feature. |
-| React Native learning experience | No profile/language persistence, curriculum reads, flashcard session, SRS sync, lesson completion, XP/streak, settings/data-rights, AI, voice, billing, or device-parity journeys are ported. | **Not ready for an internal learner cohort.** |
+| React Native learning experience | The source now has a release-gated catalogue, curriculum repository, lesson recognition/typed-recall UI, server-verified completion, and server SRS scheduling client. Profile persistence, retention/XP, data-rights, AI/voice/billing, analytics, offline/device/a11y proof, and a staging-published course remain absent. | **Not ready for an internal learner cohort.** |
 | Bundled phrase corpus | 15 language entries, 150 units, 1,800 lessons, and 21,600 sentence-pair cards are present. | A useful seed corpus, not evidence of a complete course. |
 | Content governance | A deterministic review record exists for 7,997 pipeline rows and the licensing intent is documented. The publication register has no completed per-unit/lesson/media records or native-speaker approvals. | No broad content, outcome, audio, or exam claim is authorized. |
 | Listening and pronunciation | `assets/audio/` contains only `.gitkeep`; Common Voice ingestion is designed but no language audio coverage is evidenced. | Text/TTS support only; never claim native-speaker audio or validated pronunciation assessment. |
@@ -72,7 +79,7 @@ assessment, and feedback: [CEFR descriptors](https://www.coe.int/en/web/common-e
 | World-class capability | Spark Lingo evidence now | Gap to close |
 | --- | --- | --- |
 | Explicit level and outcome map | The pipeline has a future CEFR/exam architecture, but the shipped asset has no levels, can-dos, or objectives. | Define a per-language level map; tag each lesson to a reviewed, measurable objective and prerequisite. Do not label a course A1/A2 until reviewed. |
-| Skill-balanced instruction | Flashcard sentence pairs and an SRS engine exist. No reviewed grammar progression, listening inventory, writing rubric, or speaking task library is delivered in RN. | Ship a narrow first course with recognition, recall, guided writing, listening, and goal-based speaking tasks—not more raw cards. |
+| Skill-balanced instruction | RN now has a text-only recognition, typed-recall, and guided-writing contract, but its only fixture is an unreviewed internal draft. No reviewed grammar progression, listening inventory, writing rubric, or speaking task library is delivered. | Ship a narrow first course with reviewed recognition, recall, guided writing, listening, and goal-based speaking tasks—not more raw cards. |
 | Diagnostic placement and adaptive plan | No RN placement, mastery model, or goal planner is implemented. | Add a calibrated diagnostic only after a reviewed item bank; use results to choose starting units and review intensity. |
 | Feedback quality | Flutter has server-gated AI/correction architecture; RN has only the consent boundary. No validated pronunciation or assessment feedback is ported. | Port canonical AI feedback after content grounding; define feedback rubrics and evaluate them against human-reviewed samples. |
 | Human audio and listening | No audio files are included. | Start with licensed Common Voice coverage for one priority language, record coverage/quality/dialect, and add listening tasks only where coverage is adequate. |
@@ -107,9 +114,13 @@ not increase readiness.
 
 Implement, in this order:
 
-1. profile/language selection and reviewed curriculum repository;
-2. unit/lesson list plus text-card learn, recognition, typed recall, and SRS;
-3. server-authoritative lesson completion, XP, streak, and daily-goal flows;
+1. profile/language selection and reviewed curriculum repository (**catalogue,
+   repository, and version checks are implemented; profile persistence and
+   staging evidence remain open**);
+2. unit/lesson list plus text-card learn, recognition, typed recall, and SRS
+   (**implemented against release-gated data; no published course exists**);
+3. server-authoritative lesson completion, XP, streak, and daily-goal flows
+   (**completion/SRS are implemented; XP, streak, and daily goal remain open**);
 4. explicit error/offline/loading states, user-scoped cache ownership, and
    feature analytics only after valid consent;
 5. content-attribution and capability pages, including a truthful no-audio
