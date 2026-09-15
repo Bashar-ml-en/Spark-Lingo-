@@ -10,7 +10,7 @@ Native learning slice. It does **not** mark any course as launch-ready.
 - An internal draft pilot package in
   `content/courses/ms-en-foundations-pilot/0.1.0-draft.1.json`. It has pending
   rights and reviewer states and is therefore intentionally unpublishable.
-- Migration `016_versioned_course_releases.sql`: immutable versioned releases,
+- Migration `019_versioned_course_releases.sql`: immutable versioned releases,
   reviewed exercises, attempt records without raw-response retention,
   server-side exercise verification, and server-side SRS scheduling.
 - React Native catalogue, course, and lesson screens. They query only current
@@ -21,7 +21,7 @@ Native learning slice. It does **not** mark any course as launch-ready.
 
 1. Content owners must produce a real reviewed package—not convert the pilot
    status fields to `approved` without evidence.
-2. Apply migration 016 to a disposable or dedicated staging project first.
+2. Apply migration 019 to a disposable or dedicated staging project first.
    Inspect the generated schema and run anonymous, user-isolation, version,
    exercise-completion, and SRS RPC smoke tests against that project.
 3. Import a signed package into `draft` release rows. Record its actual

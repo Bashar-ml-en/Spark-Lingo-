@@ -34,7 +34,7 @@ repository.
    anonymous/cross-user access is denied where required, raw learner responses
    are not retained by practice verification, error states remain visible, and
    a prior release can be restored.
-6. The release owner changes the row to `published` only when migration 016's
+6. The release owner changes the row to `published` only when migration 019's
    database gate accepts the complete approval and rights evidence. The RN
    catalogue exposes only this published release.
 
