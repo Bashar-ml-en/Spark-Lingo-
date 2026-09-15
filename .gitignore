@@ -33,6 +33,11 @@ migrate_working_dir/
 /build/
 /coverage/
 
+# React Native dependency and generated-output directories.
+/apps/mobile-rn/node_modules/
+/apps/mobile-rn/.expo/
+/apps/mobile-rn/dist/
+
 # Symbolication related
 app.*.symbols
 

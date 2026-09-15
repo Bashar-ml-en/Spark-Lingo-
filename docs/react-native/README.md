@@ -59,3 +59,7 @@ Supabase Auth / PostgREST RPC / Edge Functions / RevenueCat client SDK
   for database rows but does not validate untrusted network payloads.
 
 Read the remaining files in this directory before creating any mobile source.
+
+The foundation implementation decision is recorded in
+`IMPLEMENTATION_RFC.md`. Its source lives in `apps/mobile-rn`; it does not
+retire or relocate the Flutter client.
