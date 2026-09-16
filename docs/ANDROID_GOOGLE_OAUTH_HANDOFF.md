@@ -26,10 +26,12 @@ Project: "Spark Lingo" (existing)
    Testing until launch day, and add team emails as test users so QA
    logins don't hit "Access blocked".
 
-## Steps for me once you tell me it's done
-- Configure Supabase project dioisitgohusggmwowft with the same Google
-  client id/secret (already done for the web client — Android reuses the
-  SAME client id/secret; Google validates the caller by package+SHA-1).
+## Deployment sequence after the Android credential exists
+- Configure and test the confirmed staging project `dioisitgohusggmwowft`
+  first. Verify the actual Android callback and device sign-in there.
+- Promote the reviewed configuration independently to production
+  `stlzixqtvtfyrcbjappr` only through the approved production change path;
+  do not copy staging secrets into production.
 - Build a signed release AAB and verify Google sign-in on it.
 
 ## Why web login works but Android would not (yet)

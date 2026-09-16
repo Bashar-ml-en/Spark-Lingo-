@@ -36,7 +36,7 @@ zero assumptions, zero vague output.
 ### Repo state
 - Flutter app at C:\Users\User\spark-lingo; HEAD 04d4886; clean tree; flutter analyze clean; 47/47 tests.
 - Live deployment: https://spark-lingo.vercel.app (test-deploy to Vercel before any store build).
-- Supabase prod ref: dioisitgohusggmwowft; staging: stlzixqtvtfyrcbjappr. Google OAuth live on both.
+- Confirmed Supabase roles (2026-09-16): staging `dioisitgohusggmwowft` (ap-southeast-1); production `stlzixqtvtfyrcbjappr` (ap-northeast-1). Project IDs are non-secret; keep all credentials in the respective protected environment. OAuth configuration must be verified separately in each project.
 - Stack: Flutter + flutter_riverpod + go_router + supabase_flutter. Flutter SDK at C:\flutter
   (NOT on PATH — run: export PATH="/c/flutter/bin:$PATH"). Machine: Windows, no GPU, 16GB RAM.
 

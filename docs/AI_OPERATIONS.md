@@ -155,8 +155,9 @@ unencrypted to a remote host.
 ### Deployment commands (HUMAN-ONLY — hosted secrets)
 
 Run from a machine with the Supabase CLI authenticated
-(`supabase login`), project ref `dioisitgohusggmwowft` (or the approved
-staging/production ref):
+(`supabase login`) and an explicitly selected, approved project ref. For
+staging, use `dioisitgohusggmwowft`; production is
+`stlzixqtvtfyrcbjappr` and requires its separate production approval:
 
 ```bash
 # Switch the gateway to Qwen via DashScope (example):

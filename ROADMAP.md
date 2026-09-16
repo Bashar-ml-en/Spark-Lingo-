@@ -2,6 +2,8 @@
 
 _Last verified: 2026-08-24, commit 3274770 (origin/main in sync). Every label below was verified against the working tree, not assumed._
 
+> **Environment correction (2026-09-16):** The historic Supabase statements below are superseded for deployment purposes. The confirmed staging project is `dioisitgohusggmwowft` (ap-southeast-1), and production is `stlzixqtvtfyrcbjappr` (ap-northeast-1). Use the protected GitHub environments and the staging runbook as the deployment authority; project references alone do not prove configuration or approval.
+
 ## A. Project state at a glance
 
 | Area | Status | Evidence |
@@ -13,7 +15,7 @@ _Last verified: 2026-08-24, commit 3274770 (origin/main in sync). Every label be
 | Unit/widget tests | DONE | 44/44 passing (flutter test, 2026-08-24); flutter analyze: 0 issues |
 | CI | DONE | .github/workflows/: quality, release-android, staging-deploy, staging-security-smoke |
 | Web test deployment | DONE | https://spark-lingo.vercel.app live (HTTP 200); vercel.json SPA fallback committed |
-| Supabase project | EXISTS | dioisitgohusggmwowft — single shared project; separate staging project NOT provisioned (ENV-001 blocked, HUMAN-ONLY) |
+| Supabase environments | CONFIRMED | Staging: dioisitgohusggmwowft (ap-southeast-1); production: stlzixqtvtfyrcbjappr (ap-northeast-1). Live configuration and approval evidence remain required. |
 | Native audio (CC0) | MISSING | assets/audio/ contains only .gitkeep; Mozilla Common Voice subscription registered (HTTP 200) but tarball not yet received (CONT-002, HUMAN-ONLY) |
 | Live legal URLs | MISSING | No TERMS/PRIVACY dart-defines in any build script; LEG-001 blocked on counsel-approved HTTPS URLs (HUMAN-ONLY) |
 | Store accounts | MISSING | Google Play / App Store checklists exist in archive/ but no accounts/console wired (HUMAN-ONLY) |
@@ -35,7 +37,7 @@ _Last verified: 2026-08-24, commit 3274770 (origin/main in sync). Every label be
 4. **Retention purge test** — run scripts/verify_retention_purge.ts for OPS-001 agent-side evidence.
 
 ### Phase 2 — Human-only unlocks (blockers you must do, Bashar)
-5. **ENV-001**: create a dedicated STAGING Supabase project; give its ref to CI. Until then staging tests share production project dioisitgohusggmwowft.
+5. **ENV-001**: verify that the protected `staging` GitHub environment targets the dedicated staging project `dioisitgohusggmwowft`; do not run staging workflows against production `stlzixqtvtfyrcbjappr`.
 6. **SEC-001 completion**: finish PAT revocation + OpenAI key rotation in dashboards.
 7. **LEG-001/LEG-002**: counsel-reviewed Terms/Privacy/AI-notice on a real HTTPS domain; then add `--dart-define=TERMS_OF_SERVICE_URL=... --dart-define=PRIVACY_POLICY_URL=...` to the release build command. Until then purchases stay correctly disabled (fail-closed).
 8. **CONT-002**: confirm the Mozilla Common Voice email for abulithbisha@gmail.com, download the tarball, then the agent can run the audio-match pipeline (CC0 files only; ~99% of Tatoeba audio is CC-BY-NC and unusable).

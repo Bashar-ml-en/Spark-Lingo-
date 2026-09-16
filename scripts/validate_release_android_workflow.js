@@ -68,6 +68,7 @@ for (const expression of [
   /\.supabase\.co/,
   /sb_publishable_/,
   /dioisitgohusggmwowft/,
+  /stlzixqtvtfyrcbjappr/,
 ]) {
   if (expression.test(workflow)) {
     throw new Error(
