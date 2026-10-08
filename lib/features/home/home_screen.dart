@@ -18,6 +18,9 @@ import '../../core/router/router.dart';
 import '../../core/services/revenuecat_service.dart';
 import 'flashcard_study_session.dart';
 import 'sparky_chat_session.dart';
+import 'widgets/flight_path_bento_header.dart';
+import 'widgets/boss_drills_view.dart';
+import 'widgets/immersion_view.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -513,8 +516,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 // Top Stitch Cyber Navigation Bar with Logo Alignment & Sub-tabs
                 StitchTopBar(
                   activeLanguage: activeLanguage,
-                  streakDays: 21,
-                  totalXP: 1480,
+                  streakDays: profileAsync?.value?.streakDays ?? 0,
+                  totalXP: profileAsync?.value?.totalXp ?? 0,
                   showSubTabs: true,
                   activeSubTab: _activeNavTab,
                   onSubTabSelected: (tabId) {
@@ -629,11 +632,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   final curriculum = _buildCurriculumPath(
                                     context,
                                     ref,
-                                    profile.id,
+                                    profile,
                                     units,
                                     activeLang,
                                   );
-                                  if (!wide) return curriculum;
+                                  final Widget activeView = switch (_activeNavTab) {
+                                    'boss_drills' => BossDrillsView(
+                                      languageCode: activeLang,
+                                      onStartScenario: (title) {
+                                        _openAITutor(context, activeLang);
+                                      },
+                                    ),
+                                    'immersion' => ImmersionView(
+                                      languageCode: activeLang,
+                                      onStartLiveSession: () {
+                                        _openAITutor(context, activeLang);
+                                      },
+                                    ),
+                                    _ => curriculum,
+                                  };
+                                  if (!wide) return activeView;
                                   return Row(
                                     children: [
                                       PhaseSidebar(
@@ -650,7 +668,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                         color: SparkLingoTheme
                                             .surfaceContainerHighest,
                                       ),
-                                      Expanded(child: curriculum),
+                                      Expanded(child: activeView),
                                     ],
                                   );
                                 },
@@ -792,10 +810,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget _buildCurriculumPath(
     BuildContext context,
     WidgetRef ref,
-    String userId,
+    UserProfile profile,
     List<Unit> units,
     String langKey,
   ) {
+    final userId = profile.id;
     final isPremium = ref.watch(isPremiumProvider).value ?? false;
     final billingReady =
         ref.watch(billingAccessProvider).value == BillingAccessState.ready;
@@ -814,395 +833,39 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       itemCount: units.length + 1,
       itemBuilder: (context, index) {
         if (index == 0) {
-          // Stitch Screen 2 Header Bento Cards
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Rank Tier Banner
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 10,
-                ),
-                decoration: BoxDecoration(
-                  color: SparkLingoTheme.surfaceContainer,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: SparkLingoTheme.surfaceContainerHighest,
+          return FlightPathBentoHeader(
+            profile: profile,
+            currentUnit: currentUnit,
+            completionRate: units.isNotEmpty
+                ? (_selectedUnitIndex + 1) / units.length
+                : 0.1,
+            onContinueLearning: () {
+              if (currentUnit != null) {
+                final lessonsAsync = ref.read(
+                  lessonsProvider(currentUnit.id),
+                );
+                lessonsAsync.whenData((lessons) {
+                  if (lessons.isNotEmpty) {
+                    _openLessonFromSidebar(
+                      _selectedUnitIndex,
+                      lessons.first,
+                    );
+                  }
+                });
+              }
+            },
+            onAnalyticsTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => ExamReadinessDashboard(
+                    userId: userId,
+                    examId: 'cefr_$langKey',
+                    languageCode: langKey,
                   ),
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: const [
-                        Icon(
-                          Icons.military_tech,
-                          color: SparkLingoTheme.solarGold,
-                          size: 20,
-                        ),
-                        SizedBox(width: 8),
-                        Text(
-                          'TIER 3 · DIAMOND LEAGUE',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w800,
-                            color: Colors.white,
-                            letterSpacing: 1.2,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Row(
-                      children: const [
-                        Icon(
-                          Icons.diamond_outlined,
-                          color: SparkLingoTheme.electricCyan,
-                          size: 16,
-                        ),
-                        SizedBox(width: 4),
-                        Text(
-                          '1,240 XP',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w900,
-                            color: SparkLingoTheme.electricCyan,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 14),
-
-              // Unit Roadmap Bento Card with circular progress ring
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: SparkLingoTheme.surfaceContainer,
-                  borderRadius: BorderRadius.circular(24),
-                  border: Border.all(
-                    color: SparkLingoTheme.surfaceContainerHighest,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.4),
-                      blurRadius: 16,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                currentUnit != null
-                                    ? 'UNIT ${_selectedUnitIndex + 1}: ${currentUnit.title.toUpperCase()}'
-                                    : 'CURRENT UNIT',
-                                style: const TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w800,
-                                  color: SparkLingoTheme.electricCyan,
-                                  letterSpacing: 1.2,
-                                ),
-                              ),
-                              const SizedBox(height: 6),
-                              Text(
-                                currentUnit?.description ??
-                                    'Master core conversation and real sentence patterns.',
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white,
-                                  height: 1.3,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        // Circular Progress Ring (85%)
-                        Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            SizedBox(
-                              width: 54,
-                              height: 54,
-                              child: CircularProgressIndicator(
-                                value: 0.85,
-                                strokeWidth: 5,
-                                backgroundColor:
-                                    SparkLingoTheme.surfaceContainerHighest,
-                                valueColor: const AlwaysStoppedAnimation<Color>(
-                                  SparkLingoTheme.electricCyan,
-                                ),
-                              ),
-                            ),
-                            const Text(
-                              '85%',
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w900,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: ElevatedButton.icon(
-                            onPressed: () {
-                              if (currentUnit != null) {
-                                final lessonsAsync = ref.read(
-                                  lessonsProvider(currentUnit.id),
-                                );
-                                lessonsAsync.whenData((lessons) {
-                                  if (lessons.isNotEmpty) {
-                                    _openLessonFromSidebar(
-                                      _selectedUnitIndex,
-                                      lessons.first,
-                                    );
-                                  }
-                                });
-                              }
-                            },
-                            icon: const Icon(Icons.bolt_rounded, size: 18),
-                            label: const Text(
-                              'CONTINUE LEARNING',
-                              style: TextStyle(
-                                fontWeight: FontWeight.w800,
-                                fontSize: 13,
-                              ),
-                            ),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: SparkLingoTheme.electricCyan,
-                              foregroundColor: SparkLingoTheme.surfaceCanvas,
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14),
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        OutlinedButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => ExamReadinessDashboard(
-                                  userId: userId,
-                                  examId: 'cefr_$langKey',
-                                  languageCode: langKey,
-                                ),
-                              ),
-                            );
-                          },
-                          style: OutlinedButton.styleFrom(
-                            side: BorderSide(
-                              color: SparkLingoTheme.surfaceContainerHighest,
-                            ),
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 12,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                          ),
-                          child: const Icon(
-                            Icons.analytics_outlined,
-                            size: 20,
-                            color: SparkLingoTheme.solarGold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 14),
-
-              // Duo Metric Cards
-              Row(
-                children: [
-                  // Today's Target
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: SparkLingoTheme.surfaceContainer,
-                        borderRadius: BorderRadius.circular(18),
-                        border: Border.all(
-                          color: SparkLingoTheme.surfaceContainerHighest,
-                        ),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            "TODAY'S TARGET",
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w800,
-                              color: Color(0xFF94A3B8),
-                              letterSpacing: 1.0,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          Row(
-                            children: const [
-                              Text(
-                                '11',
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w900,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              Text(
-                                ' / 15 min',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: Color(0xFF94A3B8),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(4),
-                            child: LinearProgressIndicator(
-                              value: 11 / 15,
-                              minHeight: 6,
-                              backgroundColor:
-                                  SparkLingoTheme.surfaceContainerHighest,
-                              valueColor: const AlwaysStoppedAnimation<Color>(
-                                SparkLingoTheme.solarGold,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  // SM-2 Reviews Due
-                  Expanded(
-                    child: Consumer(
-                      builder: (context, ref, child) {
-                        final reviews =
-                            ref
-                                .watch(
-                                  cardReviewsProvider(
-                                    CardReviewsParam(userId, langKey),
-                                  ),
-                                )
-                                .value ??
-                            {};
-                        final dueCount = reviews.values
-                            .where(
-                              (r) => !r.nextReviewAt.isAfter(DateTime.now()),
-                            )
-                            .length;
-                        final countDisplay = dueCount > 0 ? '$dueCount' : '18';
-
-                        return Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: SparkLingoTheme.surfaceContainer,
-                            borderRadius: BorderRadius.circular(18),
-                            border: Border.all(
-                              color: SparkLingoTheme.surfaceContainerHighest,
-                            ),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'SM-2 REVIEWS',
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w800,
-                                  color: Color(0xFF94A3B8),
-                                  letterSpacing: 1.0,
-                                ),
-                              ),
-                              const SizedBox(height: 6),
-                              Row(
-                                children: [
-                                  Text(
-                                    countDisplay,
-                                    style: const TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.w900,
-                                      color: SparkLingoTheme.electricCyan,
-                                    ),
-                                  ),
-                                  const Text(
-                                    ' due cards',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                      color: Color(0xFF94A3B8),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 8),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 6,
-                                  vertical: 2,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: SparkLingoTheme.electricCyan
-                                      .withValues(alpha: 0.15),
-                                  borderRadius: BorderRadius.circular(6),
-                                ),
-                                child: const Text(
-                                  'Ready for review',
-                                  style: TextStyle(
-                                    fontSize: 9,
-                                    fontWeight: FontWeight.w700,
-                                    color: SparkLingoTheme.electricCyan,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              const Text(
-                'LEARNING PATHWAY',
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w800,
-                  color: SparkLingoTheme.electricCyan,
-                  letterSpacing: 1.5,
-                ),
-              ),
-              const SizedBox(height: 12),
-            ],
+              );
+            },
           );
         }
 

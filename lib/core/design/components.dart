@@ -475,3 +475,195 @@ class _SparkSkeletonState extends State<SparkSkeleton>
     );
   }
 }
+
+/// Stitch Design System — Primary Full-Width CTA with Indigo-Violet Gradient.
+class StitchGradientButton extends StatelessWidget {
+  final String label;
+  final IconData? icon;
+  final VoidCallback? onPressed;
+  final bool isLoading;
+
+  const StitchGradientButton({
+    super.key,
+    required this.label,
+    this.icon,
+    this.onPressed,
+    this.isLoading = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: onPressed != null
+            ? const [
+                BoxShadow(
+                  color: Color(0x406366F1),
+                  blurRadius: 20,
+                  offset: Offset(0, 4),
+                ),
+              ]
+            : null,
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: isLoading ? null : onPressed,
+          child: Ink(
+            decoration: BoxDecoration(
+              gradient: onPressed != null
+                  ? StitchTokens.primaryGradient
+                  : LinearGradient(
+                      colors: [
+                        StitchTokens.surfaceHigh,
+                        StitchTokens.surfaceHighest,
+                      ],
+                    ),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: onPressed != null
+                    ? const Color(0x4D8B5CF6)
+                    : StitchTokens.borderHairline,
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 15),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (isLoading) ...[
+                    const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                  ] else if (icon != null) ...[
+                    Icon(icon, size: 18, color: Colors.white),
+                    const SizedBox(width: 8),
+                  ],
+                  Text(
+                    label,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 14,
+                      letterSpacing: 0.5,
+                      fontFamily: 'Plus Jakarta Sans',
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Stitch Design System — CEFR Level Badge in tabular monospace styling.
+class StitchCefrBadge extends StatelessWidget {
+  final String level; // e.g. "A1", "A2", "B1", "B2", "C1", "C2"
+  final bool compact;
+
+  const StitchCefrBadge({
+    super.key,
+    required this.level,
+    this.compact = false,
+  });
+
+  Color _levelColor() {
+    final upper = level.toUpperCase();
+    if (upper.startsWith('C')) return StitchTokens.masteryEmerald;
+    if (upper.startsWith('B')) return StitchTokens.primaryIndigo;
+    return StitchTokens.textSecondary;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final color = _levelColor();
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: compact ? 6 : 10,
+        vertical: compact ? 2 : 4,
+      ),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(9999),
+        border: Border.all(
+          color: color.withValues(alpha: 0.35),
+          width: 1,
+        ),
+      ),
+      child: Text(
+        level.toUpperCase(),
+        style: TextStyle(
+          color: color,
+          fontFamily: 'JetBrains Mono',
+          fontWeight: FontWeight.w700,
+          fontSize: compact ? 10 : 12,
+          letterSpacing: 0.5,
+        ),
+      ),
+    );
+  }
+}
+
+/// Stitch Design System — Glassmorphic Container with 1px Hairline Border.
+class StitchGlassCard extends StatelessWidget {
+  final Widget child;
+  final EdgeInsetsGeometry? padding;
+  final EdgeInsetsGeometry? margin;
+  final VoidCallback? onTap;
+  final bool isElevated;
+  final Color? borderColor;
+
+  const StitchGlassCard({
+    super.key,
+    required this.child,
+    this.padding,
+    this.margin,
+    this.onTap,
+    this.isElevated = false,
+    this.borderColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final bg = isElevated ? StitchTokens.surfaceDefault : StitchTokens.surfaceLow;
+    final border = borderColor ?? StitchTokens.borderHairline;
+
+    final content = Container(
+      margin: margin,
+      padding: padding ?? const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: border, width: 1),
+        boxShadow: isElevated
+            ? const [
+                BoxShadow(
+                  color: Color(0x1A000000),
+                  blurRadius: 16,
+                  offset: Offset(0, 4),
+                ),
+              ]
+            : null,
+      ),
+      child: child,
+    );
+
+    if (onTap == null) return content;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: content,
+    );
+  }
+}

@@ -93,10 +93,71 @@ abstract final class SparkSize {
 
 /// Semantic status colors shared by streaks, XP, and feedback states.
 abstract final class SparkStatus {
-  static const Color streak = Color(0xFFFF9500);
-  static const Color xp = Color(0xFFFFC800);
-  static const Color success = Color(0xFF00C853);
-  static const Color warning = Color(0xFFFFAB00);
-  static const Color danger = Color(0xFFFF1744);
-  static const Color info = Color(0xFF2196F3);
+  static const Color streak = Color(0xFFF59E0B);
+  static const Color xp = Color(0xFF6366F1);
+  static const Color success = Color(0xFF10B981);
+  static const Color warning = Color(0xFFF59E0B);
+  static const Color danger = Color(0xFFF43F5E);
+  static const Color info = Color(0xFF6366F1);
+}
+
+/// Stitch Design System — LingoCraft Obsidian palette & specular tokens.
+abstract final class StitchTokens {
+  // Foundation Surfaces (OLED Deep Obsidian Architecture)
+  static const Color canvasBase = Color(0xFF090A0F);
+  static const Color surfaceLowest = Color(0xFF0B0E18);
+  static const Color surfaceLow = Color(0xFF12141F);
+  static const Color surfaceDefault = Color(0xFF1D1F2A);
+  static const Color surfaceHigh = Color(0xFF272935);
+  static const Color surfaceHighest = Color(0xFF323440);
+  static const Color borderHairline = Color(0xFF2A2F45);
+  static const Color borderSubtle = Color(0x402A2F45);
+
+  // Semantic & Performance Accents
+  static const Color primaryIndigo = Color(0xFF6366F1);
+  static const Color primaryViolet = Color(0xFF8B5CF6);
+  static const Color masteryEmerald = Color(0xFF10B981);
+  static const Color kineticAmber = Color(0xFFF59E0B);
+  static const Color diagnosticRose = Color(0xFFF43F5E);
+
+  // Text Contrast Tiers
+  static const Color textPrimary = Color(0xFFF8FAFC);
+  static const Color textSecondary = Color(0xFF94A3B8);
+  static const Color textTertiary = Color(0xFF475569);
+
+  // Gradients
+  static const LinearGradient primaryGradient = LinearGradient(
+    colors: [primaryIndigo, primaryViolet],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  static const LinearGradient accentGlow = LinearGradient(
+    colors: [Color(0x336366F1), Colors.transparent],
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+  );
+
+  // Specular Edge & Halos
+  static const List<BoxShadow> activeVoiceGlow = [
+    BoxShadow(
+      color: Color(0x406366F1),
+      blurRadius: 24,
+      spreadRadius: 2,
+    ),
+  ];
+
+  static const List<BoxShadow> masteryGlow = [
+    BoxShadow(
+      color: Color(0x3310B981),
+      blurRadius: 20,
+    ),
+  ];
+
+  static const List<BoxShadow> diagnosticGlow = [
+    BoxShadow(
+      color: Color(0x33F43F5E),
+      blurRadius: 16,
+    ),
+  ];
 }

@@ -5,16 +5,19 @@ export 'theme_mode_provider.dart';
 typedef SparkLingoTheme = SparkTheme;
 
 class SparkTheme {
-  // Brand Color Tokens (Stitch World-Class System - Dark Mode)
-  static const Color surfaceCanvas = Color(0xFF051424); // Deep Space Navy
-  static const Color surfaceContainer = Color(0xFF122131);
-  static const Color surfaceContainerHigh = Color(0xFF1C2B3C);
-  static const Color surfaceContainerHighest = Color(0xFF273647);
-  static const Color surfaceContainerLow = Color(0xFF0D1C2D);
-  static const Color surfaceContainerLowest = Color(0xFF010F1F);
-  static const Color surfaceBright = Color(0xFF2C3A4C);
+  // Foundation Surfaces (Stitch LingoCraft Obsidian - Deep OLED Architecture)
+  static const Color surfaceCanvas = Color(0xFF090A0F); // Deep Obsidian Base
+  static const Color surfaceContainerLowest = Color(0xFF0B0E18);
+  static const Color surfaceContainerLow = Color(0xFF12141F);
+  static const Color surfaceContainer = Color(0xFF1D1F2A);
+  static const Color surfaceContainerHigh = Color(0xFF272935);
+  static const Color surfaceContainerHighest = Color(0xFF323440);
+  static const Color surfaceBright = Color(0xFF373845);
 
-  // Light Mode Tokens
+  // Structural Framing
+  static const Color structuralBorder = Color(0xFF2A2F45);
+
+  // Light Mode Tokens (Clean Editorial Contrast)
   static const Color lightCanvas = Color(0xFFF8FAFC);
   static const Color lightContainer = Color(0xFFFFFFFF);
   static const Color lightContainerHigh = Color(0xFFF1F5F9);
@@ -39,7 +42,7 @@ class SparkTheme {
       isDarkMode(context) ? surfaceContainerHigh : lightContainerHigh;
 
   static Color border(BuildContext context) =>
-      isDarkMode(context) ? surfaceContainerHighest : lightBorder;
+      isDarkMode(context) ? structuralBorder : lightBorder;
 
   static Color text(BuildContext context) =>
       isDarkMode(context) ? textPrimary : lightTextPrimary;
@@ -47,29 +50,38 @@ class SparkTheme {
   static Color subtext(BuildContext context) =>
       isDarkMode(context) ? textSecondary : lightTextSecondary;
 
-  static const Color electricCyan = Color(0xFF00E5FF);
-  static const Color primaryCyan = Color(0xFFC3F5FF);
-  static const Color primaryCyanDim = Color(0xFF00DAF3);
-  static const Color accessibleCyan = Color(0xFF0097A7);
+  // Stitch Semantic Accents
+  static const Color primaryIndigo = Color(0xFF6366F1);
+  static const Color primaryViolet = Color(0xFF8B5CF6);
+  static const Color masteryEmerald = Color(0xFF10B981);
+  static const Color kineticAmber = Color(0xFFF59E0B);
+  static const Color diagnosticRose = Color(0xFFF43F5E);
 
-  static const Color solarGold = Color(0xFFFFB77A);
-  static const Color solarGoldContainer = Color(0xFFD37B1D);
-  static const Color solarGoldFixed = Color(0xFFFFDCC2);
+  // Backward-compatible color aliases wired to Stitch system
+  static const Color electricCyan = primaryIndigo;
+  static const Color primaryCyan = Color(0xFFC0C1FF);
+  static const Color primaryCyanDim = Color(0xFF8083FF);
+  static const Color accessibleCyan = primaryIndigo;
 
-  static const Color textPrimary = Color(0xFFD4E4FA);
-  static const Color textSecondary = Color(0xFFBAC9CC);
-  static const Color outlineColor = Color(0xFF849396);
-  static const Color outlineVariantColor = Color(0xFF3B494C);
+  static const Color solarGold = kineticAmber;
+  static const Color solarGoldContainer = Color(0xFFD97706);
+  static const Color solarGoldFixed = Color(0xFFFDE68A);
 
-  static const Color successGreen = Color(0xFF10B981);
-  static const Color errorRed = Color(0xFFFFB4AB);
+  static const Color textPrimary = Color(0xFFF8FAFC);
+  static const Color textSecondary = Color(0xFF94A3B8);
+  static const Color textTertiary = Color(0xFF475569);
+  static const Color outlineColor = structuralBorder;
+  static const Color outlineVariantColor = Color(0xFF464554);
+
+  static const Color successGreen = masteryEmerald;
+  static const Color errorRed = diagnosticRose;
   static const Color errorContainer = Color(0xFF93000A);
 
   // Backward-compatible aliases
   static const Color obsidianBlack = surfaceCanvas;
   static const Color deepCharcoal = surfaceContainer;
   static const Color elevatedSurface = surfaceContainerHigh;
-  static const Color vividOrange = solarGold;
+  static const Color vividOrange = kineticAmber;
 
   // System Typography Fallbacks (Preventing FOIT/CLS)
   static const List<String> fontFallbacks = [

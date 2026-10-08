@@ -1,0 +1,234 @@
+{
+  "name": "projects/13077383863298841327",
+  "title": "AI Language Learning Platform",
+  "visibility": "PRIVATE",
+  "createTime": "2026-10-07T16:14:22.502590Z",
+  "updateTime": "2026-10-07T16:23:52.853526Z",
+  "projectType": "TEXT_TO_UI_PRO",
+  "thumbnailScreenshot": {
+    "name": "projects/13077383863298841327/screens/17b6b283c3944dcc927c086d27826de0/fileEntries/screenshot",
+    "downloadUrl": "https://lh3.googleusercontent.com/aida/AEtjO1Wr_zvz34i-5g9-Ku5tZweqgVN7dAmIBsup3S7WwhxqLlBh3GabwftbYhxWjS_L7nWY3ekdxkkSLr2XjY9d8NqfWxW4VmFMUp4vDjydQ4whmcAJXtJCm5C17NoAxie0uuh7GXN3G8be2AG1rhbRgCB3trm0_y-e8EOaM6nQK1o-0AsZLUyTInUPJjvYx64DAsG4Kib0Li_gFm9FeuWryaA49OhmuSg98zKCB3lkmMAW"
+  },
+  "origin": "STITCH",
+  "deviceType": "MOBILE",
+  "designTheme": {
+    "colorMode": "DARK",
+    "font": "PLUS_JAKARTA_SANS",
+    "roundness": "ROUND_EIGHT",
+    "customColor": "#6366f1",
+    "headlineFont": "PLUS_JAKARTA_SANS",
+    "bodyFont": "INTER",
+    "labelFont": "JETBRAINS_MONO",
+    "namedColors": {
+      "surface_bright": "#373845",
+      "on_tertiary_fixed_variant": "#005236",
+      "surface_container_high": "#272935",
+      "on_primary": "#1000a9",
+      "on_primary_fixed_variant": "#2f2ebe",
+      "on_secondary": "#3c0091",
+      "inverse_surface": "#e1e1f1",
+      "error": "#ffb4ab",
+      "surface_variant": "#323440",
+      "secondary_fixed_dim": "#d0bcff",
+      "outline": "#908fa0",
+      "on_error_container": "#ffdad6",
+      "primary_fixed_dim": "#c0c1ff",
+      "inverse_on_surface": "#2e303c",
+      "background": "#11131e",
+      "on_secondary_fixed_variant": "#5516be",
+      "tertiary": "#4edea3",
+      "surface_container": "#1d1f2a",
+      "secondary_container": "#571bc1",
+      "primary": "#c0c1ff",
+      "on_primary_container": "#0d0096",
+      "tertiary_container": "#00885d",
+      "on_primary_fixed": "#07006c",
+      "primary_container": "#8083ff",
+      "tertiary_fixed_dim": "#4edea3",
+      "outline_variant": "#464554",
+      "secondary_fixed": "#e9ddff",
+      "on_surface_variant": "#c7c4d7",
+      "surface": "#11131e",
+      "on_secondary_fixed": "#23005c",
+      "surface_container_lowest": "#0b0e18",
+      "surface_container_low": "#191b26",
+      "primary_fixed": "#e1e0ff",
+      "secondary": "#d0bcff",
+      "surface_container_highest": "#323440",
+      "on_tertiary": "#003824",
+      "error_container": "#93000a",
+      "on_background": "#e1e1f1",
+      "surface_dim": "#11131e",
+      "tertiary_fixed": "#6ffbbe",
+      "on_error": "#690005",
+      "on_surface": "#e1e1f1",
+      "on_secondary_container": "#c4abff",
+      "inverse_primary": "#494bd6",
+      "on_tertiary_fixed": "#002113",
+      "surface_tint": "#c0c1ff",
+      "on_tertiary_container": "#000703"
+    },
+    "designMd": "---\nname: LingoCraft Obsidian\ncolors:\n  surface: '#11131e'\n  surface-dim: '#11131e'\n  surface-bright: '#373845'\n  surface-container-lowest: '#0b0e18'\n  surface-container-low: '#191b26'\n  surface-container: '#1d1f2a'\n  surface-container-high: '#272935'\n  surface-container-highest: '#323440'\n  on-surface: '#e1e1f1'\n  on-surface-variant: '#c7c4d7'\n  inverse-surface: '#e1e1f1'\n  inverse-on-surface: '#2e303c'\n  outline: '#908fa0'\n  outline-variant: '#464554'\n  surface-tint: '#c0c1ff'\n  primary: '#c0c1ff'\n  on-primary: '#1000a9'\n  primary-container: '#8083ff'\n  on-primary-container: '#0d0096'\n  inverse-primary: '#494bd6'\n  secondary: '#d0bcff'\n  on-secondary: '#3c0091'\n  secondary-container: '#571bc1'\n  on-secondary-container: '#c4abff'\n  tertiary: '#4edea3'\n  on-tertiary: '#003824'\n  tertiary-container: '#00885d'\n  on-tertiary-container: '#000703'\n  error: '#ffb4ab'\n  on-error: '#690005'\n  error-container: '#93000a'\n  on-error-container: '#ffdad6'\n  primary-fixed: '#e1e0ff'\n  primary-fixed-dim: '#c0c1ff'\n  on-primary-fixed: '#07006c'\n  on-primary-fixed-variant: '#2f2ebe'\n  secondary-fixed: '#e9ddff'\n  secondary-fixed-dim: '#d0bcff'\n  on-secondary-fixed: '#23005c'\n  on-secondary-fixed-variant: '#5516be'\n  tertiary-fixed: '#6ffbbe'\n  tertiary-fixed-dim: '#4edea3'\n  on-tertiary-fixed: '#002113'\n  on-tertiary-fixed-variant: '#005236'\n  background: '#11131e'\n  on-background: '#e1e1f1'\n  surface-variant: '#323440'\ntypography:\n  display-hero:\n    fontFamily: Plus Jakarta Sans\n    fontSize: 40px\n    fontWeight: '700'\n    lineHeight: 48px\n  display-hero-mobile:\n    fontFamily: Plus Jakarta Sans\n    fontSize: 30px\n    fontWeight: '700'\n    lineHeight: 38px\n  headline-lg:\n    fontFamily: Plus Jakarta Sans\n    fontSize: 26px\n    fontWeight: '600'\n    lineHeight: 34px\n  headline-md:\n    fontFamily: Plus Jakarta Sans\n    fontSize: 20px\n    fontWeight: '600'\n    lineHeight: 28px\n  headline-sm:\n    fontFamily: Plus Jakarta Sans\n    fontSize: 17px\n    fontWeight: '600'\n    lineHeight: 24px\n  body-lg:\n    fontFamily: Inter\n    fontSize: 18px\n    fontWeight: '400'\n    lineHeight: 28px\n  body-md:\n    fontFamily: Inter\n    fontSize: 15px\n    fontWeight: '400'\n    lineHeight: 22px\n  body-sm:\n    fontFamily: Inter\n    fontSize: 13px\n    fontWeight: '400'\n    lineHeight: 18px\n  label-tabular-lg:\n    fontFamily: JetBrains Mono\n    fontSize: 16px\n    fontWeight: '600'\n    lineHeight: 20px\n  label-tabular-md:\n    fontFamily: JetBrains Mono\n    fontSize: 13px\n    fontWeight: '500'\n    lineHeight: 16px\n  label-tabular-sm:\n    fontFamily: JetBrains Mono\n    fontSize: 11px\n    fontWeight: '500'\n    lineHeight: 14px\n  badge-cefr:\n    fontFamily: JetBrains Mono\n    fontSize: 12px\n    fontWeight: '700'\n    lineHeight: 12px\nrounded:\n  sm: 0.25rem\n  DEFAULT: 0.5rem\n  md: 0.75rem\n  lg: 1rem\n  xl: 1.5rem\n  full: 9999px\nspacing:\n  gutter: 1rem\n  margin: 1rem\n  margin-tablet: 1.5rem\n  space-xs: 0.25rem\n  space-sm: 0.5rem\n  space-md: 1rem\n  space-lg: 1.5rem\n  space-xl: 2rem\n---\n\n## Brand & Style\n\nThis design system establishes an ultra-premium, dark-mode-first environment tailored for high-focus language acquisition. It merges the disciplined precision of modern developer tools with the scientific rigor of health and performance telemetry, discarding childish gamification tropes in favor of an intelligent, tactile, and sleek digital craft.\n\n### Emotional Posture & Audience\n- **Target Audience:** Polyglots, ambitious professionals, linguistic researchers, and dedicated learners who treat cognitive acquisition as an elite discipline.\n- **Emotional Response:** Deep state of flow, cerebral clarity, technological confidence, and measurable daily mastery.\n- **Visual Aesthetic:** Neo-editorial dark glassmorphism. Deep obsidian foundations paired with subtle refraction, laser-sharp 1px structural framing, and pinpoint bioluminescent semantic accents that spotlight active cognitive performance without inducing eye strain.\n\n## Colors\n\nThe palette leverages a deep obsidian depth architecture calibrated for OLED screens, paired with high-frequency functional accents. \n\n### Foundation Surfaces\n- **Canvas Base (`#090A0F`):** Deep zero-level obsidian background for global screens.\n- **Surface Elevation 1 (`#12141F`):** Secondary container layer for interactive surfaces, exercise panels, and sheets.\n- **Surface Elevation 2 (`#1A1D2E`):** Floating modules, active state cards, and sheet dialogues.\n- **Structural Border (`#2A2F45`):** Razor-thin 1px border framing to delineate glass layers without visual bulk.\n\n### Semantic & Performance Accents\n- **Primary Indigo (`#6366F1`) & Violet Aura (`#8B5CF6`):** Signals active prompts, voice synthesis generation, and core navigational interactive targets.\n- **Mastery Emerald (`#10B981`):** Validated syntax, perfect acoustic pronunciation scores, and graduated memory retention intervals.\n- **Kinetic Amber (`#F59E0B`):** Streak maintenance, spacing cadence warnings, critical phonetic tips, and active burn rates.\n- **Diagnostic Rose (`#F43F5E`):** Grammar inflection anomalies, mispronounced phonemes, and structural corrections.\n\n### Text Contrast Tiers\n- **Text Primary (`#F8FAFC`):** Highest contrast tier for target language vocab, primary inputs, and core prompts.\n- **Text Secondary (`#94A3B8`):** Translation equivalents, grammatical glosses, and secondary metadata.\n- **Text Tertiary (`#475569`):** Inactive indicators, syntax category labels, and timestamp metadata.\n\n## Typography\n\nThe typographic hierarchy uses a dual-discipline strategy: Neo-grotesque typefaces establish conversational fluid elegance, while monospaced data treatments inject surgical diagnostic credibility.\n\n### Structural Pairing\n- **Headlines (`Plus Jakarta Sans`):** Soft geometric contours prevent technical fatigue while preserving a contemporary, focused authority.\n- **Body Context (`Inter`):** Extreme legibility across complex multi-language scripts, diacritics, and native-to-target language translations.\n- **Diagnostic Tabular (`JetBrains Mono`):** Dedicated exclusively to telemetry metrics, CEFR level markers (e.g., `B2.4`, `C1`), voice pitch hertz frequencies, match accuracy percentages, and spaced repetition half-life decay timers. All diagnostic figures must render with tabular figures to avoid layout jitter during live voice feedback.\n\n## Layout & Spacing\n\nLayouts are engineered primarily for single-handed mobile usage, relying on a 4-column fluid mobile grid transitioning to an 8-column layout on tablets.\n\n### Thumb-Zone Ergonomics\n- Interactive decision hubs (audio record triggers, check-answer CTA trays, multiple-choice grammar tiles) anchor within the lower 38% of the viewport (the physiological thumb-sweep zone).\n- High-level telemetry (spaced-repetition retention rings, daily velocity streaks, CEFR mastery tags) sits in the top inspection zone with fixed vertical heights to prevent layout shifts.\n\n### Spacing Cadence\nA rigid 4px/8px rhythmic scale governs component interiors. Spacing tokens isolate metadata chunks:\n- Compact chips and badges use `space-xs` (4px) to `space-sm` (8px) internal padding.\n- Card interiors enforce `space-md` (16px) or `space-lg` (24px) for high optical separation between foreign source phrases and localized contextual aids.\n- Outer container margins scale from 16px (`1rem`) on handheld mobile screens to 24px (`1.5rem`) on larger viewports.\n\n## Elevation & Depth\n\nVisual hierarchy does not rely on traditional muddy drop shadows. Instead, depth is articulated through **optical glassmorphism, surface luminance, and edge specular highlights**.\n\n### Structural Surface Stack\n1. **Canvas Layer (`#090A0F`):** Absorbs light; provides the deep foundation.\n2. **Elevated Glass Tier 1 (`#12141F` with 80% opacity, 16px backdrop-blur):** Default resting state for passive study modules, sentence breakdown cards, and speech logs. Enclosed in a crisp `1px solid rgba(42, 47, 69, 0.7)` hairline rim.\n3. **Elevated Glass Tier 2 (`#1A1D2E` with 90% opacity, 24px backdrop-blur):** Reserved for modal sheets, sticky control footers, and active prompt trays. Enclosed in `1px solid rgba(99, 102, 241, 0.25)`.\n\n### Accent Glows & Bioluminescence\nInteractive focus and success events trigger soft specular halos:\n- **Active State / Recording:** `0px 0px 24px 0px rgba(99, 102, 241, 0.25)` centered on the voice capture surface.\n- **Mastery State:** `0px 0px 20px 0px rgba(16, 185, 129, 0.2)` edge illumination along the border framing.\n- **Diagnostic Correction:** `0px 0px 16px 0px rgba(244, 63, 94, 0.2)` highlighting phonetic discrepancy nodes.\n\n## Shapes\n\nThe geometric architecture relies on rounded structural containment (`roundedness: 2`), balancing ergonomic friendliness with technical structure.\n\n### Corner Radii Guidelines\n- **Core Cards & Panels:** Standard `0.5rem` (8px) to `1rem` (16px) corner curves for consistent structural grounding.\n- **Interactive Exercise Chips & Option Blocks:** `0.75rem` (12px) radii for large tap surfaces that remain distinct from fluid text.\n- **Pills, Badges & Voice Triggers:** Fully rounded pill forms (`9999px`) applied strictly to status indicators (CEFR markers, SRS memory badges) and floating action actuators (mic controls, audio replay toggles).\n\n## Components\n\n### Action Triggers & Buttons\n- **Primary Exercise CTA:** Full-width bottom dock button with an indigo-to-violet linear gradient (`#6366F1` to `#8B5CF6`). Crisp, uppercase typography (`Plus Jakarta Sans`, 16px, SemiBold). Pressed state compresses slightly (`scale(0.98)`) with zero-latency tactile feedback.\n- **Secondary Interaction:** Translucent `#1A1D2E` with a 1px border of `#2A2F45`. Hover/focus activates a subtle `#6366F1` stroke highlight.\n\n### Audio Waveform & Phonetic Visualizer\n- Multi-bar reactive canvas with rounded caps (`width: 3px`, `gap: 2px`).\n- Inactive state: Dim indigo (`#2A2F45`).\n- Active user input: Animates vertically using Emerald (`#10B981`) for correct pitch/formants and Rose (`#F43F5E`) for misaligned stresses.\n- Core mic trigger: Centered 72px pill button with layered concentric ripple pulses (`rgba(99, 102, 241, 0.15)`).\n\n### CEFR Badges & Micro-Telemetry Pills\n- Pill format: `padding: 4px 10px`, background: `rgba(26, 29, 46, 0.8)`, border: `1px solid #2A2F45`.\n- Text renders in `JetBrains Mono` (`12px`, Bold).\n- Color coding: `A1-A2` (Slate `#94A3B8`), `B1-B2` (Indigo `#6366F1`), `C1-C2` (Emerald `#10B981`).\n\n### Fluency Progress Rings & Retention Meters\n- Background track: 3px stroke of `#1A1D2E`.\n- Active meter: Dynamic SVG stroke dasharray in Emerald (`#10B981`) or Kinetic Amber (`#F59E0B`), featuring rounded line-caps.\n- Center slot contains high-contrast Tabular Figures (`JetBrains Mono`) tracking SRS memory half-life decay (e.g., `94%`).\n\n### Interactive Syntax & Exercise Cards\n- Resting: `#12141F` background, 1px border `#2A2F45`.\n- Selected/Active: Background shifts to `rgba(99, 102, 241, 0.08)`, border illuminates to `#6366F1`.\n- Correct Answer: Border snaps to `#10B981`, accompanied by a subtle 12px diffuse emerald glow.\n- Incorrect Answer: Border shifts to `#F43F5E`, paired with inline diagnostic correction chips below the target tokens.\n\n### Form Inputs & Grammar Text Fields\n- Obsidian inset field (`#090A0F`), 1px border (`#2A2F45`).\n- Caret styled in luminous `#8B5CF6`.\n- Direct translation aids float above the input in secondary typography (`Inter`, 13px, `#94A3B8`).",
+    "colorVariant": "FIDELITY",
+    "overridePrimaryColor": "#6366f1",
+    "overrideSecondaryColor": "#8b5cf6",
+    "overrideTertiaryColor": "#10b981",
+    "overrideNeutralColor": "#12141f",
+    "spacingScale": 2,
+    "typography": {
+      "body-sm": {
+        "fontFamily": "Inter",
+        "fontSize": "13px",
+        "fontWeight": "400",
+        "lineHeight": "18px"
+      },
+      "label-tabular-sm": {
+        "fontFamily": "JetBrains Mono",
+        "fontSize": "11px",
+        "fontWeight": "500",
+        "lineHeight": "14px"
+      },
+      "body-lg": {
+        "fontFamily": "Inter",
+        "fontSize": "18px",
+        "fontWeight": "400",
+        "lineHeight": "28px"
+      },
+      "display-hero-mobile": {
+        "fontFamily": "Plus Jakarta Sans",
+        "fontSize": "30px",
+        "fontWeight": "700",
+        "lineHeight": "38px"
+      },
+      "body-md": {
+        "fontFamily": "Inter",
+        "fontSize": "15px",
+        "fontWeight": "400",
+        "lineHeight": "22px"
+      },
+      "label-tabular-md": {
+        "fontFamily": "JetBrains Mono",
+        "fontSize": "13px",
+        "fontWeight": "500",
+        "lineHeight": "16px"
+      },
+      "headline-sm": {
+        "fontFamily": "Plus Jakarta Sans",
+        "fontSize": "17px",
+        "fontWeight": "600",
+        "lineHeight": "24px"
+      },
+      "label-tabular-lg": {
+        "fontFamily": "JetBrains Mono",
+        "fontSize": "16px",
+        "fontWeight": "600",
+        "lineHeight": "20px"
+      },
+      "badge-cefr": {
+        "fontFamily": "JetBrains Mono",
+        "fontSize": "12px",
+        "fontWeight": "700",
+        "lineHeight": "12px"
+      },
+      "headline-lg": {
+        "fontFamily": "Plus Jakarta Sans",
+        "fontSize": "26px",
+        "fontWeight": "600",
+        "lineHeight": "34px"
+      },
+      "display-hero": {
+        "fontFamily": "Plus Jakarta Sans",
+        "fontSize": "40px",
+        "fontWeight": "700",
+        "lineHeight": "48px"
+      },
+      "headline-md": {
+        "fontFamily": "Plus Jakarta Sans",
+        "fontSize": "20px",
+        "fontWeight": "600",
+        "lineHeight": "28px"
+      }
+    },
+    "spacing": {
+      "margin-tablet": "1.5rem",
+      "space-lg": "1.5rem",
+      "space-xl": "2rem",
+      "gutter": "1rem",
+      "margin": "1rem",
+      "space-sm": "0.5rem",
+      "space-md": "1rem",
+      "space-xs": "0.25rem"
+    },
+    "headlineFontFamily": "Plus Jakarta Sans",
+    "bodyFontFamily": "Inter",
+    "labelFontFamily": "JetBrains Mono"
+  },
+  "screenInstances": [
+    {
+      "id": "14bdcd7120674a3b8f031705a12a293a",
+      "sourceScreen": "projects/13077383863298841327/screens/14bdcd7120674a3b8f031705a12a293a",
+      "x": 2419,
+      "y": 110,
+      "width": 390,
+      "height": 1808,
+      "label": "Generating Screen..."
+    },
+    {
+      "id": "17b6b283c3944dcc927c086d27826de0",
+      "sourceScreen": "projects/13077383863298841327/screens/17b6b283c3944dcc927c086d27826de0",
+      "x": 1511,
+      "y": 110,
+      "width": 390,
+      "height": 1194,
+      "label": "Generating Screen..."
+    },
+    {
+      "id": "8373820986834a77a77946d9ca3ceaff",
+      "sourceScreen": "projects/13077383863298841327/screens/8373820986834a77a77946d9ca3ceaff",
+      "x": 1091,
+      "y": 110,
+      "width": 390,
+      "height": 1651,
+      "label": "Generating Screen..."
+    },
+    {
+      "id": "assets_ab682534ead547098d38e4240da52855",
+      "x": 33,
+      "y": 110,
+      "width": 960,
+      "height": 540,
+      "sourceAsset": "assets/ab682534ead547098d38e4240da52855",
+      "type": "DESIGN_SYSTEM_INSTANCE"
+    },
+    {
+      "id": "cc7ab83ce57a47419da80009fd1230f4",
+      "sourceScreen": "projects/13077383863298841327/screens/cc7ab83ce57a47419da80009fd1230f4",
+      "x": 2878,
+      "y": 119,
+      "width": 390,
+      "height": 2240,
+      "label": "Generating Screen..."
+    },
+    {
+      "id": "ee1d64cc5fd14a1ba260004cdadda107",
+      "sourceScreen": "projects/13077383863298841327/screens/ee1d64cc5fd14a1ba260004cdadda107",
+      "x": 1965,
+      "y": 110,
+      "width": 390,
+      "height": 1397,
+      "label": "Generating Screen..."
+    },
+    {
+      "id": "f53b9bfed6724a1984c61f200c102e70",
+      "sourceScreen": "projects/13077383863298841327/screens/f53b9bfed6724a1984c61f200c102e70",
+      "x": 3332,
+      "y": 119,
+      "width": 512,
+      "height": 504,
+      "label": "Generating Image..."
+    }
+  ],
+  "metadata": {
+    "userRole": "OWNER"
+  }
+}

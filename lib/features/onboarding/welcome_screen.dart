@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart'
     show TargetPlatform, defaultTargetPlatform, kIsWeb;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,6 +7,8 @@ import '../../core/constants/auth_config.dart';
 import '../../core/constants/language_catalog.dart';
 import '../../core/design/motion_tokens.dart';
 import '../../core/design/neumorph.dart';
+import '../../core/design/tokens.dart';
+import '../../core/design/components.dart';
 import '../../core/router/router.dart';
 import '../../core/services/auth_service.dart';
 import '../../core/theme/theme.dart';
@@ -331,41 +333,11 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen>
                   // Primary CTA Buttons
                   _entranceItem(
                     delay: 0.50,
-                    child: ElevatedButton(
+                    child: StitchGradientButton(
+                      label: 'Get Started (Free)',
+                      icon: Icons.arrow_forward_rounded,
+                      isLoading: _isLoading,
                       onPressed: _isLoading ? null : _handleGetStarted,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: SparkLingoTheme.electricCyan,
-                        foregroundColor: SparkLingoTheme.surfaceCanvas,
-                        minimumSize: const Size.fromHeight(54),
-                        elevation: 4,
-                        shadowColor: SparkLingoTheme.electricCyan.withValues(alpha: 0.4),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                      ),
-                      child: _isLoading
-                          ? const SizedBox(
-                              width: 24,
-                              height: 24,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2.5,
-                                color: SparkLingoTheme.surfaceCanvas,
-                              ),
-                            )
-                          : const Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  'Get Started (Free)',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w800,
-                                  ),
-                                ),
-                                SizedBox(width: 8),
-                                Icon(Icons.arrow_forward_rounded, size: 20),
-                              ],
-                            ),
                     ),
                   ),
                   const SizedBox(height: 12),
