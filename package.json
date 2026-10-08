@@ -1,0 +1,12 @@
+{
+  "name": "spark-lingo",
+  "version": "1.0.0",
+  "private": true,
+  "bin": {
+    "flutter": "./scripts/flutter_shim.sh"
+  },
+  "scripts": {
+    "build": "bash scripts/build_vercel.sh",
+    "vercel-build": "bash scripts/build_vercel.sh"
+  }
+}
