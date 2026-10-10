@@ -103,6 +103,18 @@ abstract final class SparkStatus {
 
 /// Stitch Design System — LingoPulse AI Obsidian & Terracotta palette & specular tokens.
 abstract final class StitchTokens {
+  // Stitch Sahara Warm Cream Theme (Light Palette from Project 13518708541474104452)
+  static const Color saharaCream = Color(0xFFFAF5EE);
+  static const Color cardWhite = Color(0xFFFFFFFF);
+  static const Color surfaceSubtle = Color(0xFFF2ECE4);
+  static const Color surfaceMuted = Color(0xFFF6F0E8);
+  static const Color borderSand = Color(0xFFEBD9CA);
+  static const Color textEspresso = Color(0xFF1F1610);
+  static const Color textMedium = Color(0xFF605850);
+  static const Color textBrown = Color(0xFF7A5E4B);
+  static const Color textLabel = Color(0xFF8C6E58);
+  static const Color chipWarm = Color(0xFFFBE8D8);
+
   // Foundation Surfaces (OLED Deep Obsidian Architecture - LingoPulse Studio)
   static const Color canvasBase = Color(0xFF10131A);
   static const Color surfaceLowest = Color(0xFF141720);
