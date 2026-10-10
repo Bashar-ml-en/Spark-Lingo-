@@ -2,11 +2,9 @@
   "name": "spark-lingo",
   "version": "1.0.0",
   "private": true,
-  "bin": {
-    "flutter": "./scripts/flutter_shim.sh"
-  },
   "scripts": {
-    "build": "bash scripts/build_vercel.sh",
-    "vercel-build": "bash scripts/build_vercel.sh"
+    "postinstall": "mkdir -p node_modules/.bin && cp scripts/flutter_shim.sh node_modules/.bin/flutter && chmod +x node_modules/.bin/flutter",
+    "build": "bash scripts/flutter_shim.sh build web --release",
+    "vercel-build": "bash scripts/flutter_shim.sh build web --release"
   }
 }

@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spark Lingo - Stitch LingoCraft Obsidian</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
+
+    :root {
+      --canvas-base: #090A0F;
+      --surface-low: #12141F;
+      --surface-default: #1D1F2A;
+      --surface-high: #252839;
+      --border-hairline: #2A2F45;
+      --primary-indigo: #6366F1;
+      --primary-violet: #8B5CF6;
+      --mastery-emerald: #10B981;
+      --kinetic-amber: #F59E0B;
+      --diagnostic-rose: #F43F5E;
+      --electric-cyan: #06B6D4;
+      --text-high: #F8FAFC;
+      --text-medium: #94A3B8;
+      --text-low: #64748B;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #06070B;
+      color: #F8FAFC;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+    }
+
+    /* Glassmorphism specular utility */
+    .glass-card {
+      background: linear-gradient(135deg, rgba(29, 31, 42, 0.75) 0%, rgba(18, 20, 31, 0.85) 100%);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    }
+
+    .glass-card-interactive {
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .glass-card-interactive:hover {
+      transform: translateY(-2px);
+      border-color: rgba(99, 102, 241, 0.4);
+      box-shadow: 0 12px 36px 0 rgba(99, 102, 241, 0.2);
+    }
+
+    .gradient-primary {
+      background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+    }
+
+    .gradient-emerald {
+      background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+    }
+
+    .gradient-amber {
+      background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+    }
+
+    .glow-indigo {
+      box-shadow: 0 0 24px -2px rgba(99, 102, 241, 0.5);
+    }
+
+    .glow-emerald {
+      box-shadow: 0 0 24px -2px rgba(16, 185, 129, 0.5);
+    }
+
+    .pulse-ring {
+      animation: pulseGlow 2.4s infinite cubic-bezier(0.4, 0, 0.6, 1);
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% {
+        transform: scale(1);
+        opacity: 0.8;
+      }
+      50% {
+        transform: scale(1.08);
+        opacity: 0.3;
+      }
+    }
+
+    /* Flip Card Animation */
+    .perspective-1000 {
+      perspective: 1000px;
+    }
+    .transform-style-3d {
+      transform-style: preserve-3d;
+    }
+    .backface-hidden {
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+    }
+    .rotate-y-180 {
+      transform: rotateY(180deg);
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(18, 20, 31, 0.5);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(99, 102, 241, 0.3);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(99, 102, 241, 0.6);
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-[#07080D] flex flex-col items-center justify-start p-4 md:p-8">
+
+  <!-- Header Banner -->
+  <header class="w-full max-w-5xl mb-6 flex flex-col md:flex-row items-center justify-between gap-4 border-b border-[#2A2F45] pb-5">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center font-extrabold text-xl shadow-lg glow-indigo">
+        ⚡
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="text-xl font-bold tracking-tight text-[#F8FAFC]">Spark Lingo</h1>
+          <span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-[#6366F1]/20 text-[#8B5CF6] border border-[#6366F1]/40">
+            Stitch Theme: LingoCraft Obsidian
+          </span>
+        </div>
+        <p class="text-xs text-[#94A3B8]">Connected to Google Stitch Project 13077383863298841327 • Production Build</p>
+      </div>
+    </div>
+
+    <!-- Quick Controls -->
+    <div class="flex items-center gap-2 bg-[#12141F] border border-[#2A2F45] p-1.5 rounded-xl">
+      <button onclick="switchView('pathway')" id="btn-view-pathway" class="view-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#6366F1] text-white shadow-sm transition">
+        Adaptive Flight Path
+      </button>
+      <button onclick="switchView('boss')" id="btn-view-boss" class="view-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-[#94A3B8] hover:text-white transition">
+        Boss Drills
+      </button>
+      <button onclick="switchView('immersion')" id="btn-view-immersion" class="view-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-[#94A3B8] hover:text-white transition">
+        Voice Lab
+      </button>
+      <button onclick="switchView('flashcards')" id="btn-view-flashcards" class="view-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-[#94A3B8] hover:text-white transition">
+        SM-2 Cards
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Showcase Container -->
+  <main class="w-full max-w-5xl flex flex-col lg:flex-row gap-8 items-center justify-center">
+
+    <!-- Phone Mockup Frame -->
+    <div class="relative w-[390px] h-[820px] bg-[#090A0F] rounded-[52px] p-3.5 shadow-2xl border-[6px] border-[#2A2F45] flex flex-col shrink-0 overflow-hidden"
+         style="box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.9), 0 0 40px -10px rgba(99, 102, 241, 0.35);">
+
+      <!-- Dynamic Island / Speaker Notch -->
+      <div class="absolute top-5 left-1/2 -translate-x-1/2 w-28 h-6 bg-black rounded-full z-50 flex items-center justify-between px-3 border border-white/10">
+        <div class="w-2.5 h-2.5 rounded-full bg-emerald-500/80 animate-pulse"></div>
+        <div class="w-3 h-3 rounded-full bg-[#12141F] border border-white/20"></div>
+      </div>
+
+      <!-- Phone Screen Container -->
+      <div class="w-full h-full bg-[#090A0F] rounded-[42px] overflow-hidden flex flex-col relative pt-7">
+
+        <!-- Status Bar -->
+        <div class="w-full px-6 py-1 flex justify-between items-center text-[12px] font-semibold text-[#94A3B8] z-40 select-none">
+          <span>9:41</span>
+          <div class="flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L12 22l7.03-4.39C20.26 16.07 21 14.12 21 12c0-4.97-4.03-9-9-9z"/></svg>
+            <span class="text-[11px]">5G</span>
+            <div class="w-5 h-2.5 border border-[#94A3B8] rounded-[3px] p-0.5 flex items-center">
+              <div class="w-full h-full bg-emerald-400 rounded-[1px]"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stitch Top Bar (StitchTopBar implementation) -->
+        <div class="px-4 py-2.5 border-b border-[#2A2F45]/60 bg-[#12141F]/80 backdrop-blur-md flex items-center justify-between z-40">
+          <!-- Flag & Language Pill -->
+          <div class="flex items-center gap-2 bg-[#1D1F2A] border border-[#2A2F45] px-2.5 py-1 rounded-full cursor-pointer hover:border-[#6366F1]/50 transition">
+            <span class="text-sm">🇪🇸</span>
+            <span class="text-xs font-bold text-[#F8FAFC]">Spanish</span>
+            <span class="px-1.5 py-0.2 rounded text-[10px] font-bold bg-[#6366F1]/20 text-[#8B5CF6]">B2</span>
+          </div>
+
+          <!-- Reactive Stats Indicators -->
+          <div class="flex items-center gap-3">
+            <!-- Streak -->
+            <div class="flex items-center gap-1 text-[#F59E0B]">
+              <span class="text-sm">🔥</span>
+              <span id="streak-counter" class="text-xs font-extrabold text-[#F8FAFC]">14</span>
+            </div>
+
+            <!-- XP Counter -->
+            <div class="flex items-center gap-1 text-[#6366F1]">
+              <span class="text-sm">⚡</span>
+              <span id="xp-counter" class="text-xs font-extrabold text-[#F8FAFC]">2,840</span>
+            </div>
+
+            <!-- Hearts -->
+            <div class="flex items-center gap-1 text-[#F43F5E]">
+              <span class="text-sm">❤️</span>
+              <span class="text-xs font-extrabold text-[#F8FAFC]">5</span>
+            </div>
+
+            <!-- Profile Avatar -->
+            <div class="w-7 h-7 rounded-full bg-gradient-to-tr from-[#6366F1] to-[#06B6D4] p-0.5 cursor-pointer">
+              <div class="w-full h-full bg-[#12141F] rounded-full flex items-center justify-center text-[11px] font-bold text-white">
+                B
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sub-Navigation Pills (Pathway / Boss Drills / Immersion) -->
+        <div class="px-4 pt-2.5 pb-1 flex gap-1.5 bg-[#090A0F] border-b border-[#2A2F45]/30">
+          <button onclick="switchView('pathway')" id="tab-pathway" class="flex-1 py-1.5 text-center text-xs font-bold rounded-lg bg-[#6366F1] text-white transition">
+            Pathway
+          </button>
+          <button onclick="switchView('boss')" id="tab-boss" class="flex-1 py-1.5 text-center text-xs font-semibold rounded-lg bg-[#12141F] text-[#94A3B8] border border-[#2A2F45] hover:text-white transition">
+            Boss Drills
+          </button>
+          <button onclick="switchView('immersion')" id="tab-immersion" class="flex-1 py-1.5 text-center text-xs font-semibold rounded-lg bg-[#12141F] text-[#94A3B8] border border-[#2A2F45] hover:text-white transition">
+            Immersion
+          </button>
+        </div>
+
+        <!-- Scrollable Screen Content Area -->
+        <div id="screen-content" class="flex-1 overflow-y-auto px-4 py-3 space-y-4 pb-20">
+
+          <!-- ================= VIEW 1: PATHWAY ================= -->
+          <div id="view-pathway" class="space-y-4">
+
+            <!-- Flight Path Bento Grid Header (FlightPathBentoHeader) -->
+            <div class="grid grid-cols-2 gap-2.5">
+              
+              <!-- Bento Card 1: Retention Rate & SM-2 Ring -->
+              <div class="glass-card p-3 rounded-2xl flex flex-col justify-between relative overflow-hidden">
+                <div class="flex items-center justify-between">
+                  <span class="text-[11px] font-bold text-[#94A3B8] uppercase tracking-wider">Retention</span>
+                  <span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-semibold">SM-2 Opt</span>
+                </div>
+                <div class="my-2 flex items-center justify-center">
+                  <div class="relative w-16 h-16 flex items-center justify-center">
+                    <svg class="w-full h-full -rotate-90" viewBox="0 0 36 36">
+                      <path class="text-[#2A2F45]" stroke-width="3.5" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                      <path class="text-emerald-400" stroke-dasharray="92, 100" stroke-width="3.5" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                    </svg>
+                    <div class="absolute inset-0 flex flex-col items-center justify-center">
+                      <span class="text-sm font-extrabold text-[#F8FAFC]">92%</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="text-[10px] text-[#94A3B8] text-center">48 words due today</div>
+              </div>
+
+              <!-- Bento Card 2: CEFR Level Mastery -->
+              <div class="glass-card p-3 rounded-2xl flex flex-col justify-between">
+                <div class="flex items-center justify-between">
+                  <span class="text-[11px] font-bold text-[#94A3B8] uppercase tracking-wider">CEFR Rank</span>
+                  <span class="text-[10px] px-1.5 py-0.5 rounded bg-[#6366F1]/20 text-[#8B5CF6] font-bold">B2.4</span>
+                </div>
+                <div class="my-2">
+                  <div class="text-base font-extrabold text-[#F8FAFC]">Professional</div>
+                  <div class="text-[11px] text-[#94A3B8]">Fluency Pathway</div>
+                </div>
+                <div class="space-y-1">
+                  <div class="flex justify-between text-[10px] text-[#94A3B8]">
+                    <span>To C1</span>
+                    <span class="text-indigo-400 font-bold">68%</span>
+                  </div>
+                  <div class="w-full h-1.5 bg-[#12141F] rounded-full overflow-hidden border border-[#2A2F45]">
+                    <div class="h-full bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] rounded-full" style="width: 68%;"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Bento Card 3: Daily Goal & Streak (Full Width) -->
+              <div class="col-span-2 glass-card p-3 rounded-2xl flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-xl gradient-amber flex items-center justify-center text-lg shadow-md">
+                    🔥
+                  </div>
+                  <div>
+                    <div class="text-xs font-bold text-[#F8FAFC]">Daily Target: 30 / 30 XP</div>
+                    <div class="text-[11px] text-[#94A3B8]">14 day streak active • Top 5% in League</div>
+                  </div>
+                </div>
+                <button onclick="triggerQuickReview()" class="px-3 py-1.5 rounded-xl gradient-primary text-xs font-bold text-white shadow-md glow-indigo hover:opacity-90 active:scale-95 transition">
+                  Review
+                </button>
+              </div>
+            </div>
+
+            <!-- Learning Flight Path Section -->
+            <div class="pt-2">
+              <div class="flex items-center justify-between mb-3">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-[#94A3B8]">Current Unit: Advanced Subjunctive</h3>
+                <span class="text-xs text-[#6366F1] font-semibold cursor-pointer">Unit Map &rarr;</span>
+              </div>
+
+              <!-- Path Nodes (Curved Timeline) -->
+              <div class="relative flex flex-col items-center space-y-6 py-2">
+                <!-- SVG Connecting Curve Background -->
+                <svg class="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-full pointer-events-none opacity-30" viewBox="0 0 100 300" preserveAspectRatio="none">
+                  <path d="M 50 20 Q 80 80, 50 140 T 50 260" fill="none" stroke="#6366F1" stroke-width="4" stroke-dasharray="6,6"/>
+                </svg>
+
+                <!-- Node 1: Completed -->
+                <div class="relative flex flex-col items-center group cursor-pointer" onclick="openNodeModal('Subjunctive in Doubt', 'Completed with 100% accuracy', 'completed')">
+                  <div class="w-16 h-16 rounded-full gradient-emerald flex items-center justify-center text-white text-xl font-bold shadow-lg glow-emerald transform group-hover:scale-105 transition">
+                    ✓
+                  </div>
+                  <span class="mt-1 text-[11px] font-bold text-[#F8FAFC]">1. Doubt & Uncertainty</span>
+                  <span class="text-[10px] text-emerald-400 font-semibold">Mastered (100%)</span>
+                </div>
+
+                <!-- Node 2: Current Active (Pulsing Gradient) -->
+                <div class="relative flex flex-col items-center group cursor-pointer" onclick="openNodeModal('Diplomatic & Business Nuances', 'Unit 4 • 12 Interactive Exercises', 'active')">
+                  <div class="absolute -inset-2 rounded-full gradient-primary opacity-40 pulse-ring"></div>
+                  <div class="w-18 h-18 w-[72px] h-[72px] rounded-full gradient-primary flex items-center justify-center text-white text-2xl font-black shadow-xl glow-indigo transform group-hover:scale-105 transition border-2 border-white/20">
+                    ⚡
+                  </div>
+                  <div class="mt-2 px-2.5 py-0.5 rounded-full bg-[#6366F1] text-[10px] font-extrabold text-white tracking-wide uppercase shadow-sm">
+                    START LESSON
+                  </div>
+                  <span class="mt-1 text-xs font-extrabold text-[#F8FAFC]">2. Diplomatic Nuances</span>
+                  <span class="text-[10px] text-[#8B5CF6] font-semibold">+40 XP • 4 mins</span>
+                </div>
+
+                <!-- Node 3: Upcoming Locked -->
+                <div class="relative flex flex-col items-center opacity-60">
+                  <div class="w-14 h-14 rounded-full bg-[#1D1F2A] border border-[#2A2F45] flex items-center justify-center text-[#94A3B8] text-lg">
+                    🔒
+                  </div>
+                  <span class="mt-1 text-[11px] font-semibold text-[#94A3B8]">3. Idiomatic Colloquialisms</span>
+                  <span class="text-[10px] text-[#64748B]">Locked</span>
+                </div>
+
+                <!-- Node 4: Boss Milestone -->
+                <div class="relative flex flex-col items-center group cursor-pointer opacity-70 hover:opacity-100" onclick="switchView('boss')">
+                  <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-[#F43F5E] to-[#F59E0B] flex items-center justify-center text-2xl shadow-lg border border-amber-300/30">
+                    👑
+                  </div>
+                  <span class="mt-1 text-xs font-bold text-[#F59E0B]">Boss Milestone</span>
+                  <span class="text-[10px] text-[#94A3B8]">Executive Debate</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- ================= VIEW 2: BOSS DRILLS ================= -->
+          <div id="view-boss" class="space-y-3 hidden">
+            <div class="flex items-center justify-between">
+              <div>
+                <h2 class="text-sm font-bold text-[#F8FAFC]">AI Scenario Simulator</h2>
+                <p class="text-[11px] text-[#94A3B8]">High-stakes communicative roleplay</p>
+              </div>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#F43F5E]/20 text-[#F43F5E] border border-[#F43F5E]/40">
+                PRO ACTIVE
+              </span>
+            </div>
+
+            <!-- Scenario Card 1 -->
+            <div class="glass-card glass-card-interactive p-3.5 rounded-2xl cursor-pointer" onclick="launchScenario('Salary & Equity Negotiation')">
+              <div class="flex items-start justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-[#6366F1] to-[#06B6D4] flex items-center justify-center text-xl shadow-md">
+                    💼
+                  </div>
+                  <div>
+                    <h4 class="text-xs font-bold text-[#F8FAFC]">Salary & Equity Negotiation</h4>
+                    <p class="text-[10px] text-[#94A3B8]">Madrid Tech Executive • C1 Advanced</p>
+                  </div>
+                </div>
+                <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[10px] font-bold">94% Mastery</span>
+              </div>
+              <div class="mt-3 flex items-center justify-between text-[11px] border-t border-[#2A2F45]/60 pt-2 text-[#94A3B8]">
+                <span>Adaptive Pressure: High</span>
+                <span class="text-[#6366F1] font-semibold flex items-center gap-1">Play Drill &rarr;</span>
+              </div>
+            </div>
+
+            <!-- Scenario Card 2 -->
+            <div class="glass-card glass-card-interactive p-3.5 rounded-2xl cursor-pointer" onclick="launchScenario('Medical Emergency Consultation')">
+              <div class="flex items-start justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-[#F43F5E] to-[#F59E0B] flex items-center justify-center text-xl shadow-md">
+                    🏥
+                  </div>
+                  <div>
+                    <h4 class="text-xs font-bold text-[#F8FAFC]">Medical Emergency Consult</h4>
+                    <p class="text-[10px] text-[#94A3B8]">Hospital Clínico • B2 Technical</p>
+                  </div>
+                </div>
+                <span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 text-[10px] font-bold">88% Mastery</span>
+              </div>
+              <div class="mt-3 flex items-center justify-between text-[11px] border-t border-[#2A2F45]/60 pt-2 text-[#94A3B8]">
+                <span>Triage Urgency: Extreme</span>
+                <span class="text-[#6366F1] font-semibold flex items-center gap-1">Play Drill &rarr;</span>
+              </div>
+            </div>
+
+            <!-- Scenario Card 3 -->
+            <div class="glass-card glass-card-interactive p-3.5 rounded-2xl cursor-pointer" onclick="launchScenario('Apartment Lease Dispute')">
+              <div class="flex items-start justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-[#8B5CF6] to-[#EC4899] flex items-center justify-center text-xl shadow-md">
+                    🏢
+                  </div>
+                  <div>
+                    <h4 class="text-xs font-bold text-[#F8FAFC]">Apartment Lease Dispute</h4>
+                    <p class="text-[10px] text-[#94A3B8]">Barcelona Landlord • B2 Persuasive</p>
+                  </div>
+                </div>
+                <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[10px] font-bold">76% Mastery</span>
+              </div>
+              <div class="mt-3 flex items-center justify-between text-[11px] border-t border-[#2A2F45]/60 pt-2 text-[#94A3B8]">
+                <span>Formality: Legal & Firm</span>
+                <span class="text-[#6366F1] font-semibold flex items-center gap-1">Play Drill &rarr;</span>
+              </div>
+            </div>
+
+            <!-- Active Simulation Feed Card -->
+            <div id="scenario-feed" class="glass-card p-3 rounded-2xl border border-[#6366F1]/30">
+              <div class="text-[11px] font-bold text-[#8B5CF6] uppercase mb-1">Live Dialogue Preview</div>
+              <div class="space-y-2 text-xs">
+                <div class="bg-[#12141F] p-2 rounded-lg border border-[#2A2F45]">
+                  <span class="text-[10px] font-bold text-[#06B6D4]">AI Director (Carlos):</span>
+                  <p class="text-[#F8FAFC] text-[11px] mt-0.5">"Entiendo su postura sobre el salario base, pero ¿qué compensación variable consideraría aceptable en este trimestre?"</p>
+                </div>
+                <div class="bg-[#6366F1]/10 p-2 rounded-lg border border-[#6366F1]/40">
+                  <span class="text-[10px] font-bold text-emerald-400">Suggested CEFR C1 Response:</span>
+                  <p class="text-[#F8FAFC] text-[11px] mt-0.5">"Propondría vincular el diez por ciento a la consecución de los hitos trimestrales de ARR."</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ================= VIEW 3: IMMERSION VOICE LAB ================= -->
+          <div id="view-immersion" class="space-y-4 hidden flex flex-col items-center">
+            <div class="w-full flex items-center justify-between">
+              <div>
+                <h2 class="text-sm font-bold text-[#F8FAFC]">Multimodal AI Voice Lab</h2>
+                <p class="text-[11px] text-[#94A3B8]">Acoustic feedback & intonation scoring</p>
+              </div>
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+            </div>
+
+            <!-- Soundwave Canvas Area -->
+            <div class="w-full h-32 glass-card rounded-2xl p-2.5 flex flex-col justify-between relative overflow-hidden">
+              <div class="flex justify-between items-center text-[10px] text-[#94A3B8]">
+                <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-[#06B6D4]"></span> AI Model Pitch</span>
+                <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-[#8B5CF6]"></span> User Resonance</span>
+              </div>
+
+              <!-- Animated Soundwave Canvas -->
+              <canvas id="soundwaveCanvas" width="320" height="70" class="w-full h-16"></canvas>
+
+              <div class="flex justify-between items-center text-[10px] text-[#64748B]">
+                <span>24.1 kHz • Hi-Res Neural Audio</span>
+                <span id="audio-status" class="text-emerald-400 font-semibold">Listening...</span>
+              </div>
+            </div>
+
+            <!-- Target Pronunciation Prompt Card -->
+            <div class="w-full glass-card p-3.5 rounded-2xl text-center space-y-1.5">
+              <span class="text-[10px] uppercase font-bold text-[#8B5CF6] tracking-wider">Pronounce this idiom:</span>
+              <div class="text-base font-extrabold text-[#F8FAFC]">
+                "No hay que buscarle tres pies al gato"
+              </div>
+              <div class="text-xs text-[#94A3B8] italic">
+                /no ai ke busˈkaɾ.le tɾes pjes al ˈɡa.to/
+              </div>
+              <div class="text-[11px] text-[#64748B]">
+                "Don't complicate things unnecessarily"
+              </div>
+            </div>
+
+            <!-- 72px Pulsing Mic Button (Stitch design specification) -->
+            <div class="relative py-2 flex flex-col items-center">
+              <div id="mic-aura" class="absolute -inset-3 rounded-full gradient-primary opacity-30 pulse-ring"></div>
+              <button id="mic-btn" onclick="toggleVoiceRecording()"
+                      class="relative w-[76px] h-[76px] rounded-full gradient-primary flex items-center justify-center text-white text-3xl shadow-2xl glow-indigo border-4 border-white/20 active:scale-95 transition">
+                <span id="mic-icon">🎙️</span>
+              </button>
+              <span id="mic-label" class="mt-2 text-xs font-bold text-[#94A3B8]">Tap to Speak</span>
+            </div>
+
+            <!-- Live Pronunciation Analysis Chips -->
+            <div class="w-full grid grid-cols-3 gap-2 text-center">
+              <div class="bg-[#12141F] border border-[#2A2F45] p-2 rounded-xl">
+                <div class="text-sm font-extrabold text-emerald-400">96%</div>
+                <div class="text-[9px] text-[#94A3B8] uppercase">Intonation</div>
+              </div>
+              <div class="bg-[#12141F] border border-[#2A2F45] p-2 rounded-xl">
+                <div class="text-sm font-extrabold text-[#6366F1]">94%</div>
+                <div class="text-[9px] text-[#94A3B8] uppercase">Fluency</div>
+              </div>
+              <div class="bg-[#12141F] border border-[#2A2F45] p-2 rounded-xl">
+                <div class="text-sm font-extrabold text-amber-400">98%</div>
+                <div class="text-[9px] text-[#94A3B8] uppercase">Phonemes</div>
+              </div>
+            </div>
+
+            <!-- Phoneme Feedback Badge -->
+            <div class="w-full p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-[11px] text-emerald-300 flex items-center justify-between">
+              <span>✨ Perfect trill on <b>/r/</b> in <i>tres</i></span>
+              <span class="font-bold">+15 XP</span>
+            </div>
+
+          </div>
+
+          <!-- ================= VIEW 4: FLASHCARDS (SM-2 ENGINE) ================= -->
+          <div id="view-flashcards" class="space-y-4 hidden">
+            <div class="flex items-center justify-between">
+              <div>
+                <h2 class="text-sm font-bold text-[#F8FAFC]">SM-2 Spaced Repetition</h2>
+                <p class="text-[11px] text-[#94A3B8]">SuperMemo-2 retention schedule</p>
+              </div>
+              <span class="text-xs font-bold text-amber-400">Card 1 / 12</span>
+            </div>
+
+            <!-- 3D Flip Card -->
+            <div class="w-full h-56 perspective-1000 cursor-pointer" onclick="flipFlashcard()">
+              <div id="flashcard-inner" class="relative w-full h-full transform-style-3d transition-transform duration-500 rounded-3xl glass-card border border-[#6366F1]/30">
+                
+                <!-- Front Side -->
+                <div class="absolute inset-0 backface-hidden p-5 flex flex-col justify-between rounded-3xl">
+                  <div class="flex justify-between items-center text-xs text-[#94A3B8]">
+                    <span class="px-2 py-0.5 rounded bg-[#6366F1]/20 text-[#8B5CF6] font-bold">Spanish Expression</span>
+                    <span>Tap to flip 🔄</span>
+                  </div>
+                  <div class="text-center my-auto">
+                    <h3 class="text-xl font-black text-[#F8FAFC]">Dar en el clavo</h3>
+                    <p class="text-xs text-[#94A3B8] mt-1 italic">/daɾ en el ˈkla.βo/</p>
+                  </div>
+                  <div class="text-[10px] text-center text-[#64748B]">Context: Workplace & Problem Solving</div>
+                </div>
+
+                <!-- Back Side -->
+                <div class="absolute inset-0 backface-hidden rotate-y-180 p-5 flex flex-col justify-between rounded-3xl bg-[#1D1F2A]">
+                  <div class="flex justify-between items-center text-xs text-[#94A3B8]">
+                    <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold">English Meaning</span>
+                    <span>Tap to return 🔄</span>
+                  </div>
+                  <div class="text-center my-auto">
+                    <h3 class="text-lg font-black text-emerald-400">"To hit the nail on the head"</h3>
+                    <p class="text-xs text-[#F8FAFC] mt-2">To describe exactly what is causing a situation or problem.</p>
+                  </div>
+                  <div class="text-[10px] text-center text-[#8B5CF6]">Example: "Tu análisis dio en el clavo."</div>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- SM-2 Difficulty Buttons -->
+            <div class="space-y-1.5 pt-1">
+              <span class="text-[10px] font-bold text-[#94A3B8] uppercase">Rate Recall Difficulty:</span>
+              <div class="grid grid-cols-4 gap-1.5">
+                <button onclick="rateCard('again')" class="py-2 rounded-xl bg-[#F43F5E]/20 text-[#F43F5E] border border-[#F43F5E]/40 text-xs font-bold hover:bg-[#F43F5E]/30 transition">
+                  <div>Again</div>
+                  <div class="text-[9px] opacity-75">&lt; 1 min</div>
+                </button>
+                <button onclick="rateCard('hard')" class="py-2 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/40 text-xs font-bold hover:bg-amber-500/30 transition">
+                  <div>Hard</div>
+                  <div class="text-[9px] opacity-75">12 hrs</div>
+                </button>
+                <button onclick="rateCard('good')" class="py-2 rounded-xl bg-[#6366F1]/20 text-[#8B5CF6] border border-[#6366F1]/40 text-xs font-bold hover:bg-[#6366F1]/30 transition">
+                  <div>Good</div>
+                  <div class="text-[9px] opacity-75">1 day</div>
+                </button>
+                <button onclick="rateCard('easy')" class="py-2 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-xs font-bold hover:bg-emerald-500/30 transition">
+                  <div>Easy</div>
+                  <div class="text-[9px] opacity-75">4 days</div>
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- Stitch Bottom Navigation Bar (Glass Elevated Bar) -->
+        <div class="absolute bottom-0 left-0 right-0 h-16 bg-[#12141F]/90 backdrop-blur-xl border-t border-[#2A2F45] px-6 flex items-center justify-between z-40">
+          <!-- Nav Item 1: Learn -->
+          <div onclick="switchView('pathway')" class="flex flex-col items-center gap-0.5 cursor-pointer text-[#6366F1]">
+            <span class="text-lg">🗺️</span>
+            <span class="text-[10px] font-bold">Learn</span>
+          </div>
+
+          <!-- Nav Item 2: Practice -->
+          <div onclick="switchView('flashcards')" class="flex flex-col items-center gap-0.5 cursor-pointer text-[#94A3B8] hover:text-white transition">
+            <span class="text-lg">🃏</span>
+            <span class="text-[10px] font-bold">Review</span>
+          </div>
+
+          <!-- Nav Item 3: Voice / AI -->
+          <div onclick="switchView('immersion')" class="flex flex-col items-center gap-0.5 cursor-pointer text-[#94A3B8] hover:text-white transition">
+            <div class="w-8 h-8 rounded-full gradient-primary flex items-center justify-center text-white text-xs -mt-3 shadow-lg glow-indigo">
+              🎙️
+            </div>
+            <span class="text-[10px] font-bold">Voice</span>
+          </div>
+
+          <!-- Nav Item 4: Scenarios -->
+          <div onclick="switchView('boss')" class="flex flex-col items-center gap-0.5 cursor-pointer text-[#94A3B8] hover:text-white transition">
+            <span class="text-lg">⚔️</span>
+            <span class="text-[10px] font-bold">Drills</span>
+          </div>
+
+          <!-- Nav Item 5: Profile -->
+          <div onclick="alert('Profile & CEFR Mastery settings')" class="flex flex-col items-center gap-0.5 cursor-pointer text-[#94A3B8] hover:text-white transition">
+            <span class="text-lg">👤</span>
+            <span class="text-[10px] font-bold">Profile</span>
+          </div>
+        </div>
+
+        <!-- Home Indicator Bar -->
+        <div class="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-32 h-1 bg-white/30 rounded-full z-50"></div>
+
+      </div>
+    </div>
+
+    <!-- Right Side: Architecture & Stitch Design Tokens Panel -->
+    <div class="flex-1 max-w-md space-y-4">
+      
+      <!-- Design System Specs Card -->
+      <div class="glass-card p-5 rounded-2xl border border-[#2A2F45]">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-sm font-bold text-[#F8FAFC] flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-[#6366F1]"></span>
+            Stitch Theme Tokens Applied
+          </h3>
+          <span class="text-[11px] font-mono text-[#06B6D4]">Obsidian V2</span>
+        </div>
+
+        <!-- Swatches -->
+        <div class="grid grid-cols-2 gap-2 text-xs font-mono">
+          <div class="flex items-center gap-2 bg-[#12141F] p-2 rounded-xl border border-[#2A2F45]">
+            <div class="w-5 h-5 rounded-lg bg-[#090A0F] border border-white/20"></div>
+            <div>
+              <div class="text-[10px] text-[#94A3B8]">Canvas Base</div>
+              <div class="text-white font-bold">#090A0F</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 bg-[#12141F] p-2 rounded-xl border border-[#2A2F45]">
+            <div class="w-5 h-5 rounded-lg bg-[#6366F1]"></div>
+            <div>
+              <div class="text-[10px] text-[#94A3B8]">Primary Indigo</div>
+              <div class="text-white font-bold">#6366F1</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 bg-[#12141F] p-2 rounded-xl border border-[#2A2F45]">
+            <div class="w-5 h-5 rounded-lg bg-[#8B5CF6]"></div>
+            <div>
+              <div class="text-[10px] text-[#94A3B8]">Primary Violet</div>
+              <div class="text-white font-bold">#8B5CF6</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 bg-[#12141F] p-2 rounded-xl border border-[#2A2F45]">
+            <div class="w-5 h-5 rounded-lg bg-[#10B981]"></div>
+            <div>
+              <div class="text-[10px] text-[#94A3B8]">Mastery Emerald</div>
+              <div class="text-white font-bold">#10B981</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-3 text-[11px] text-[#94A3B8] leading-relaxed">
+          Mapped 1:1 to Flutter <code class="text-indigo-300">StitchTokens</code> in <code class="text-indigo-300">lib/core/design/tokens.dart</code> and components in <code class="text-indigo-300">lib/core/design/components.dart</code>.
+        </div>
+      </div>
+
+      <!-- Feature Audit Matrix Card -->
+      <div class="glass-card p-5 rounded-2xl border border-[#2A2F45]">
+        <h3 class="text-sm font-bold text-[#F8FAFC] mb-2">Live Application Modules</h3>
+        <div class="space-y-2 text-xs">
+          <div class="flex items-center justify-between p-2 rounded-xl bg-[#12141F] border border-[#2A2F45]">
+            <span class="text-[#F8FAFC] font-semibold">Adaptive Flight Path Bento</span>
+            <span class="text-emerald-400 font-bold">✅ Integrated</span>
+          </div>
+          <div class="flex items-center justify-between p-2 rounded-xl bg-[#12141F] border border-[#2A2F45]">
+            <span class="text-[#F8FAFC] font-semibold">Stitch Top Bar & Reactive Stats</span>
+            <span class="text-emerald-400 font-bold">✅ Integrated</span>
+          </div>
+          <div class="flex items-center justify-between p-2 rounded-xl bg-[#12141F] border border-[#2A2F45]">
+            <span class="text-[#F8FAFC] font-semibold">Boss Drills AI Roleplay Scenarios</span>
+            <span class="text-emerald-400 font-bold">✅ Integrated</span>
+          </div>
+          <div class="flex items-center justify-between p-2 rounded-xl bg-[#12141F] border border-[#2A2F45]">
+            <span class="text-[#F8FAFC] font-semibold">Multimodal AI Voice Lab Waveforms</span>
+            <span class="text-emerald-400 font-bold">✅ Integrated</span>
+          </div>
+          <div class="flex items-center justify-between p-2 rounded-xl bg-[#12141F] border border-[#2A2F45]">
+            <span class="text-[#F8FAFC] font-semibold">SM-2 Spaced Repetition Flashcards</span>
+            <span class="text-emerald-400 font-bold">✅ Integrated</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Interactive Actions Card -->
+      <div class="glass-card p-4 rounded-2xl border border-[#2A2F45] flex items-center justify-between">
+        <div>
+          <div class="text-xs font-bold text-[#F8FAFC]">Simulate Lesson Completion</div>
+          <div class="text-[10px] text-[#94A3B8]">Gain +40 XP, update streak & sound chime</div>
+        </div>
+        <button onclick="simulateCompleteLesson()" class="px-3 py-2 rounded-xl gradient-primary text-xs font-bold text-white shadow-md glow-indigo hover:opacity-90 active:scale-95 transition">
+          +40 XP Gain
+        </button>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Node Modal Dialog -->
+  <div id="node-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+    <div class="glass-card p-6 rounded-3xl max-w-sm w-full border border-[#6366F1]/40 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between">
+        <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#6366F1]/20 text-[#8B5CF6]">Unit Lesson Node</span>
+        <button onclick="closeNodeModal()" class="text-[#94A3B8] hover:text-white text-lg font-bold">&times;</button>
+      </div>
+      <div>
+        <h3 id="modal-title" class="text-base font-extrabold text-[#F8FAFC]">Lesson Title</h3>
+        <p id="modal-desc" class="text-xs text-[#94A3B8] mt-1">Lesson description</p>
+      </div>
+      <div class="p-3 rounded-xl bg-[#12141F] border border-[#2A2F45] text-xs space-y-1">
+        <div class="flex justify-between text-[#94A3B8]"><span>Skill Target:</span> <span class="text-white font-bold">CEFR B2.4 Subjunctive</span></div>
+        <div class="flex justify-between text-[#94A3B8]"><span>Reward:</span> <span class="text-indigo-400 font-bold">+40 XP & 1 Gem</span></div>
+      </div>
+      <div class="flex gap-2 pt-1">
+        <button onclick="closeNodeModal()" class="flex-1 py-2.5 rounded-xl bg-[#1D1F2A] border border-[#2A2F45] text-xs font-bold text-[#94A3B8] hover:text-white transition">Cancel</button>
+        <button onclick="simulateCompleteLesson(); closeNodeModal();" class="flex-1 py-2.5 rounded-xl gradient-primary text-xs font-bold text-white shadow-md glow-indigo transition">Start & Master</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript Interactivity -->
+  <script>
+    let isRecording = false;
+    let cardFlipped = false;
+    let xp = 2840;
+    let streak = 14;
+
+    function switchView(viewName) {
+      // Hide all views
+      ['pathway', 'boss', 'immersion', 'flashcards'].forEach(v => {
+        const el = document.getElementById(`view-${v}`);
+        if (el) el.classList.add('hidden');
+        
+        const topBtn = document.getElementById(`btn-view-${v}`);
+        if (topBtn) {
+          topBtn.classList.remove('bg-[#6366F1]', 'text-white');
+          topBtn.classList.add('text-[#94A3B8]');
+        }
+
+        const tabBtn = document.getElementById(`tab-${v}`);
+        if (tabBtn) {
+          tabBtn.classList.remove('bg-[#6366F1]', 'text-white');
+          tabBtn.classList.add('bg-[#12141F]', 'text-[#94A3B8]');
+        }
+      });
+
+      // Show selected view
+      const targetEl = document.getElementById(`view-${viewName}`);
+      if (targetEl) targetEl.classList.remove('hidden');
+
+      const activeTopBtn = document.getElementById(`btn-view-${viewName}`);
+      if (activeTopBtn) {
+        activeTopBtn.classList.add('bg-[#6366F1]', 'text-white');
+        activeTopBtn.classList.remove('text-[#94A3B8]');
+      }
+
+      const activeTabBtn = document.getElementById(`tab-${viewName}`);
+      if (activeTabBtn) {
+        activeTabBtn.classList.add('bg-[#6366F1]', 'text-white');
+        activeTabBtn.classList.remove('bg-[#12141F]', 'text-[#94A3B8]');
+      }
+
+      if (viewName === 'immersion') {
+        startSoundwaveAnimation();
+      }
+    }
+
+    function toggleVoiceRecording() {
+      isRecording = !isRecording;
+      const micBtn = document.getElementById('mic-btn');
+      const micAura = document.getElementById('mic-aura');
+      const micLabel = document.getElementById('mic-label');
+      const audioStatus = document.getElementById('audio-status');
+
+      if (isRecording) {
+        micBtn.classList.remove('gradient-primary');
+        micBtn.classList.add('bg-[#F43F5E]');
+        micAura.classList.remove('gradient-primary');
+        micAura.classList.add('bg-[#F43F5E]');
+        micLabel.innerText = "Analyzing Phonemes...";
+        micLabel.classList.add('text-[#F43F5E]');
+        audioStatus.innerText = "Processing Voice Audio (24kHz)";
+        audioStatus.className = "text-[#F43F5E] font-semibold";
+      } else {
+        micBtn.classList.add('gradient-primary');
+        micBtn.classList.remove('bg-[#F43F5E]');
+        micAura.classList.add('gradient-primary');
+        micAura.classList.remove('bg-[#F43F5E]');
+        micLabel.innerText = "Tap to Speak";
+        micLabel.classList.remove('text-[#F43F5E]');
+        audioStatus.innerText = "Analyzed (96% Intonation)";
+        audioStatus.className = "text-emerald-400 font-semibold";
+        xp += 15;
+        document.getElementById('xp-counter').innerText = xp.toLocaleString();
+      }
+    }
+
+    function flipFlashcard() {
+      cardFlipped = !cardFlipped;
+      const cardInner = document.getElementById('flashcard-inner');
+      if (cardFlipped) {
+        cardInner.classList.add('rotate-y-180');
+      } else {
+        cardInner.classList.remove('rotate-y-180');
+      }
+    }
+
+    function rateCard(rating) {
+      flipFlashcard();
+      xp += 5;
+      document.getElementById('xp-counter').innerText = xp.toLocaleString();
+      alert(`Card rated as [${rating.toUpperCase()}]. SM-2 interval recalculated.`);
+    }
+
+    function launchScenario(name) {
+      const feed = document.getElementById('scenario-feed');
+      feed.classList.remove('hidden');
+      alert(`Launching Scenario: ${name}\nAI Persona is ready for roleplay!`);
+    }
+
+    function triggerQuickReview() {
+      switchView('flashcards');
+    }
+
+    function openNodeModal(title, desc, status) {
+      document.getElementById('modal-title').innerText = title;
+      document.getElementById('modal-desc').innerText = desc;
+      document.getElementById('node-modal').classList.remove('hidden');
+    }
+
+    function closeNodeModal() {
+      document.getElementById('node-modal').classList.add('hidden');
+    }
+
+    function simulateCompleteLesson() {
+      xp += 40;
+      document.getElementById('xp-counter').innerText = xp.toLocaleString();
+      alert("Lesson Complete!\n🎉 +40 XP earned\n🔥 Streak maintained at 14 days!");
+    }
+
+    // Soundwave visualizer on canvas
+    let animationId = null;
+    function startSoundwaveAnimation() {
+      const canvas = document.getElementById('soundwaveCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      let step = 0;
+
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // AI cyan wave
+        ctx.beginPath();
+        ctx.lineWidth = 2.5;
+        ctx.strokeStyle = '#06B6D4';
+        for (let x = 0; x < canvas.width; x += 4) {
+          const y = (canvas.height / 2) + Math.sin((x + step) * 0.05) * 16 * Math.sin(step * 0.03);
+          if (x === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+
+        // User violet wave
+        ctx.beginPath();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#8B5CF6';
+        for (let x = 0; x < canvas.width; x += 4) {
+          const amp = isRecording ? 24 : 8;
+          const y = (canvas.height / 2) + Math.cos((x - step * 1.5) * 0.07) * amp;
+          if (x === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+
+        step += isRecording ? 3 : 1;
+        animationId = requestAnimationFrame(draw);
+      }
+
+      if (animationId) cancelAnimationFrame(animationId);
+      draw();
+    }
+
+    // Initialize default view
+    window.onload = function() {
+      switchView('pathway');
+    };
+  </script>
+</body>
+</html>

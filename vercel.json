@@ -1,5 +1,6 @@
 {
   "cleanUrls": true,
+  "outputDirectory": "build/web",
   "routes": [
     {
       "handle": "filesystem"

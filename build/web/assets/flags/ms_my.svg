@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600">
+<rect y="0.0" width="1200" height="42.857" fill="#CC0001"/><rect y="42.857" width="1200" height="42.857" fill="#FFFFFF"/><rect y="85.714" width="1200" height="42.857" fill="#CC0001"/><rect y="128.571" width="1200" height="42.857" fill="#FFFFFF"/><rect y="171.429" width="1200" height="42.857" fill="#CC0001"/><rect y="214.286" width="1200" height="42.857" fill="#FFFFFF"/><rect y="257.143" width="1200" height="42.857" fill="#CC0001"/><rect y="300.0" width="1200" height="42.857" fill="#FFFFFF"/><rect y="342.857" width="1200" height="42.857" fill="#CC0001"/><rect y="385.714" width="1200" height="42.857" fill="#FFFFFF"/><rect y="428.571" width="1200" height="42.857" fill="#CC0001"/><rect y="471.429" width="1200" height="42.857" fill="#FFFFFF"/><rect y="514.286" width="1200" height="42.857" fill="#CC0001"/><rect y="557.143" width="1200" height="42.857" fill="#FFFFFF"/>
+<rect width="600" height="300" fill="#010066"/>
+<circle cx="190" cy="150" r="95" fill="#FFCC00"/>
+<circle cx="222" cy="150" r="82" fill="#010066"/>
+<polygon points="395.0,66.0 403.2,113.9 431.4,74.3 418.1,121.1 460.7,97.6 428.3,133.9 476.9,131.3 432.0,150.0 476.9,168.7 428.3,166.1 460.7,202.4 418.1,178.9 431.4,225.7 403.2,186.1 395.0,234.0 386.8,186.1 358.6,225.7 371.9,178.9 329.3,202.4 361.7,166.1 313.1,168.7 358.0,150.0 313.1,131.3 361.7,133.9 329.3,97.6 371.9,121.1 358.6,74.3 386.8,113.9" fill="#FFCC00"/>
+</svg>
