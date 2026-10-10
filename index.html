@@ -1,1324 +1,1120 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Spark Lingo — LingoPulse AI Cognitive Studio</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Spark Lingo — Sahara Warm Cream Studio</title>
   <link rel="icon" type="image/png" href="favicon.png">
-  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700;800&family=Noto+Sans+Arabic:wght@400;600;700;900&family=Noto+Sans+JP:wght@400;600;700;900&display=swap');
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700;800&family=Noto+Sans+Arabic:wght@400;600;700;900&family=Noto+Sans+JP:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
 
+  <style>
     :root {
-      --canvas-base: #10131A;
-      --surface-lowest: #141720;
-      --surface-low: #171C26;
-      --surface-default: #1F2430;
-      --surface-high: #272D3B;
-      --border-hairline: #2A2F45;
-      --border-amber-hairline: rgba(224, 136, 80, 0.25);
+      --bg-sahara: #FAF5EE;
+      --surface-card: #FFFFFF;
+      --surface-subtle: #F2ECE4;
+      --surface-muted: #F6F0E8;
+      --border-sand: #EBD9CA;
+      --text-espresso: #1F1610;
+      --text-medium: #605850;
+      --text-brown: #7A5E4B;
+      --text-label: #8C6E58;
       --primary-terracotta: #C2652A;
-      --primary-ember: #E08850;
-      --accent-teal: #207868;
-      --accent-emerald: #10B981;
-      --accent-amber: #F59E0B;
-      --text-high: #F8FAFC;
-      --text-medium: #94A3B8;
-      --text-low: #64748B;
+      --primary-container: #D96B27;
+      --chip-warm: #FBE8D8;
     }
 
-    body {
+    body, html {
+      background-color: #FAF5EE !important;
+      color: #1F1610 !important;
       font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: #10131A;
-      color: #F8FAFC;
       margin: 0;
       padding: 0;
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .font-mono {
-      font-family: 'JetBrains Mono', monospace;
+      overscroll-behavior: none;
     }
 
     .font-arabic {
       font-family: 'Noto Sans Arabic', 'Plus Jakarta Sans', sans-serif;
     }
 
-    .glass-card {
-      background: linear-gradient(135deg, rgba(31, 36, 48, 0.88) 0%, rgba(23, 28, 38, 0.95) 100%);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(224, 136, 80, 0.2);
-      box-shadow: 0 10px 32px 0 rgba(0, 0, 0, 0.5);
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
     }
 
-    .glass-card-interactive {
-      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    .pb-safe {
+      padding-bottom: env(safe-area-inset-bottom, 16px);
     }
-    .glass-card-interactive:hover {
-      transform: translateY(-2px);
-      border-color: rgba(224, 136, 80, 0.45);
-      box-shadow: 0 12px 36px 0 rgba(194, 101, 42, 0.25);
+    .pt-safe {
+      padding-top: env(safe-area-inset-top, 0px);
     }
 
-    .gradient-terracotta {
-      background: linear-gradient(135deg, #C2652A 0%, #E08850 100%);
+    .stitch-card {
+      background-color: #FFFFFF !important;
+      border: 1px solid #EBD9CA !important;
+      border-radius: 16px;
+      box-shadow: 0 1px 6px rgba(45, 30, 21, 0.04);
     }
 
-    .glow-terracotta {
-      box-shadow: 0 0 24px -2px rgba(194, 101, 42, 0.5);
+    .stitch-subtle-box {
+      background-color: #FAF5EE !important;
+      border: 1px solid #EBD9CA !important;
+      border-radius: 12px;
     }
 
-    .glow-teal {
-      box-shadow: 0 0 24px -2px rgba(32, 120, 104, 0.5);
+    .stitch-pill {
+      background-color: #F2ECE4 !important;
+      border: 1px solid #EBD9CA !important;
+      color: #2D1E15 !important;
     }
 
-    .pulse-ring {
-      animation: pulseGlow 2.4s infinite cubic-bezier(0.4, 0, 0.6, 1);
+    .stitch-btn-primary {
+      background-color: #C2652A !important;
+      color: #FFFFFF !important;
+    }
+    .stitch-btn-primary:hover {
+      background-color: #A8521D !important;
     }
 
-    @keyframes pulseGlow {
-      0%, 100% { transform: scale(1); opacity: 0.8; }
-      50% { transform: scale(1.08); opacity: 0.3; }
-    }
-
-    /* 3D Flip Card */
-    .perspective-1000 { perspective: 1000px; }
-    .transform-style-3d { transform-style: preserve-3d; }
-    .backface-hidden {
-      backface-visibility: hidden;
-      -webkit-backface-visibility: hidden;
-    }
-    .rotate-y-180 { transform: rotateY(180deg); }
-
-    /* Custom Scrollbar */
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: rgba(20, 23, 32, 0.5); }
-    ::-webkit-scrollbar-thumb { background: rgba(224, 136, 80, 0.3); border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: rgba(224, 136, 80, 0.6); }
+    /* Custom scrollbar */
+    ::-webkit-scrollbar { display: none; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
   </style>
 </head>
-<body class="bg-[#10131A] text-[#F8FAFC]">
+<body class="bg-[#FAF5EE] text-[#1F1610] flex flex-col min-h-screen selection:bg-[#C2652A] selection:text-white">
 
-  <!-- Top Sticky Navigation Bar -->
-  <header class="sticky top-0 z-50 w-full bg-[#141720]/92 backdrop-blur-xl border-b border-[rgba(224,136,80,0.18)]">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-3">
+  <!-- Top Sticky Navigation Bar (100% Stitch Exact) -->
+  <header class="fixed top-0 w-full z-50 backdrop-blur-xl pt-safe shadow-[0_1px_8px_rgba(45,30,21,0.04)]" style="background-color: rgba(250, 245, 238, 0.94); border-bottom: 1px solid #EBD9CA;">
+    <div class="max-w-7xl mx-auto h-16 px-4 sm:px-6 flex items-center justify-between gap-2 sm:gap-4">
       
-      <!-- Brand & Studio Title -->
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl gradient-terracotta flex items-center justify-center font-black text-xl shadow-lg glow-terracotta cursor-pointer text-white" onclick="switchTab('pathway')">
-          ⚡
-        </div>
-        <div>
-          <div class="flex items-center gap-2">
-            <span class="text-lg font-black tracking-tight text-white">Spark Lingo</span>
-            <span class="hidden sm:inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#C2652A]/20 text-[#E08850] border border-[rgba(224,136,80,0.35)]">
-              LingoPulse AI Studio
-            </span>
-          </div>
-          <p class="text-[11px] text-[#94A3B8] hidden md:block">Socio-Pragmatic & Morphological Interface • 15 Languages</p>
-        </div>
-      </div>
-
-      <!-- Center Desktop Studio Tabs -->
-      <nav class="hidden lg:flex items-center gap-1 bg-[#171C26] border border-[#2A2F45] p-1 rounded-xl">
-        <button onclick="switchTab('pathway')" id="nav-pathway" class="nav-tab px-3.5 py-1.5 rounded-lg text-xs font-bold bg-[#C2652A] text-white transition flex items-center gap-1.5">
-          <span>🗺️</span> <span>Flight Path</span>
-        </button>
-        <button onclick="switchTab('dialect')" id="nav-dialect" class="nav-tab px-3.5 py-1.5 rounded-lg text-xs font-semibold text-[#94A3B8] hover:text-white transition flex items-center gap-1.5">
-          <span>🔄</span> <span>Dialect Bridge</span>
-        </button>
-        <button onclick="switchTab('morphology')" id="nav-morphology" class="nav-tab px-3.5 py-1.5 rounded-lg text-xs font-semibold text-[#94A3B8] hover:text-white transition flex items-center gap-1.5">
-          <span>🌳</span> <span>Morphology Tree</span>
-        </button>
-        <button onclick="switchTab('vocal_lab')" id="nav-vocal_lab" class="nav-tab px-3.5 py-1.5 rounded-lg text-xs font-semibold text-[#94A3B8] hover:text-white transition flex items-center gap-1.5">
-          <span>🗣️</span> <span>Vocal Lab</span>
-        </button>
-        <button onclick="switchTab('fsrs_queue')" id="nav-fsrs_queue" class="nav-tab px-3.5 py-1.5 rounded-lg text-xs font-semibold text-[#94A3B8] hover:text-white transition flex items-center gap-1.5">
-          <span>🧠</span> <span>FSRS Queue</span>
-        </button>
-      </nav>
-
-      <!-- Right Controls: 15-Language Dropdown + Stats Telemetry -->
+      <!-- Left: Language Dropdown Pill & Live AI Status -->
       <div class="flex items-center gap-2 sm:gap-3">
-        
-        <!-- Language Switcher Button (15 Languages) -->
-        <button onclick="openLanguageModal()" class="flex items-center gap-2 bg-[#171C26] hover:bg-[#1F2430] border border-[rgba(224,136,80,0.25)] hover:border-[#E08850] px-3 py-1.5 rounded-xl cursor-pointer transition shadow-sm">
-          <span id="header-flag" class="text-base">🇸🇦</span>
-          <span id="header-lang-name" class="text-xs font-bold text-white">العربية</span>
-          <span id="header-cefr" class="px-1.5 py-0.2 rounded text-[10px] font-black bg-[#C2652A]/20 text-[#E08850]">B2+</span>
-          <svg class="w-3.5 h-3.5 text-[#94A3B8]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+        <!-- Language Selector Button -->
+        <button onclick="openLanguageModal()" class="h-11 px-3 sm:px-4 rounded-full flex items-center gap-1.5 sm:gap-2 text-[#2D1E15] transition-all shadow-sm active:scale-95 cursor-pointer" style="background-color: #F2ECE4; border: 1px solid #EBD9CA;">
+          <span id="hdr-flag" class="text-base sm:text-lg leading-none">🇸🇦</span>
+          <span id="hdr-lang-title" class="text-xs sm:text-sm font-bold text-[#2D1E15]">AR · Arabic</span>
+          <span class="material-symbols-outlined text-[#7A5E4B] text-[18px]">expand_more</span>
         </button>
 
-        <!-- Streak Pill -->
-        <div class="hidden sm:flex items-center gap-1.5 bg-[#F59E0B]/10 border border-[#F59E0B]/30 px-2.5 py-1.5 rounded-xl text-[#F59E0B]">
-          <span class="text-xs">🔥</span>
-          <span id="streak-val" class="text-xs font-black">21</span>
+        <!-- Sparky AI Live Engine Badge -->
+        <div class="flex items-center gap-1.5 h-11 px-3 rounded-full shadow-sm" style="background-color: #F2ECE4; border: 1px solid #EBD9CA;">
+          <span class="relative flex h-2 w-2">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#C2652A] opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-[#C2652A]"></span>
+          </span>
+          <span class="text-[11px] sm:text-xs text-[#C2652A] font-extrabold uppercase tracking-wider">Sparky AI</span>
         </div>
-
-        <!-- XP Pill -->
-        <div class="hidden sm:flex items-center gap-1.5 bg-[#C2652A]/10 border border-[rgba(224,136,80,0.3)] px-2.5 py-1.5 rounded-xl text-[#E08850]">
-          <span class="text-xs">⚡</span>
-          <span id="xp-val" class="text-xs font-black">3,420</span>
-        </div>
-
-        <!-- Student Profile Avatar -->
-        <div class="w-8 h-8 rounded-full gradient-terracotta p-0.5 cursor-pointer" title="Student Session">
-          <div class="w-full h-full bg-[#141720] rounded-full flex items-center justify-center text-xs font-extrabold text-white">
-            B
-          </div>
-        </div>
-
       </div>
 
-    </div>
+      <!-- Center Desktop Studio Mode Toggle -->
+      <div class="hidden md:flex items-center gap-1 p-1 rounded-full shadow-sm" style="background-color: #F2ECE4; border: 1px solid #EBD9CA;">
+        <button onclick="setStudioView('arabic')" id="btn-view-ar" class="px-4 py-1.5 rounded-full text-xs font-bold bg-[#C2652A] text-white transition-all shadow-sm">
+          🇸🇦 Arabic (Fasih Studio)
+        </button>
+        <button onclick="setStudioView('spanish')" id="btn-view-es" class="px-4 py-1.5 rounded-full text-xs font-bold text-[#605850] hover:text-[#1F1610] transition-all">
+          🇪🇸 Spanish (Castizo Studio)
+        </button>
+        <button onclick="setStudioView('dual')" id="btn-view-dual" class="px-4 py-1.5 rounded-full text-xs font-bold text-[#605850] hover:text-[#1F1610] transition-all">
+          📱 Side-by-Side Canvas
+        </button>
+      </div>
 
-    <!-- Mobile Top Sub-Nav Strip -->
-    <div class="flex lg:hidden overflow-x-auto items-center gap-1 px-3 py-2 border-t border-[#2A2F45]/50 bg-[#10131A]">
-      <button onclick="switchTab('pathway')" id="mob-top-pathway" class="whitespace-nowrap px-3 py-1 text-xs font-bold bg-[#C2652A] text-white rounded-lg">🗺️ Flight Path</button>
-      <button onclick="switchTab('dialect')" id="mob-top-dialect" class="whitespace-nowrap px-3 py-1 text-xs font-semibold text-[#94A3B8] rounded-lg">🔄 Dialect Bridge</button>
-      <button onclick="switchTab('morphology')" id="mob-top-morphology" class="whitespace-nowrap px-3 py-1 text-xs font-semibold text-[#94A3B8] rounded-lg">🌳 Morphology</button>
-      <button onclick="switchTab('vocal_lab')" id="mob-top-vocal_lab" class="whitespace-nowrap px-3 py-1 text-xs font-semibold text-[#94A3B8] rounded-lg">🗣️ Vocal Lab</button>
-      <button onclick="switchTab('fsrs_queue')" id="mob-top-fsrs_queue" class="whitespace-nowrap px-3 py-1 text-xs font-semibold text-[#94A3B8] rounded-lg">🧠 FSRS</button>
+      <!-- Right Telemetry Metrics & Avatar -->
+      <div class="flex items-center gap-1.5 sm:gap-2">
+        <div class="flex items-center h-11 px-2.5 sm:px-3 rounded-full shadow-sm" style="background-color: #F2ECE4; border: 1px solid #EBD9CA;">
+          <span class="material-symbols-outlined text-[16px] text-[#C2652A] mr-1">neurology</span>
+          <span class="text-xs text-[#2D1E15] font-extrabold">94%</span>
+        </div>
+        <div class="flex items-center h-11 px-2.5 sm:px-3 rounded-full shadow-sm" style="background-color: #F2ECE4; border: 1px solid #EBD9CA;">
+          <span class="material-symbols-outlined text-[16px] text-[#C2652A] mr-1">local_fire_department</span>
+          <span class="text-xs text-[#2D1E15] font-extrabold">18d</span>
+        </div>
+        <div class="w-8 h-8 rounded-full bg-[#C2652A] flex items-center justify-center shrink-0 ml-1 shadow-md cursor-pointer text-white">
+          <span class="material-symbols-outlined text-white text-[18px]">person</span>
+        </div>
+      </div>
+
     </div>
   </header>
 
-  <!-- Main Content Container -->
-  <main class="max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 flex-1 pb-28">
+  <!-- Main Multi-Screen Content Layout -->
+  <main class="flex flex-col relative w-full pt-20 pb-28 min-h-screen max-w-7xl mx-auto px-3 sm:px-6">
 
-    <!-- ================= SECTION 1: ADAPTIVE FLIGHT PATH (PATHWAY) ================= -->
-    <div id="section-pathway" class="space-y-6">
+    <!-- Container that adapts: Single Column or Side-by-Side Dual Canvas -->
+    <div id="studio-grid" class="grid grid-cols-1 gap-8 w-full max-w-xl mx-auto transition-all duration-300">
 
-      <!-- Bento Telemetry Dashboard -->
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-        
-        <!-- Bento 1: Retention Stability (FSRS-4.5) -->
-        <div class="glass-card p-5 rounded-2xl flex flex-col justify-between relative overflow-hidden">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-[#94A3B8] uppercase tracking-wider">FSRS Stability</span>
-            <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-bold border border-emerald-500/30">FSRS 4.5</span>
+      <!-- ========================================================================= -->
+      <!-- SCREEN 1: ARABIC IMMERSION - SPARKY FASIH STUDIO (100% STITCH EXACT)      -->
+      <!-- ========================================================================= -->
+      <section id="screen-arabic" class="flex flex-col gap-5 w-full">
+
+        <!-- Subtle Ambient Engine Status Sub-bar -->
+        <div class="relative w-full rounded-2xl p-4 sm:p-5 shadow-sm overflow-hidden" style="background: linear-gradient(180deg, #F6F0E8 0%, #FFFFFF 100%); border: 1px solid #EBD9CA;">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-[#C2652A] text-[20px]" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+              <span class="text-[11px] font-bold text-[#C2652A] tracking-wider uppercase">Dialect Bridge Engine</span>
+            </div>
+            <div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FAF5EE] text-[#7A5E4B] border border-[#EBD9CA]">
+              <span class="w-1.5 h-1.5 rounded-full bg-[#C2652A] animate-pulse"></span>
+              <span class="text-[10px] font-bold text-[#C2652A]">MSA ⇄ Shami (Levantine)</span>
+            </div>
           </div>
-          <div class="my-4 flex items-center justify-center">
-            <div class="relative w-20 h-20 flex items-center justify-center">
-              <svg class="w-20 h-20 transform -rotate-90" viewBox="0 0 36 36">
-                <path class="text-[#2A2F45]" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                <path class="text-emerald-400" stroke-width="3" stroke-dasharray="92, 100" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-              </svg>
-              <div class="absolute text-center">
-                <span class="text-lg font-black text-white">92%</span>
+          <div class="flex items-baseline justify-between mt-1">
+            <h1 class="text-2xl font-black text-[#1F1610] tracking-tight">العربية · Arabic</h1>
+            <span class="text-base font-extrabold text-[#C2652A]" dir="rtl">الجذور واللهجات</span>
+          </div>
+          <p class="text-xs text-[#7A5E4B] mt-0.5">Modern Standard (فصحى) &amp; Levantine Ammiya morphology matrix</p>
+        </div>
+
+        <!-- Dedicated AI Coach: Sparky Fasih Personality Module -->
+        <div class="stitch-card p-4 sm:p-5 relative overflow-hidden">
+          <!-- Visual Left-Spine Indicator for AI Persona -->
+          <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-[#C2652A]"></div>
+          <div class="flex items-start gap-4 pl-1">
+            <!-- Sparky Fasih Arabesque Emblem Avatar (100% Exact SVG from Stitch) -->
+            <div class="relative shrink-0">
+              <div class="w-14 h-14 rounded-2xl flex items-center justify-center shadow-md overflow-hidden" style="background-color: #FAF5EE; border: 1.5px solid #EBD9CA;">
+                <svg class="w-10 h-10 text-[#C2652A]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 100 100">
+                  <polygon fill="rgba(194, 101, 42, 0.12)" points="50,5 61,35 95,35 68,57 79,91 50,70 21,91 32,57 5,35 39,35" stroke="currentColor"></polygon>
+                  <circle cx="50" cy="50" fill="#D96B27" r="14" stroke="#FDDEAE" stroke-width="2"></circle>
+                  <circle cx="50" cy="46" fill="#FFFFFF" r="3.5"></circle>
+                </svg>
+              </div>
+              <span class="absolute -bottom-1 -right-1 px-1.5 py-0.2 rounded-full bg-[#C2652A] text-white text-[9px] font-black shadow-sm">AI</span>
+            </div>
+
+            <!-- Coach Pitch & Cognitive Status -->
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between">
+                <span class="text-sm sm:text-base font-bold text-[#1F1610]">Sparky Fasih (سباركي الفصيح)</span>
+                <span class="text-[10px] font-bold text-[#7A5E4B] px-2 py-0.5 rounded-full" style="background-color: #FAF5EE; border: 1px solid #EBD9CA;">Form I–X</span>
+              </div>
+              <p class="text-xs text-[#605850] mt-1 leading-snug">
+                Master of Triliteral Root Systems (<span class="text-[#C2652A] font-bold" dir="rtl">الجذور الثلاثية</span>) &amp; real-time MSA-to-Ammiya socio-linguistic shifts.
+              </p>
+              <div class="flex items-center gap-2 mt-2">
+                <span class="px-2 py-0.5 rounded-full bg-[#FBE8D8] text-[#C2652A] text-[10px] font-bold flex items-center gap-1">
+                  <span class="material-symbols-outlined text-[13px]">psychology</span> Syntax Flow: Active
+                </span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold text-[#7A5E4B]" style="background-color: #FAF5EE; border: 1px solid #EBD9CA;">
+                  Root: ك - ت - ب
+                </span>
               </div>
             </div>
           </div>
-          <div class="text-[11px] text-[#94A3B8] flex justify-between">
-            <span>Half-life: 14.2 Days</span>
-            <span class="text-emerald-400 font-bold">Stable</span>
-          </div>
         </div>
 
-        <!-- Bento 2: Active Dialect & CEFR Level -->
-        <div class="glass-card p-5 rounded-2xl flex flex-col justify-between">
+        <!-- The 3-Letter Root Derivation Tree (Scientific Morphology Studio) -->
+        <div class="stitch-card p-4 sm:p-5 flex flex-col gap-4">
           <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-[#94A3B8] uppercase tracking-wider">Dialect Register</span>
-            <span class="text-[10px] px-2 py-0.5 rounded-full bg-[#C2652A]/20 text-[#E08850] font-bold border border-[rgba(224,136,80,0.3)]">Poly-Dialect</span>
-          </div>
-          <div class="my-3">
-            <div class="text-2xl font-black text-white flex items-center gap-2">
-              <span id="card-active-dialect">MSA ⇄ Shami</span>
-            </div>
-            <p class="text-xs text-[#94A3B8] mt-1">Stage B2+ Socio-Pragmatic Register</p>
-          </div>
-          <div class="w-full bg-[#141720] rounded-full h-1.5 overflow-hidden">
-            <div class="bg-gradient-to-r from-[#C2652A] to-[#E08850] h-1.5 rounded-full w-[78%]"></div>
-          </div>
-        </div>
-
-        <!-- Bento 3: Krashen Comprehensible Input i+1 -->
-        <div class="glass-card p-5 rounded-2xl flex flex-col justify-between">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-[#94A3B8] uppercase tracking-wider">Natural Acquisition</span>
-            <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-bold border border-emerald-500/30">i+1 Active</span>
-          </div>
-          <div class="my-3">
-            <div class="text-2xl font-black text-white">94%</div>
-            <p class="text-xs text-[#94A3B8] mt-1">Socio-Pragmatic Naturality Flow</p>
-          </div>
-          <div class="text-[11px] text-emerald-400 font-mono font-bold flex items-center gap-1">
-            <span>●</span> High Immersion Retention
-          </div>
-        </div>
-
-        <!-- Bento 4: 1-Tap AI Coach Session -->
-        <div class="glass-card p-5 rounded-2xl flex flex-col justify-between border-[rgba(224,136,80,0.45)]">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-[#E08850] uppercase tracking-wider">Live AI Persona</span>
-            <span class="text-[10px] px-2 py-0.5 rounded-full bg-[#C2652A]/20 text-[#E08850] font-bold">Sparky Studio</span>
-          </div>
-          <div class="my-2">
-            <h4 id="coach-banner-name" class="text-base font-black text-white">Sparky Fasih</h4>
-            <p id="coach-banner-title" class="text-xs text-[#94A3B8]">Senior Morpho-Phonetician</p>
-          </div>
-          <button onclick="switchTab('dialect')" class="w-full py-2 rounded-xl gradient-terracotta text-white font-extrabold text-xs shadow-md glow-terracotta transition flex items-center justify-center gap-2">
-            <span>🎙️</span> <span>START DIALECT BRIDGE</span>
-          </button>
-        </div>
-
-      </div>
-
-      <!-- Krashen i+1 Real-World Scenario with Tri-Mode Cognitive Decoder -->
-      <div class="glass-card p-6 sm:p-8 rounded-3xl">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
-          <div>
-            <div class="flex items-center gap-2 text-xs font-mono font-bold text-[#E08850] tracking-wider uppercase">
-              <span>📍</span> <span id="scenario-location">Taberna La Dolores • Huertas, Madrid</span>
-            </div>
-            <h3 class="text-xl sm:text-2xl font-black text-white mt-1">Krashen ($i+1$) Real-World Scenario</h3>
-          </div>
-          <div class="flex items-center gap-2">
-            <button onclick="playTargetSentenceAudio()" class="px-4 py-2 rounded-xl bg-[#171C26] hover:bg-[#1F2430] border border-[rgba(224,136,80,0.3)] text-white text-xs font-bold transition flex items-center gap-2">
-              <span>🔊</span> <span>LISTEN NATIVE</span>
-            </button>
-            <span class="px-2.5 py-1 rounded-full text-xs font-black bg-[#C2652A]/20 text-[#E08850] border border-[rgba(224,136,80,0.3)]">B2+</span>
-          </div>
-        </div>
-
-        <!-- Target Phrase Showcase -->
-        <div class="bg-[#141720] border border-[rgba(224,136,80,0.25)] rounded-2xl p-6 mb-6 text-center">
-          <div id="target-phrase-foreign" class="text-2xl sm:text-3xl font-extrabold text-white leading-relaxed">
-            ¿Me pones un tinto de verano, por fa, que entra de lujo?
-          </div>
-          <div id="target-phrase-ipa" class="text-xs font-mono text-[#94A3B8] mt-2">
-            /me ˈpones un ˈtinto ðe βeˈɾano poɾ fa ke ˈentɾa ðe ˈluxo/
-          </div>
-        </div>
-
-        <!-- Tri-Mode Cognitive Decoder Switcher -->
-        <div class="bg-[#171C26] border border-[#2A2F45] rounded-2xl p-4 sm:p-6">
-          <div class="flex items-center justify-between mb-4 border-b border-[#2A2F45] pb-3">
-            <div class="text-xs font-mono font-bold text-[#94A3B8] uppercase tracking-wider">
-              TRI-MODE COGNITIVE DECODER
-            </div>
-            <div class="flex items-center gap-1 bg-[#141720] p-1 rounded-xl border border-[#2A2F45]">
-              <button onclick="switchDecoderMode(0)" id="dec-mode-0" class="px-3 py-1 rounded-lg text-xs font-bold bg-[#C2652A] text-white transition">Natural EN</button>
-              <button onclick="switchDecoderMode(1)" id="dec-mode-1" class="px-3 py-1 rounded-lg text-xs font-semibold text-[#94A3B8] transition">Literal Gloss</button>
-              <button onclick="switchDecoderMode(2)" id="dec-mode-2" class="px-3 py-1 rounded-lg text-xs font-semibold text-[#94A3B8] transition">Pragmatics</button>
-            </div>
-          </div>
-
-          <!-- Mode 0: Natural EN -->
-          <div id="decoder-view-0" class="p-4 rounded-xl bg-[#141720] border border-[#2A2F45] flex items-start gap-3">
-            <span class="text-xl">💬</span>
             <div>
-              <div class="text-xs font-bold text-[#E08850] font-mono">NATURAL IDIOMATIC TRANSLATION</div>
-              <p id="decoder-natural-text" class="text-base font-semibold text-white mt-1 italic">
-                “Could you pour me a tinto de verano, please? It really hits the spot!”
-              </p>
+              <span class="text-[10px] font-mono font-bold text-[#C2652A] uppercase tracking-wider">Mizan As-Sarfi · ميزان الصرف</span>
+              <h2 class="text-base sm:text-lg font-bold text-[#1F1610]">Scientific Morphology Tree</h2>
             </div>
-          </div>
-
-          <!-- Mode 1: Literal Gloss -->
-          <div id="decoder-view-1" class="hidden p-4 rounded-xl bg-[#141720] border border-[#2A2F45]">
-            <div class="text-xs font-bold text-[#E08850] font-mono mb-3">SYNTACTIC MORPHEME-BY-MORPHEME ALIGNMENT</div>
-            <div id="decoder-gloss-tokens" class="flex flex-wrap gap-2">
-              <!-- Dynamically populated tokens -->
-            </div>
-          </div>
-
-          <!-- Mode 2: Pragmatics -->
-          <div id="decoder-view-2" class="hidden p-4 rounded-xl bg-[#141720] border border-[rgba(224,136,80,0.3)] flex items-start gap-3">
-            <span class="text-xl">💡</span>
-            <div>
-              <div class="text-xs font-bold text-[#E08850] font-mono">SOCIO-CULTURAL & REGISTER MECHANICS</div>
-              <p id="decoder-pragmatics-text" class="text-xs sm:text-sm text-[#94A3B8] mt-1 leading-relaxed">
-                In Madrid tapas culture, using <span class="text-white font-bold">"poner"</span> (to put/pour) is customary and warmer than "traer" (to bring). <span class="text-white font-bold">"Entrar de lujo"</span> is a classic local idiom indicating that a beverage or dish goes down smoothly and is thoroughly refreshing.
-              </p>
-            </div>
-          </div>
-
-        </div>
-
-      </div>
-
-      <!-- Curriculum Roadmap Units -->
-      <div class="space-y-4">
-        <div class="flex items-center justify-between">
-          <div>
-            <h3 class="text-xl font-black text-white flex items-center gap-2">
-              <span id="roadmap-flag">🇸🇦</span>
-              <span id="roadmap-heading">Curriculum Roadmap • Arabic (العربية)</span>
-            </h3>
-            <p class="text-xs text-[#94A3B8]">Scientific Units organized by CEFR Competencies</p>
-          </div>
-          <button onclick="switchTab('morphology')" class="text-xs font-bold text-[#E08850] hover:underline flex items-center gap-1">
-            <span>Explore Root Family</span> <span>→</span>
-          </button>
-        </div>
-
-        <div id="units-container" class="space-y-3">
-          <!-- Dynamic Units Rendered Here -->
-        </div>
-      </div>
-
-    </div>
-
-    <!-- ================= SECTION 2: DIALECT REGISTER BRIDGE ================= -->
-    <div id="section-dialect" class="hidden space-y-6">
-
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div>
-          <span class="text-xs font-mono font-bold text-[#E08850] tracking-wider uppercase">DUAL-REGISTER ACOUSTIC BRIDGE</span>
-          <h2 class="text-2xl font-black text-white mt-1">Literary Standard ⇄ Spoken Vernacular</h2>
-          <p class="text-xs text-[#94A3B8]">Bridge the cognitive divide between formal grammar and real-world street fluency.</p>
-        </div>
-        <div class="flex items-center gap-2">
-          <span class="px-3 py-1 rounded-full text-xs font-mono font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">94% Naturality</span>
-        </div>
-      </div>
-
-      <!-- AI Coach Persona Card -->
-      <div class="glass-card p-6 rounded-3xl flex flex-col md:flex-row md:items-center justify-between gap-6 border-[rgba(224,136,80,0.3)]">
-        <div class="flex items-center gap-4">
-          <div class="w-16 h-16 rounded-2xl gradient-terracotta flex items-center justify-center font-black text-2xl text-white shadow-lg glow-terracotta">
-            🎙️
-          </div>
-          <div>
-            <h3 id="dialect-coach-name" class="text-lg font-black text-white">Sparky Fasih</h3>
-            <p id="dialect-coach-title" class="text-xs text-[#E08850] font-mono">Senior Morpho-Phonetician & Dialectologist</p>
-            <p class="text-xs text-[#94A3B8] mt-1">Dual-register bridging active for Literary Standard & Spoken Vernacular.</p>
-          </div>
-        </div>
-        <div class="flex items-center gap-3">
-          <button onclick="playCurrentDialectAudio()" class="px-5 py-2.5 rounded-xl gradient-terracotta text-white font-extrabold text-xs shadow-md glow-terracotta transition flex items-center gap-2">
-            <span>▶️</span> <span>PLAY SYNCHRONIZED</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Dialect Toggle Bar -->
-      <div class="bg-[#141720] p-1.5 rounded-2xl border border-[#2A2F45] grid grid-cols-2 gap-2">
-        <button onclick="toggleDialectRegister(false)" id="btn-reg-std" class="py-3 px-4 rounded-xl text-xs sm:text-sm font-bold bg-[#1F2430] border border-[rgba(224,136,80,0.3)] text-white transition text-center">
-          <span id="std-reg-name">Modern Standard Arabic (فصحى)</span>
-        </button>
-        <button onclick="toggleDialectRegister(true)" id="btn-reg-col" class="py-3 px-4 rounded-xl text-xs sm:text-sm font-medium text-[#94A3B8] hover:text-white transition text-center">
-          <span id="col-reg-name">Levantine Shami (شامي)</span>
-        </button>
-      </div>
-
-      <!-- Dual Track Acoustic Player Card -->
-      <div class="glass-card p-6 sm:p-8 rounded-3xl">
-        <div class="flex items-center justify-between mb-4">
-          <div class="flex items-center gap-2">
-            <span class="w-2.5 h-2.5 rounded-full bg-[#E08850] animate-ping"></span>
-            <span id="dialect-player-reg-badge" class="text-xs font-mono font-bold text-[#E08850]">FORMAL LITERARY REGISTER</span>
-          </div>
-          <span class="text-xs font-mono text-[#94A3B8]">0.9x NATIVE SPEED</span>
-        </div>
-
-        <div class="text-center my-6">
-          <div id="dialect-phrase-display" class="text-2xl sm:text-4xl font-extrabold text-white leading-relaxed">
-            مَاذَا تُرِيدُ أَنْ تَشْرَبَ الْيَوْمَ؟
-          </div>
-          <div id="dialect-ipa-display" class="text-xs sm:text-sm font-mono text-[#94A3B8] mt-3">
-            /maːðaː turiːdu ʔan taʃraba l-jawm/
-          </div>
-          <div id="dialect-en-display" class="text-xs sm:text-sm text-[#E08850] mt-2 italic">
-            “What would you like to drink today, my friend?”
-          </div>
-        </div>
-
-        <!-- Waveform Divergence Canvas -->
-        <div class="bg-[#141720] border border-[#2A2F45] rounded-2xl p-4 my-6">
-          <div class="flex items-center justify-between text-[11px] font-mono text-[#94A3B8] mb-2">
-            <span>PHONETIC WAVEFORM ALIGNMENT</span>
-            <span class="text-[#E08850]">DIVERGENCE POINT DETECTED</span>
-          </div>
-          <div id="waveform-bars" class="h-14 flex items-center justify-between gap-1 px-2">
-            <!-- Dynamically populated waveform bars -->
-          </div>
-          <div id="divergence-callout-text" class="mt-3 p-3 rounded-xl bg-[#C2652A]/10 border border-[rgba(224,136,80,0.25)] text-xs text-[#94A3B8] flex items-center gap-2">
-            <span>ℹ️</span> <span>Glottal stop shift: [mādhā] → [shū], informal vocative [yā ghālī]</span>
-          </div>
-        </div>
-
-        <!-- 1-Tap Socio-Pragmatic Query Chips -->
-        <div class="space-y-3">
-          <span class="text-xs font-mono font-bold text-[#94A3B8] uppercase">1-TAP SOCIO-PRAGMATIC QUERIES</span>
-          <div id="query-chips-container" class="flex flex-wrap gap-2">
-            <!-- Chips rendered here -->
-          </div>
-          <div id="query-answer-box" class="hidden p-4 rounded-xl bg-[#141720] border border-[rgba(224,136,80,0.3)] text-xs sm:text-sm text-[#94A3B8] leading-relaxed">
-            <!-- Answer populated here -->
-          </div>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- ================= SECTION 3: SCIENTIFIC MORPHOLOGY TREE ================= -->
-    <div id="section-morphology" class="hidden space-y-6">
-
-      <div class="text-center max-w-2xl mx-auto space-y-2">
-        <span class="text-xs font-mono font-bold text-[#E08850] tracking-wider uppercase" id="morph-system-name">MĪZĀN AṢ-ṢARFĪ (مِيزَان الصَّرْف)</span>
-        <h2 class="text-2xl sm:text-3xl font-black text-white">The Scientific Morphology Tree</h2>
-        <p class="text-xs sm:text-sm text-[#94A3B8]">Explore how an entire semantic galaxy of words sprouts from a single core morphological root.</p>
-      </div>
-
-      <!-- Root Nucleus Card -->
-      <div class="glass-card p-6 sm:p-8 rounded-3xl text-center border-[rgba(224,136,80,0.35)]">
-        <div class="text-xs font-mono font-bold text-[#E08850] uppercase" id="morph-root-title">TRILITERAL ROOT NUCLEUS</div>
-        <div class="my-4 inline-block px-8 py-3 rounded-2xl bg-gradient-to-r from-[#C2652A]/20 to-[#E08850]/20 border border-[#E08850]/40 shadow-lg glow-terracotta">
-          <span id="morph-root-letters" class="text-3xl sm:text-4xl font-black text-white tracking-widest">ك - ت - ب</span>
-        </div>
-        <p id="morph-root-concept" class="text-sm font-semibold text-[#94A3B8] max-w-md mx-auto">
-          The Core Semantic Archetype of "Writing, Inscribing & Documenting"
-        </p>
-      </div>
-
-      <!-- Bento Derivation Branches Selector -->
-      <div>
-        <span class="text-xs font-mono font-bold text-[#94A3B8] uppercase">DERIVATION BRANCHES (CLICK TO INSPECT)</span>
-        <div id="morph-branches-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 mt-3">
-          <!-- Dynamically populated branch cards -->
-        </div>
-      </div>
-
-      <!-- Deep Branch Inspection Card -->
-      <div class="glass-card p-6 sm:p-8 rounded-3xl border-[rgba(224,136,80,0.3)]" id="morph-detail-card">
-        <div class="flex items-center justify-between mb-4">
-          <span id="branch-detail-form" class="px-3 py-1 rounded-lg text-xs font-mono font-bold bg-[#141720] border border-[#2A2F45] text-[#E08850]">Form I Noun</span>
-          <span id="branch-detail-cefr" class="px-2.5 py-0.5 rounded-full text-xs font-black bg-emerald-500/20 text-emerald-400">A1</span>
-        </div>
-
-        <div class="text-center my-6">
-          <div id="branch-detail-word" class="text-3xl sm:text-4xl font-black text-white">كِتَاب</div>
-          <div id="branch-detail-trans" class="text-sm sm:text-base font-bold text-[#E08850] mt-2">Kitāb • “Book / Text”</div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-6">
-          <div class="bg-[#141720] p-4 rounded-xl border border-[#2A2F45]">
-            <div class="text-[10px] font-mono font-bold text-[#94A3B8] uppercase">MORPHO-SYNTACTIC PATTERN (WEIGHT)</div>
-            <div id="branch-detail-wazn" class="text-sm font-black text-white mt-1">فِعَال (Fi‘āl)</div>
-          </div>
-          <div class="bg-[#141720] p-4 rounded-xl border border-[#2A2F45]">
-            <div class="text-[10px] font-mono font-bold text-[#94A3B8] uppercase">SEMANTIC ROLE</div>
-            <div id="branch-detail-role" class="text-sm font-medium text-[#94A3B8] mt-1">Noun of Patient / Concrete Manifestation</div>
-          </div>
-        </div>
-
-        <div class="bg-[#141720] p-5 rounded-2xl border border-[rgba(224,136,80,0.25)]">
-          <div class="flex items-center justify-between mb-2">
-            <span class="text-[10px] font-mono font-bold text-[#E08850] uppercase">CORPUS USAGE IN CONTEXT</span>
-            <button onclick="playBranchSentenceAudio()" class="text-xs font-bold text-[#E08850] hover:underline flex items-center gap-1">
-              <span>🔊</span> <span>Listen Sentence</span>
+            <button class="px-3 py-1 rounded-full text-xs font-semibold text-[#605850] hover:text-[#1F1610] flex items-center gap-1 shadow-sm" style="background-color: #FAF5EE; border: 1px solid #EBD9CA;" type="button">
+              <span class="material-symbols-outlined text-[15px]">shuffle</span>
+              <span>Roots</span>
             </button>
           </div>
-          <div id="branch-detail-example" class="text-base sm:text-lg font-bold text-white">هَذَا كِتَابٌ مُفِيدٌ جِدًّا فِي دِرَاسَتِنَا.</div>
-          <div id="branch-detail-example-en" class="text-xs text-[#94A3B8] mt-1 italic">“This is a very useful book in our study.”</div>
-        </div>
-      </div>
 
-    </div>
-
-    <!-- ================= SECTION 4: VOCAL ARTICULATION TRAINER ================= -->
-    <div id="section-vocal_lab" class="hidden space-y-6">
-
-      <div class="text-center max-w-2xl mx-auto space-y-2">
-        <span class="text-xs font-mono font-bold text-[#E08850] tracking-wider uppercase" id="vocal-lab-title">MAKHĀRIJ AL-ḤURŪF (مَخَارِج الحُرُوف)</span>
-        <h2 class="text-2xl sm:text-3xl font-black text-white" id="vocal-lab-subtitle">Anatomical Pharyngeal Articulation Studio</h2>
-        <p class="text-xs sm:text-sm text-[#94A3B8]">Master challenging pharyngeal and emphatic consonants through acoustic resonance and sagittal vocal tract cutaways.</p>
-      </div>
-
-      <!-- Target Consonant Selector Chips -->
-      <div id="vocal-targets-bar" class="flex flex-wrap items-center justify-center gap-3">
-        <!-- Dynamically populated consonant chips -->
-      </div>
-
-      <!-- Sagittal Cutaway Canvas Card -->
-      <div class="glass-card p-6 sm:p-8 rounded-3xl border-[rgba(224,136,80,0.3)]">
-        <div class="flex items-center justify-between mb-4">
-          <span class="text-xs font-mono font-bold text-[#94A3B8] uppercase">SAGITTAL VOCAL TRACT CUTAWAY</span>
-          <span id="vocal-target-type" class="px-2.5 py-1 rounded-lg text-xs font-mono font-bold bg-[#C2652A]/20 text-[#E08850]">Voiced Pharyngeal Fricative</span>
-        </div>
-
-        <!-- Interactive Sagittal Diagram Canvas -->
-        <div class="relative w-full h-56 bg-[#141720] border border-[#2A2F45] rounded-2xl flex flex-col items-center justify-center overflow-hidden">
-          <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#E08850_1px,transparent_1px)] [background-size:16px_16px]"></div>
-          
-          <div class="relative flex flex-col items-center">
-            <div class="w-24 h-24 rounded-full border-2 border-[#E08850]/50 bg-gradient-to-br from-[#C2652A]/30 to-transparent flex items-center justify-center shadow-lg glow-terracotta animate-pulse">
-              <span id="vocal-symbol-large" class="text-4xl font-black text-white">ع</span>
+          <!-- Central Root Pod -->
+          <div class="relative w-full rounded-xl p-4 flex flex-col items-center justify-center text-center overflow-hidden" style="background-color: #FAF5EE; border: 1px solid #EBD9CA;">
+            <div class="absolute inset-0 flex items-center justify-center opacity-5 pointer-events-none text-[120px] font-black text-[#C2652A] select-none" dir="rtl">
+              كتب
             </div>
-            <div id="vocal-active-zone" class="mt-3 px-3 py-1 rounded-full bg-[#171C26] border border-[rgba(224,136,80,0.3)] text-xs font-mono font-bold text-[#E08850]">
-              ACTIVE ZONE: MIDDLE THROAT / EPIGLOTTIS
+            <div class="inline-flex items-center gap-1 px-3 py-0.5 rounded-full bg-[#FBE8D8] text-[#C2652A] mb-2">
+              <span class="material-symbols-outlined text-[14px]">account_tree</span>
+              <span class="text-[10px] font-bold">Semantic Nucleus · الفكرة المجردة</span>
+            </div>
+
+            <!-- Glyphs Split: Kāf • Tā' • Bā' -->
+            <div class="flex items-center justify-center gap-3 my-2" dir="rtl">
+              <div class="w-11 h-11 rounded-xl bg-white flex flex-col items-center justify-center shadow-sm" style="border: 1px solid #EBD9CA;">
+                <span class="text-[20px] font-bold text-[#C2652A]">ك</span>
+                <span class="text-[9px] text-[#7A5E4B]">Kāf</span>
+              </div>
+              <span class="text-[#7A5E4B] text-lg font-bold">•</span>
+              <div class="w-11 h-11 rounded-xl bg-white flex flex-col items-center justify-center shadow-sm" style="border: 1px solid #EBD9CA;">
+                <span class="text-[20px] font-bold text-[#C2652A]">ت</span>
+                <span class="text-[9px] text-[#7A5E4B]">Tā’</span>
+              </div>
+              <span class="text-[#7A5E4B] text-lg font-bold">•</span>
+              <div class="w-11 h-11 rounded-xl bg-white flex flex-col items-center justify-center shadow-sm" style="border: 1px solid #EBD9CA;">
+                <span class="text-[20px] font-bold text-[#C2652A]">ب</span>
+                <span class="text-[9px] text-[#7A5E4B]">Bā’</span>
+              </div>
+            </div>
+            <p class="text-xs text-[#605850] mt-1">Core Concept: <span class="text-[#1F1610] font-bold">"Writing, Inscribing, Binding Record"</span></p>
+          </div>
+
+          <!-- Interactive Derivation Branches (5 Exact Stitch Cards) -->
+          <div class="grid grid-cols-1 gap-2">
+            <!-- Branch 1: Kitāb -->
+            <div class="flex items-center justify-between p-3 rounded-xl hover:shadow-sm transition-all cursor-pointer" style="background-color: #FAF5EE; border: 1px solid #EBD9CA;" onclick="playAudio('كِتَاب', 'ar')">
+              <div class="flex items-center gap-3 min-w-0">
+                <div class="w-8 h-8 rounded-full bg-[#FBE8D8] text-[#C2652A] flex items-center justify-center shrink-0">
+                  <span class="material-symbols-outlined text-[18px]">menu_book</span>
+                </div>
+                <div class="min-w-0">
+                  <div class="flex items-center gap-2">
+                    <span class="text-sm font-bold text-[#1F1610]">Kitāb</span>
+                    <span class="text-[10px] px-1.5 py-0.2 rounded bg-white text-[#7A5E4B] border border-[#EBD9CA]">Form Fi'āl</span>
+                  </div>
+                  <p class="text-xs text-[#605850] truncate">Book · That which is bound and written</p>
+                </div>
+              </div>
+              <div class="flex flex-col items-end shrink-0 pl-2" dir="rtl">
+                <span class="text-lg font-black text-[#C2652A]">كِتَاب</span>
+                <span class="text-[10px] text-[#7A5E4B]">اسم مفعول</span>
+              </div>
+            </div>
+
+            <!-- Branch 2: Kātib -->
+            <div class="flex items-center justify-between p-3 rounded-xl hover:shadow-sm transition-all cursor-pointer" style="background-color: #FAF5EE; border: 1px solid #EBD9CA;" onclick="playAudio('كَاتِب', 'ar')">
+              <div class="flex items-center gap-3 min-w-0">
+                <div class="w-8 h-8 rounded-full bg-[#FBE8D8] text-[#C2652A] flex items-center justify-center shrink-0">
+                  <span class="material-symbols-outlined text-[18px]">edit_note</span>
+                </div>
+                <div class="min-w-0">
+                  <div class="flex items-center gap-2">
+                    <span class="text-sm font-bold text-[#1F1610]">Kātib</span>
+                    <span class="text-[10px] px-1.5 py-0.2 rounded bg-white text-[#7A5E4B] border border-[#EBD9CA]">Active Participle</span>
+                  </div>
+                  <p class="text-xs text-[#605850] truncate">Writer / Scribe · The agent doing the action</p>
+                </div>
+              </div>
+              <div class="flex flex-col items-end shrink-0 pl-2" dir="rtl">
+                <span class="text-lg font-black text-[#C2652A]">كَاتِب</span>
+                <span class="text-[10px] text-[#7A5E4B]">اسم فاعل</span>
+              </div>
+            </div>
+
+            <!-- Branch 3: Maktab -->
+            <div class="flex items-center justify-between p-3 rounded-xl hover:shadow-sm transition-all cursor-pointer" style="background-color: #FAF5EE; border: 1px solid #EBD9CA;" onclick="playAudio('مَكْتَب', 'ar')">
+              <div class="flex items-center gap-3 min-w-0">
+                <div class="w-8 h-8 rounded-full bg-[#FBE8D8] text-[#C2652A] flex items-center justify-center shrink-0">
+                  <span class="material-symbols-outlined text-[18px]">desk</span>
+                </div>
+                <div class="min-w-0">
+                  <div class="flex items-center gap-2">
+                    <span class="text-sm font-bold text-[#1F1610]">Maktab</span>
+                    <span class="text-[10px] px-1.5 py-0.2 rounded bg-white text-[#7A5E4B] border border-[#EBD9CA]">Noun of Place</span>
+                  </div>
+                  <p class="text-xs text-[#605850] truncate">Desk / Office · Place where writing occurs</p>
+                </div>
+              </div>
+              <div class="flex flex-col items-end shrink-0 pl-2" dir="rtl">
+                <span class="text-lg font-black text-[#C2652A]">مَكْتَب</span>
+                <span class="text-[10px] text-[#7A5E4B]">اسم مكان</span>
+              </div>
+            </div>
+
+            <!-- Branch 4: Maktaba -->
+            <div class="flex items-center justify-between p-3 rounded-xl hover:shadow-sm transition-all cursor-pointer" style="background-color: #FAF5EE; border: 1px solid #EBD9CA;" onclick="playAudio('مَكْتَبَة', 'ar')">
+              <div class="flex items-center gap-3 min-w-0">
+                <div class="w-8 h-8 rounded-full bg-[#FBE8D8] text-[#C2652A] flex items-center justify-center shrink-0">
+                  <span class="material-symbols-outlined text-[18px]">local_library</span>
+                </div>
+                <div class="min-w-0">
+                  <div class="flex items-center gap-2">
+                    <span class="text-sm font-bold text-[#1F1610]">Maktaba</span>
+                    <span class="text-[10px] px-1.5 py-0.2 rounded bg-white text-[#7A5E4B] border border-[#EBD9CA]">Feminine Institution</span>
+                  </div>
+                  <p class="text-xs text-[#605850] truncate">Library / Bookstore · Collective repository</p>
+                </div>
+              </div>
+              <div class="flex flex-col items-end shrink-0 pl-2" dir="rtl">
+                <span class="text-lg font-black text-[#C2652A]">مَكْتَبَة</span>
+                <span class="text-[10px] text-[#7A5E4B]">اسم مكان جمعي</span>
+              </div>
+            </div>
+
+            <!-- Branch 5: Iktitāb -->
+            <div class="flex items-center justify-between p-3 rounded-xl hover:shadow-sm transition-all cursor-pointer" style="background-color: #FAF5EE; border: 1px solid #EBD9CA;" onclick="playAudio('اِكْتِتَاب', 'ar')">
+              <div class="flex items-center gap-3 min-w-0">
+                <div class="w-8 h-8 rounded-full bg-[#FBE8D8] text-[#C2652A] flex items-center justify-center shrink-0">
+                  <span class="material-symbols-outlined text-[18px]">how_to_reg</span>
+                </div>
+                <div class="min-w-0">
+                  <div class="flex items-center gap-2">
+                    <span class="text-sm font-bold text-[#1F1610]">Iktitāb</span>
+                    <span class="text-[10px] px-1.5 py-0.2 rounded bg-white text-[#7A5E4B] border border-[#EBD9CA]">Form VIII Masdar</span>
+                  </div>
+                  <p class="text-xs text-[#605850] truncate">Subscription / Enrolment · Registering mutually</p>
+                </div>
+              </div>
+              <div class="flex flex-col items-end shrink-0 pl-2" dir="rtl">
+                <span class="text-lg font-black text-[#C2652A]">اِكْتِتَاب</span>
+                <span class="text-[10px] text-[#7A5E4B]">مصدر افتعال</span>
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- Articulatory Mechanics Guidance -->
-        <div class="my-6 p-4 rounded-2xl bg-[#141720] border border-[#2A2F45] flex items-start gap-3">
-          <span class="text-2xl">🗣️</span>
+        <!-- Authentic Dialect Dual-Track Player (Levantine vs MSA Bridge) -->
+        <div class="stitch-card p-4 sm:p-5 flex flex-col gap-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <span class="text-[10px] font-mono font-bold text-[#C2652A] uppercase tracking-wider">Acoustic Socio-Bridge</span>
+              <h2 class="text-base sm:text-lg font-bold text-[#1F1610]">Dual-Track Dialect Bridge</h2>
+            </div>
+            <div class="flex items-center gap-1 p-1 rounded-full" style="background-color: #FAF5EE; border: 1px solid #EBD9CA;">
+              <button onclick="toggleArDialect(false)" id="ar-btn-levantine" class="px-3 py-1 rounded-full text-xs font-bold bg-[#C2652A] text-white transition-all shadow-sm">
+                Levantine
+              </button>
+              <button onclick="toggleArDialect(true)" id="ar-btn-msa" class="px-3 py-1 rounded-full text-xs font-semibold text-[#605850] hover:text-[#1F1610] transition-all">
+                Fusha MSA
+              </button>
+            </div>
+          </div>
+
+          <!-- Sentence Exhibition Cards -->
+          <div class="flex flex-col gap-3 rounded-xl p-4" style="background-color: #FAF5EE; border: 1px solid #EBD9CA;">
+            <!-- Levantine Track Card -->
+            <div id="ar-card-levantine" class="flex flex-col gap-1 transition-all">
+              <div class="flex items-center justify-between">
+                <span class="text-[10px] font-bold text-[#C2652A] flex items-center gap-1">
+                  <span class="material-symbols-outlined text-[14px]">location_on</span> Beirut / Damascus (عامية شامية)
+                </span>
+                <span class="text-[10px] text-[#7A5E4B]">Colloquial Street Register</span>
+              </div>
+              <p class="text-xl sm:text-2xl font-bold text-[#1F1610] my-1 text-right" dir="rtl">
+                "شو رأيك نشرب فنجان قهوة سوا؟"
+              </p>
+              <p class="text-xs text-[#7A5E4B] italic">"Shō ra'yak nishrab finjān 'ahwe sawa?"</p>
+              <p class="text-xs text-[#605850]">Meaning: "What do you say we drink a cup of coffee together?"</p>
+            </div>
+
+            <!-- Fusha MSA Reference Track -->
+            <div id="ar-card-msa" class="flex flex-col gap-1 p-3 rounded-lg bg-white/70 border border-[#EBD9CA] opacity-80">
+              <div class="flex items-center justify-between">
+                <span class="text-[10px] font-bold text-[#7A5E4B] flex items-center gap-1">
+                  <span class="material-symbols-outlined text-[14px]">school</span> Literary Standard (الفصحى المعاصرة)
+                </span>
+                <span class="text-[10px] text-[#7A5E4B]">Pan-Arab Formal</span>
+              </div>
+              <p class="text-lg font-bold text-[#1F1610] my-0.5 text-right" dir="rtl">
+                "مَا رَأْيُكَ أَنْ نَشْرَبَ فِنْجَانَ قَهْوَةٍ مَعاً؟"
+              </p>
+              <p class="text-xs text-[#7A5E4B] italic">"Mā ra'yuka an nashraba finjāna qahwatin ma'an?"</p>
+            </div>
+
+            <!-- Dual Formant Waveform SVG Visualization -->
+            <div class="w-full rounded-xl bg-white p-3 flex flex-col gap-1.5 border border-[#EBD9CA]">
+              <div class="flex items-center justify-between text-[10px] text-[#7A5E4B]">
+                <span class="flex items-center gap-1 font-bold text-[#C2652A]">
+                  <span class="material-symbols-outlined text-[14px]">graphic_eq</span> Formant Waveform (Glottal Stop ['] vs Qāf [q])
+                </span>
+                <span class="font-mono">0:03 / 0:03</span>
+              </div>
+              <!-- Waveform Graphic -->
+              <svg class="w-full h-10 text-[#C2652A]" fill="none" viewBox="0 0 320 40">
+                <line stroke="#EBD9CA" stroke-linecap="round" stroke-width="2" x1="5" x2="5" y1="20" y2="20"></line>
+                <line stroke="#C2652A" stroke-linecap="round" stroke-width="2" x1="15" x2="15" y1="16" y2="24"></line>
+                <line stroke="#C2652A" stroke-linecap="round" stroke-width="2" x1="25" x2="25" y1="12" y2="28"></line>
+                <line stroke="#C2652A" stroke-linecap="round" stroke-width="2" x1="35" x2="35" y1="8" y2="32"></line>
+                <line stroke="#C2652A" stroke-linecap="round" stroke-width="2" x1="45" x2="45" y1="5" y2="35"></line>
+                <line stroke="#D96B27" stroke-linecap="round" stroke-width="2" x1="75" x2="75" y1="10" y2="30"></line>
+                <line stroke="#D96B27" stroke-linecap="round" stroke-width="2" x1="85" x2="85" y1="6" y2="34"></line>
+                <line stroke="#D96B27" stroke-linecap="round" stroke-width="2" x1="95" x2="95" y1="4" y2="36"></line>
+                <!-- Glottal dip -->
+                <line stroke="#A8521D" stroke-linecap="round" stroke-width="3" x1="165" x2="165" y1="18" y2="22"></line>
+                <line stroke="#A8521D" stroke-linecap="round" stroke-width="3" x1="175" x2="175" y1="19" y2="21"></line>
+                <line stroke="#A8521D" stroke-linecap="round" stroke-width="3" x1="185" x2="185" y1="5" y2="35"></line>
+                <line stroke="#C2652A" stroke-linecap="round" stroke-width="2" x1="215" x2="215" y1="8" y2="32"></line>
+                <line stroke="#C2652A" stroke-linecap="round" stroke-width="2" x1="245" x2="245" y1="16" y2="24"></line>
+                <line stroke="#C2652A" stroke-linecap="round" stroke-width="2" x1="275" x2="275" y1="15" y2="25"></line>
+                <line stroke="#EBD9CA" stroke-linecap="round" stroke-width="2" x1="305" x2="305" y1="20" y2="20"></line>
+              </svg>
+
+              <!-- Controls Strip -->
+              <div class="flex items-center justify-between pt-1">
+                <button class="w-8 h-8 rounded-full bg-[#FAF5EE] text-[#1F1610] flex items-center justify-center border border-[#EBD9CA]" type="button">
+                  <span class="material-symbols-outlined text-[18px]">replay_10</span>
+                </button>
+                <button onclick="playArDialectSentence()" class="h-10 px-5 rounded-full bg-[#C2652A] text-white font-bold text-xs flex items-center gap-1.5 shadow-md shadow-[#C2652A]/30 hover:bg-[#A8521D] transition-all" type="button">
+                  <span class="material-symbols-outlined text-[18px]">play_arrow</span>
+                  <span>Listen Native (0.9x)</span>
+                </button>
+                <button class="w-8 h-8 rounded-full bg-[#FAF5EE] text-[#1F1610] flex items-center justify-center border border-[#EBD9CA]" type="button">
+                  <span class="material-symbols-outlined text-[18px]">speed</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Makhārij Al-Hurūf (Vocal Articulation Trainer) -->
+        <div class="stitch-card p-4 sm:p-5 flex flex-col gap-4">
           <div>
-            <div class="text-xs font-mono font-bold text-[#E08850] uppercase">ANATOMICAL PLACEMENT INSTRUCTION</div>
-            <p id="vocal-guidance-text" class="text-xs sm:text-sm text-[#94A3B8] mt-1 leading-relaxed">
-              Constrict the pharyngeal walls and draw the epiglottis backward towards the posterior pharyngeal wall without creating oral closure.
+            <span class="text-[10px] font-mono font-bold text-[#C2652A] uppercase tracking-wider">Makhārij Al-Hurūf · مخارج الحروف</span>
+            <h2 class="text-base sm:text-lg font-bold text-[#1F1610]">Pharyngeal &amp; Emphatic Vocal Trainer</h2>
+            <p class="text-xs text-[#7A5E4B]">Real-time acoustic resonance sensor for deep guttural targets</p>
+          </div>
+
+          <!-- 3 Targets: ‘Ayn, Ḥā’, Ṣād -->
+          <div class="grid grid-cols-3 gap-2">
+            <button onclick="setVocalTarget('ayn')" id="btn-vocal-ayn" class="flex flex-col items-center justify-center p-3 rounded-xl bg-[#FAF5EE] border-2 border-[#C2652A] text-[#C2652A] shadow-sm transition-all" type="button">
+              <span class="text-2xl font-bold" dir="rtl">ع</span>
+              <span class="text-xs font-bold text-[#1F1610]">‘Ayn</span>
+              <span class="text-[9px] text-[#7A5E4B]">Voiced Pharyngeal</span>
+            </button>
+            <button onclick="setVocalTarget('haa')" id="btn-vocal-haa" class="flex flex-col items-center justify-center p-3 rounded-xl bg-white border border-[#EBD9CA] text-[#605850] hover:bg-[#FAF5EE] transition-all" type="button">
+              <span class="text-2xl font-bold" dir="rtl">ح</span>
+              <span class="text-xs font-bold text-[#1F1610]">Ḥā’</span>
+              <span class="text-[9px] text-[#7A5E4B]">Voiceless Pharyngeal</span>
+            </button>
+            <button onclick="setVocalTarget('saad')" id="btn-vocal-saad" class="flex flex-col items-center justify-center p-3 rounded-xl bg-white border border-[#EBD9CA] text-[#605850] hover:bg-[#FAF5EE] transition-all" type="button">
+              <span class="text-2xl font-bold" dir="rtl">ص</span>
+              <span class="text-xs font-bold text-[#1F1610]">Ṣād</span>
+              <span class="text-[9px] text-[#7A5E4B]">Velarized Alveolar</span>
+            </button>
+          </div>
+
+          <!-- Vocal Tract Cutaway Diagram & Resonance Feedback -->
+          <div class="rounded-xl p-4 flex flex-col gap-3" style="background-color: #FAF5EE; border: 1px solid #EBD9CA;">
+            <div class="flex items-start justify-between">
+              <div>
+                <span class="text-[10px] text-[#7A5E4B] uppercase font-bold">Acoustic Focal Point</span>
+                <p id="vocal-focal-label" class="text-sm font-bold text-[#1F1610]">Middle Pharynx (وسط الحلق) · Epiglottis Constriction</p>
+              </div>
+              <div class="px-2 py-0.5 rounded-full bg-[#FBE8D8] text-[#C2652A] text-[10px] font-bold">
+                F1/F2 Formant: 92%
+              </div>
+            </div>
+
+            <!-- Anatomical Sagittal Cutaway SVG Diagram (100% Exact from Stitch) -->
+            <div class="relative w-full h-36 bg-white rounded-xl flex items-center justify-center overflow-hidden border border-[#EBD9CA]">
+              <svg class="w-full h-full text-[#7A5E4B]" fill="none" viewBox="0 0 280 120">
+                <path d="M 60 20 C 100 20, 140 25, 170 45 C 190 60, 200 80, 205 110" stroke="currentColor" stroke-linecap="round" stroke-width="2"></path>
+                <path d="M 80 95 C 110 95, 130 85, 155 75 C 175 68, 185 85, 190 110" stroke="#C2652A" stroke-dasharray="4 2" stroke-width="2.5"></path>
+                <circle class="animate-ping opacity-50" cx="198" cy="88" fill="#D96B27" r="8"></circle>
+                <circle cx="198" cy="88" fill="#C2652A" r="7"></circle>
+                <path d="M 195 110 L 195 95" stroke="#C2652A" stroke-width="2"></path>
+                <path d="M 192 80 C 170 55, 120 50, 70 50" stroke="#7A5E4B" stroke-linecap="round" stroke-width="2"></path>
+                <text fill="#C2652A" font-family="Plus Jakarta Sans" font-size="10" font-weight="bold" x="120" y="105">Epiglottic compression</text>
+              </svg>
+              <span class="absolute bottom-2 left-2 text-[10px] text-[#7A5E4B] font-semibold">Sagittal Articulation View</span>
+            </div>
+
+            <!-- Microphone Shadowing Test Dock -->
+            <div class="flex items-center gap-2 pt-1">
+              <button onmousedown="startMicFeedback()" onmouseup="stopMicFeedback()" ontouchstart="startMicFeedback()" ontouchend="stopMicFeedback()" id="btn-ar-mic" class="flex-1 h-11 rounded-xl bg-white hover:bg-[#FAF5EE] text-[#1F1610] font-bold text-xs flex items-center justify-center gap-2 border border-[#EBD9CA] shadow-sm transition-all" type="button">
+                <span class="material-symbols-outlined text-[20px] text-[#C2652A]">mic</span>
+                <span id="ar-mic-label">Hold to Shadow Pronunciation</span>
+              </button>
+              <button onclick="playAudio('ع', 'ar')" class="w-11 h-11 rounded-xl bg-white text-[#C2652A] flex items-center justify-center border border-[#EBD9CA] shadow-sm hover:bg-[#FAF5EE]" type="button">
+                <span class="material-symbols-outlined text-[20px]">volume_up</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Spaced Recall Queue (FSRS Morphology Memory Model) -->
+        <div class="stitch-card p-4 sm:p-5 flex flex-col gap-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <div class="w-2.5 h-2.5 rounded-full bg-[#C2652A]"></div>
+              <h2 class="text-base sm:text-lg font-bold text-[#1F1610]">SRS Morphological Queue</h2>
+            </div>
+            <span class="px-2.5 py-0.5 rounded-full bg-[#FBE8D8] text-[#C2652A] text-xs font-bold">
+              12 Roots Due
+            </span>
+          </div>
+
+          <div class="p-3 rounded-xl flex items-center justify-between" style="background-color: #FAF5EE; border: 1px solid #EBD9CA;">
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-[18px] text-[#C2652A]">analytics</span>
+              <span class="text-xs text-[#7A5E4B]">FSRS Stability (S): <strong class="text-[#1F1610]">14.2 days</strong></span>
+            </div>
+            <span class="text-xs font-bold text-[#C2652A]">Retention: 91.8%</span>
+          </div>
+
+          <!-- 4 Roots Cards (Exact from Stitch) -->
+          <div class="grid grid-cols-2 gap-2.5">
+            <div class="p-3 rounded-xl bg-[#FAF5EE] border border-[#EBD9CA] flex flex-col justify-between h-28">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-[#C2652A]">د - ر - س</span>
+                <span class="text-[9px] text-[#7A5E4B]">Form II</span>
+              </div>
+              <div>
+                <span class="text-sm font-bold text-[#1F1610]">Darrasa</span>
+                <p class="text-[11px] text-[#7A5E4B] truncate">To Teach (Causative)</p>
+              </div>
+              <div class="w-full bg-[#EBD9CA] h-1 rounded-full overflow-hidden">
+                <div class="bg-[#C2652A] h-full w-3/4"></div>
+              </div>
+            </div>
+
+            <div class="p-3 rounded-xl bg-[#FAF5EE] border border-[#EBD9CA] flex flex-col justify-between h-28">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-[#C2652A]">س - ل - م</span>
+                <span class="text-[9px] text-[#7A5E4B]">Form X</span>
+              </div>
+              <div>
+                <span class="text-sm font-bold text-[#1F1610]">Istaslama</span>
+                <p class="text-[11px] text-[#7A5E4B] truncate">To Surrender</p>
+              </div>
+              <div class="w-full bg-[#EBD9CA] h-1 rounded-full overflow-hidden">
+                <div class="bg-[#C2652A] h-full w-2/5"></div>
+              </div>
+            </div>
+
+            <div class="p-3 rounded-xl bg-[#FAF5EE] border border-[#EBD9CA] flex flex-col justify-between h-28">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-[#C2652A]">ق - و - ل</span>
+                <span class="text-[9px] text-[#7A5E4B]">Ammiya</span>
+              </div>
+              <div>
+                <span class="text-sm font-bold text-[#1F1610]">‘Āl (Qāla)</span>
+                <p class="text-[11px] text-[#7A5E4B] truncate">To Say (Levantine)</p>
+              </div>
+              <div class="w-full bg-[#EBD9CA] h-1 rounded-full overflow-hidden">
+                <div class="bg-[#C2652A] h-full w-4/5"></div>
+              </div>
+            </div>
+
+            <div class="p-3 rounded-xl bg-[#FAF5EE] border border-[#EBD9CA] flex flex-col justify-between h-28">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-[#C2652A]">ح - ب - ب</span>
+                <span class="text-[9px] text-[#7A5E4B]">Form IV</span>
+              </div>
+              <div>
+                <span class="text-sm font-bold text-[#1F1610]">Aḥabba</span>
+                <p class="text-[11px] text-[#7A5E4B] truncate">To Love / To Like</p>
+              </div>
+              <div class="w-full bg-[#EBD9CA] h-1 rounded-full overflow-hidden">
+                <div class="bg-[#C2652A] h-full w-1/3"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Review Session Primary CTA -->
+          <button onclick="triggerSprint()" id="btn-ar-sprint" class="w-full h-12 rounded-xl bg-[#C2652A] hover:bg-[#A8521D] text-white font-bold text-sm flex items-center justify-center gap-2 shadow-md shadow-[#C2652A]/25 transition-all" type="button">
+            <span class="material-symbols-outlined text-[20px]">play_circle</span>
+            <span id="ar-sprint-label">Begin 12-Root Sprint (3 Mins)</span>
+          </button>
+        </div>
+
+      </section>
+
+
+      <!-- ========================================================================= -->
+      <!-- SCREEN 2: SPANISH IMMERSION - SPARKY CASTIZO STUDIO (100% STITCH EXACT)   -->
+      <!-- ========================================================================= -->
+      <section id="screen-spanish" class="flex flex-col gap-5 w-full">
+
+        <!-- Dialect & Status Banner -->
+        <div class="flex flex-col gap-1 pt-1">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="inline-flex items-center justify-center w-2 h-2 rounded-full bg-[#C2652A] animate-pulse"></span>
+              <span class="text-[11px] uppercase tracking-wider text-[#C2652A] font-bold">Dialect Pragmatics Studio</span>
+            </div>
+            <span class="text-xs text-[#7A5E4B] px-3 py-0.5 rounded-full font-semibold shadow-sm" style="background-color: #FFFFFF; border: 1px solid #EBD9CA;">Stage B2+ Mastery</span>
+          </div>
+          <div class="flex items-baseline justify-between mt-1">
+            <h1 class="text-2xl font-black text-[#1F1610] tracking-tight">Castilian &amp; Poly-Dialect</h1>
+            <span class="text-xs text-[#C2652A] font-bold flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#FBE8D8]">
+              <span class="material-symbols-outlined text-[14px]">bolt</span> i+1 Comprehensible
+            </span>
+          </div>
+        </div>
+
+        <!-- Sparky Castizo AI Coach Banner -->
+        <div class="stitch-card p-4 sm:p-5 relative overflow-hidden flex flex-col gap-4">
+          <div class="flex items-center justify-between z-10">
+            <div class="flex items-center gap-3">
+              <div class="relative w-12 h-12 rounded-full overflow-hidden shrink-0 shadow-sm border border-[#EBD9CA]">
+                <img class="w-full h-full object-cover" alt="Sparky Castizo AI Coach" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAfNfqDcPmuPbrw29MYQPqV1VBn4TjKx8XriAvu7ND1_OADUZkcSu4fnZHCNlcTaGrGqhYCGW58-Z2cBGJuAv4yhh4HVlY1Z1t2ohLiHacINo0iFDSlA85iU4NgXffnE32sFE68RcBKXAmvBqC1Suby8yu2WKysJkJmaZrpFMqd9Z2hXQTMXslg5HRDnDIdXaDArGzL-Mmnnyl9g3eP7tyElVqiQwhe71ApPeTwyd8ulMEkxv8rp5c3IQ">
+                <div class="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-[#C2652A] ring-2 ring-white"></div>
+              </div>
+              <div class="flex flex-col min-w-0">
+                <div class="flex items-center gap-1.5">
+                  <span class="text-sm sm:text-base font-bold text-[#1F1610]">Sparky Castizo</span>
+                  <span class="material-symbols-outlined text-[#C2652A] text-[16px]" style="font-variation-settings: 'FILL' 1;">verified</span>
+                </div>
+                <span class="text-xs text-[#7A5E4B] truncate font-medium">Madrid Ceceo vs. CDMX Chilango</span>
+              </div>
+            </div>
+            <button onclick="playAudio('Hola, ¿qué tal amigos?', 'es')" class="h-9 px-3 rounded-full text-[#C2652A] flex items-center gap-1 shadow-sm hover:bg-[#FAF5EE]" style="background-color: #FAF5EE; border: 1px solid #EBD9CA;" type="button">
+              <span class="material-symbols-outlined text-[18px]">graphic_eq</span>
+              <span class="text-xs font-bold">Live Feed</span>
+            </button>
+          </div>
+
+          <!-- Live Ambient Waveform Strip -->
+          <div class="flex items-center justify-between gap-1 h-7 px-3 rounded-lg" style="background-color: #FAF5EE; border: 1px solid #EBD9CA;">
+            <div class="w-1 bg-[#C2652A] h-2 rounded-full animate-pulse"></div>
+            <div class="w-1 bg-[#C2652A] h-4 rounded-full"></div>
+            <div class="w-1 bg-[#D96B27] h-5 rounded-full"></div>
+            <div class="w-1 bg-[#C2652A] h-3 rounded-full"></div>
+            <div class="w-1 bg-[#A8521D] h-2 rounded-full"></div>
+            <div class="w-1 bg-[#C2652A] h-5 rounded-full"></div>
+            <div class="w-1 bg-[#C2652A] h-4 rounded-full"></div>
+            <div class="w-1 bg-[#D96B27] h-6 rounded-full"></div>
+            <div class="w-1 bg-[#C2652A] h-3 rounded-full"></div>
+            <div class="w-1 bg-[#A8521D] h-1 rounded-full"></div>
+            <div class="w-1 bg-[#C2652A] h-4 rounded-full"></div>
+            <div class="w-1 bg-[#C2652A] h-5 rounded-full"></div>
+            <div class="w-1 bg-[#D96B27] h-2 rounded-full"></div>
+            <div class="w-1 bg-[#C2652A] h-4 rounded-full"></div>
+            <div class="w-1 bg-[#C2652A] h-3 rounded-full"></div>
+            <span class="text-[10px] text-[#7A5E4B] tracking-wider uppercase font-bold ml-2">Active Modality</span>
+          </div>
+
+          <!-- 1-Tap Quick Query Chips -->
+          <div class="flex items-center gap-2 overflow-x-auto pb-0.5 no-scrollbar">
+            <button onclick="showEsQueryAnswer(0)" class="whitespace-nowrap px-3 py-1.5 rounded-full text-[#605850] text-xs shadow-sm hover:text-[#1F1610]" style="background-color: #FAF5EE; border: 1px solid #EBD9CA;" type="button">
+              Explain ¿Qué hubo?
+            </button>
+            <button onclick="showEsQueryAnswer(1)" class="whitespace-nowrap px-3 py-1.5 rounded-full text-[#605850] text-xs shadow-sm hover:text-[#1F1610]" style="background-color: #FAF5EE; border: 1px solid #EBD9CA;" type="button">
+              Subjunctive vs Imperfect Nuance
+            </button>
+            <button onclick="showEsQueryAnswer(2)" class="whitespace-nowrap px-3 py-1.5 rounded-full text-[#605850] text-xs shadow-sm hover:text-[#1F1610]" style="background-color: #FAF5EE; border: 1px solid #EBD9CA;" type="button">
+              3 Native Slang Alternatives
+            </button>
+          </div>
+          <div id="es-query-modal" class="hidden p-3 rounded-xl bg-[#FAF5EE] border border-[#EBD9CA] text-xs text-[#605850]"></div>
+        </div>
+
+        <!-- Krashen (i+1) Natural Acquisition Node -->
+        <div class="stitch-card p-4 sm:p-5 flex flex-col gap-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-[#C2652A] text-[20px]">explore</span>
+              <span class="text-[11px] font-bold uppercase tracking-wider text-[#C2652A]">Krashen (i+1) Street Dialogue</span>
+            </div>
+            <span class="text-xs text-[#7A5E4B] px-3 py-0.5 rounded-full font-semibold shadow-sm" style="background-color: #FAF5EE; border: 1px solid #EBD9CA;">Tapas Bar Context</span>
+          </div>
+
+          <!-- Dialogue Bubble with Context Media -->
+          <div class="flex flex-col gap-2.5 rounded-xl p-4" style="background-color: #FAF5EE; border: 1px solid #EBD9CA;">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex flex-col gap-1 min-w-0">
+                <span class="text-[10px] text-[#C2652A] uppercase font-bold tracking-wider">Castilian Slang · Madrid</span>
+                <p class="text-lg sm:text-xl text-[#1F1610] font-bold leading-snug">
+                  “¿Me pones un tinto de verano, por fa, que entra de lujo?”
+                </p>
+              </div>
+              <button onclick="playAudio('¿Me pones un tinto de verano, por fa, que entra de lujo?', 'es')" class="w-10 h-10 rounded-full bg-[#C2652A] text-white flex items-center justify-center shrink-0 shadow-md hover:bg-[#A8521D] transition-colors" type="button">
+                <span class="material-symbols-outlined text-[20px]">volume_up</span>
+              </button>
+            </div>
+
+            <!-- Atmosphere Snippet Thumbnail -->
+            <div class="relative w-full h-28 rounded-xl overflow-hidden shadow-sm border border-[#EBD9CA]">
+              <img class="w-full h-full object-cover" alt="Taberna La Dolores, Huertas" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDNcUbnmWBSP2CD44277qiO32vsR3Q4uT49rSI2tz59tmSYs0EPld20QU73QWDA5vq3CS0CXr9azTXJh55VfKFbluU5dRWvi2TH-S97jdmYDEkkqzt0d7Ovl4Pc_KGPIQslpr1JWPFa1Z8j1S9udwzH67zQjwCekRQqzOi1D9X5Ye3J_l5P7_AgUpBY5s0GjszU-GvHW7xJWgr8CpQHBsO9dzGfAIsyETx0tZjlKNulEfKXNmBuSD0V1w">
+              <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end p-2.5">
+                <span class="text-xs text-white font-medium flex items-center gap-1 drop-shadow">
+                  <span class="material-symbols-outlined text-[14px]">location_on</span> Taberna La Dolores, Huertas
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tri-Mode Cognitive Decoder -->
+          <div class="flex flex-col gap-2">
+            <div class="flex p-0.5 rounded-full shadow-sm" style="background-color: #F6F0E8; border: 1px solid #EBD9CA;">
+              <button onclick="setDecoderTab('natural')" id="tab-dec-natural" class="flex-1 py-1.5 rounded-full text-xs font-bold text-center text-white bg-[#C2652A] shadow-sm transition-all" type="button">Natural EN</button>
+              <button onclick="setDecoderTab('literal')" id="tab-dec-literal" class="flex-1 py-1.5 rounded-full text-xs font-semibold text-center text-[#605850] hover:text-[#1F1610] transition-all" type="button">Literal Gloss</button>
+              <button onclick="setDecoderTab('pragmatic')" id="tab-dec-pragmatic" class="flex-1 py-1.5 rounded-full text-xs font-semibold text-center text-[#605850] hover:text-[#1F1610] transition-all" type="button">Pragmatics</button>
+            </div>
+
+            <!-- Decoder Content Panels -->
+            <div class="p-3.5 rounded-xl" style="background-color: #FAF5EE; border: 1px solid #EBD9CA;">
+              <div id="panel-dec-natural" class="flex flex-col gap-1">
+                <span class="text-[10px] text-[#7A5E4B] uppercase font-bold">Idiomatic Meaning</span>
+                <p class="text-sm font-semibold text-[#1F1610]">“Could you pour me a tinto de verano, please? It really hits the spot!”</p>
+              </div>
+              <div id="panel-dec-literal" class="hidden flex flex-col gap-1">
+                <span class="text-[10px] text-[#7A5E4B] uppercase font-bold">Word-for-Word Alignment</span>
+                <p class="text-sm font-semibold text-[#1F1610]">“[To me] [you put] [a red-wine of summer], [please], [that enters] [of luxury]?”</p>
+              </div>
+              <div id="panel-dec-pragmatic" class="hidden flex flex-col gap-1">
+                <span class="text-[10px] text-[#C2652A] uppercase font-bold">Cultural Mechanics</span>
+                <p class="text-sm text-[#605850] leading-relaxed">“Poner” is universally preferred over “dar/traer” for tavern hospitality. “Entrar de lujo” communicates smooth physical refreshment during scorching meseta heat.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Real-Time Shadowing & Pitch Contour Waveform -->
+        <div class="stitch-card p-4 sm:p-5 flex flex-col gap-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-[#C2652A] text-[20px]">mic</span>
+              <span class="text-[11px] font-bold uppercase tracking-wider text-[#C2652A]">Phonetic Shadowing Engine</span>
+            </div>
+            <div class="flex items-center gap-1 px-3 py-0.5 rounded-full shadow-sm" style="background-color: #FAF5EE; border: 1px solid #EBD9CA;">
+              <span class="material-symbols-outlined text-[#C2652A] text-[14px]">tune</span>
+              <span class="text-xs text-[#1F1610] font-bold">96% Contour Match</span>
+            </div>
+          </div>
+
+          <!-- IPA & Acoustic Transcription -->
+          <div class="flex flex-col gap-1 p-3 rounded-xl" style="background-color: #FAF5EE; border: 1px solid #EBD9CA;">
+            <span class="text-[10px] text-[#7A5E4B] uppercase font-bold">Acoustic Model (Castilian Neutral)</span>
+            <p class="text-sm font-mono text-[#C2652A] font-bold">
+              /me ˈpo.nes un ˈtin.to de βeˈɾa.no/
             </p>
+            <span class="text-xs text-[#605850]">Notice the voiced bilabial approximant [β] and tapped alveolar [ɾ].</span>
           </div>
-        </div>
 
-        <!-- Formant Resonance Meters F1 & F2 -->
-        <div class="grid grid-cols-2 gap-4 mb-6">
-          <div class="bg-[#141720] p-4 rounded-xl border border-[#2A2F45]">
-            <div class="text-[10px] font-mono font-bold text-[#94A3B8] uppercase">FORMANT F1 (PHARYNX)</div>
-            <div id="vocal-f1-val" class="text-lg font-black text-white font-mono mt-1">620 Hz</div>
+          <!-- Pitch Accent Waveform Canvas Container (100% Exact from Stitch) -->
+          <div class="flex flex-col gap-1.5 p-3 rounded-xl relative overflow-hidden" style="background-color: #FAF5EE; border: 1px solid #EBD9CA;">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] text-[#7A5E4B] font-bold">Target Pitch (Terracotta) vs Your Voice (Dashed)</span>
+              <span class="text-[10px] font-bold text-[#C2652A]">Δ 0.04 semitones</span>
+            </div>
+            <div class="w-full h-20 relative flex items-center pt-1">
+              <svg class="w-full h-full absolute inset-0 overflow-visible" preserveAspectRatio="none" viewBox="0 0 300 80">
+                <line stroke="#EBD9CA" stroke-dasharray="3 3" stroke-width="1" x1="0" x2="300" y1="20" y2="20"></line>
+                <line stroke="#EBD9CA" stroke-dasharray="3 3" stroke-width="1" x1="0" x2="300" y1="55" y2="55"></line>
+              </svg>
+              <!-- Target Pitch (Terracotta) -->
+              <svg class="w-full h-full text-[#C2652A] relative z-10" fill="none" preserveAspectRatio="none" viewBox="0 0 300 80">
+                <path d="M 0 50 Q 30 20 70 35 T 140 15 T 210 60 T 300 25" fill="none" stroke="#C2652A" stroke-linecap="round" stroke-width="3.5"></path>
+              </svg>
+              <!-- User Voice (Dashed) -->
+              <svg class="w-full h-full text-[#A8521D] absolute inset-0 z-10" fill="none" preserveAspectRatio="none" viewBox="0 0 300 80">
+                <path d="M 0 54 Q 32 24 72 37 T 142 18 T 208 58 T 300 28" fill="none" stroke="#8A4518" stroke-dasharray="4 2" stroke-linecap="round" stroke-width="2.5"></path>
+              </svg>
+            </div>
+            <div class="flex justify-between items-center text-[#7A5E4B] text-[10px] font-bold pt-1">
+              <span>¿Me pones</span>
+              <span>un tinto</span>
+              <span>de verano?</span>
+            </div>
           </div>
-          <div class="bg-[#141720] p-4 rounded-xl border border-[#2A2F45]">
-            <div class="text-[10px] font-mono font-bold text-[#94A3B8] uppercase">FORMANT F2 (ORAL CAVITY)</div>
-            <div id="vocal-f2-val" class="text-lg font-black text-white font-mono mt-1">1380 Hz</div>
-          </div>
-        </div>
 
-        <!-- Hold to Shadow Pronunciation Actuator -->
-        <div class="space-y-3">
-          <button onmousedown="startShadowing()" onmouseup="stopShadowing()" ontouchstart="startShadowing()" ontouchend="stopShadowing()" id="btn-shadow" class="w-full py-4 rounded-2xl gradient-terracotta text-white font-extrabold text-sm shadow-lg glow-terracotta transition flex items-center justify-center gap-2 select-none cursor-pointer">
-            <span id="shadow-mic-icon">🎙️</span> <span id="shadow-btn-text">HOLD TO SHADOW ARTICULATION</span>
-          </button>
-          <div id="shadow-score-strip" class="text-center text-xs font-mono font-bold text-emerald-400">
-            ACOUSTIC CONTOUR MATCH: 96%
-          </div>
-        </div>
-
-      </div>
-
-    </div>
-
-    <!-- ================= SECTION 5: FSRS MORPHOLOGICAL QUEUE ================= -->
-    <div id="section-fsrs_queue" class="hidden space-y-6">
-
-      <div class="text-center max-w-2xl mx-auto space-y-2">
-        <span class="text-xs font-mono font-bold text-[#E08850] tracking-wider uppercase">FSRS-4.5 ADAPTIVE SCHEDULING</span>
-        <h2 class="text-2xl sm:text-3xl font-black text-white">Morphological Memory Queue</h2>
-        <p class="text-xs sm:text-sm text-[#94A3B8]">Memory retrievability calculated via exponential decay curves (R = e^-t/S). Maintain root stability.</p>
-      </div>
-
-      <!-- Sprint Launcher CTA Card -->
-      <div class="glass-card p-6 sm:p-8 rounded-3xl border-[rgba(224,136,80,0.35)]">
-        <div class="flex items-center justify-between mb-4">
+          <!-- Shadowing Trigger -->
           <div class="flex items-center gap-2">
-            <span class="text-lg">⚡</span>
-            <span class="text-xs font-mono font-bold text-[#E08850] uppercase tracking-wider">HIGH-INTENSITY MORPHO SPRINT</span>
+            <button onmousedown="startEsShadow()" onmouseup="stopEsShadow()" ontouchstart="startEsShadow()" ontouchend="stopEsShadow()" id="btn-es-shadow" class="flex-1 h-12 rounded-xl bg-[#C2652A] text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md hover:bg-[#A8521D] transition-all cursor-pointer" type="button">
+              <span class="material-symbols-outlined text-[20px]">mic</span>
+              <span id="es-shadow-label">Hold to Shadow (Castilian Dialect)</span>
+            </button>
+            <button onclick="playAudio('¿Me pones un tinto de verano?', 'es')" class="w-12 h-12 rounded-xl text-[#7A5E4B] hover:text-[#1F1610] flex items-center justify-center border border-[#EBD9CA] bg-white shadow-sm" type="button">
+              <span class="material-symbols-outlined text-[20px]">replay</span>
+            </button>
           </div>
-          <span class="px-2.5 py-1 rounded-full text-xs font-mono font-bold bg-[#F59E0B]/20 text-[#F59E0B]">3 MINS</span>
         </div>
-        <p class="text-xs sm:text-sm text-[#94A3B8] leading-relaxed mb-6">
-          Review 2 decaying morphological roots and consolidate 18 derived branch tokens before stability decays below the critical threshold.
-        </p>
-        <button onclick="startMorphoSprint()" id="btn-sprint-launch" class="w-full py-3.5 rounded-2xl gradient-terracotta text-white font-extrabold text-xs sm:text-sm shadow-md glow-terracotta transition flex items-center justify-center gap-2">
-          <span>🚀</span> <span id="sprint-btn-text">BEGIN 12-ROOT SPRINT (3 MINS)</span>
-        </button>
-      </div>
 
-      <!-- Root Repositories Queue -->
-      <div class="space-y-3">
-        <span class="text-xs font-mono font-bold text-[#94A3B8] uppercase">ACTIVE ROOT REPOSITORIES IN MEMORY</span>
-        <div id="fsrs-roots-list" class="space-y-3">
-          <!-- Dynamically populated root cards -->
+        <!-- Dynamic Pathway Progression Node -->
+        <div class="stitch-card p-4 sm:p-5 flex flex-col gap-3 relative overflow-hidden">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-[#C2652A]">Pathway Objective</span>
+            <span class="text-xs font-bold text-[#C2652A] px-2.5 py-0.5 rounded-full bg-[#FBE8D8]">+120 XP</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="relative w-14 h-14 rounded-xl overflow-hidden shrink-0 shadow-sm border border-[#EBD9CA]">
+              <img class="w-full h-full object-cover" alt="Plaza de Chueca Madrid" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA3mIULRjYeK03jMin1SoHNN8U59mVsYQ8hWGaL-uJbv8sNB5Bu_3C13ekuAHIN5p12oIT15nL_DRPNbTCd823uXRX8W8K8NP18fOKlmRMqS1W0GxA_IzmHN_0aV1Hyt9uGDu2jYcqF6-OLrRFB1jmB3NdpcwpsFFmRd4hhlvyHL0pR7WJw45oUFHqHG63xTUNGYJkQ1d9kKfGhb1L94s4Yi3uqq0p_6FBNXiWeJCOoYGZs_S0n9_5hJQ">
+            </div>
+            <div class="flex flex-col min-w-0 flex-1">
+              <span class="text-sm font-bold text-[#1F1610] truncate">Debate con el Camarero en Chueca</span>
+              <span class="text-xs text-[#7A5E4B]">Negotiate an off-menu pairing with full idiomatic tact.</span>
+            </div>
+          </div>
+          <div class="flex flex-col gap-1 mt-1">
+            <div class="w-full h-2 rounded-full overflow-hidden bg-[#F2ECE4]">
+              <div class="h-full bg-[#C2652A] rounded-full w-[72%]"></div>
+            </div>
+            <div class="flex justify-between text-[10px] text-[#7A5E4B]">
+              <span>Current Branch: Informal Dining</span>
+              <span class="text-[#1F1610] font-bold">Step 3 of 4</span>
+            </div>
+          </div>
         </div>
-      </div>
+
+        <!-- FSRS Flash-Drill Dynamic Drawer -->
+        <div class="stitch-card p-4 sm:p-5 flex flex-col gap-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-[#C2652A] text-[20px]">psychology</span>
+              <span class="text-[11px] font-bold uppercase tracking-wider text-[#1F1610]">FSRS Spaced Retention</span>
+            </div>
+            <span class="text-xs text-[#C2652A] px-2.5 py-0.5 rounded-full font-bold bg-[#FBE8D8]">Optimal Interval</span>
+          </div>
+          <div class="flex items-center justify-between p-3 rounded-xl" style="background-color: #FAF5EE; border: 1px solid #EBD9CA;">
+            <div class="flex flex-col">
+              <span class="text-sm font-bold text-[#1F1610]">7 vulnerable idioms due</span>
+              <span class="text-xs text-[#7A5E4B]">Includes: ‘Flipando en colores’, ‘Costar un ojo’</span>
+            </div>
+            <div class="w-10 h-10 rounded-full flex items-center justify-center text-[#C2652A] shadow-sm bg-white border border-[#EBD9CA]">
+              <span class="material-symbols-outlined text-[20px]">timer</span>
+            </div>
+          </div>
+          <button onclick="launchEsSprint()" id="btn-es-sprint" class="w-full h-12 rounded-xl bg-[#C2652A] text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md hover:bg-[#A8521D] transition-all cursor-pointer" type="button">
+            <span class="material-symbols-outlined text-[20px]">bolt</span>
+            <span id="es-sprint-label">Launch 2-Min Flash-Drill Sprint</span>
+          </button>
+        </div>
+
+      </section>
 
     </div>
 
   </main>
 
-  <!-- Ergonomic Bottom Floating Glass Navigation Bar -->
-  <nav class="fixed bottom-4 left-4 right-4 max-w-xl mx-auto z-40 bg-[#141720]/95 backdrop-blur-2xl border border-[rgba(224,136,80,0.25)] rounded-3xl p-2 shadow-2xl flex items-center justify-around">
-    <button onclick="switchTab('pathway')" id="bnav-pathway" class="p-2 text-center text-[#E08850] flex flex-col items-center">
-      <span class="text-lg">🗺️</span>
-      <span class="text-[10px] font-bold">Curriculum</span>
-    </button>
-    <button onclick="switchTab('dialect')" id="bnav-dialect" class="p-2 text-center text-[#94A3B8] hover:text-white flex flex-col items-center">
-      <span class="text-lg">🔄</span>
-      <span class="text-[10px] font-medium">Dialect</span>
-    </button>
-    
-    <!-- Elevated Center Sparky Action Orb -->
-    <button onclick="triggerCenterSparky()" class="w-13 h-13 -mt-6 rounded-full gradient-terracotta flex items-center justify-center shadow-xl glow-terracotta border-2 border-white/40 cursor-pointer transition transform active:scale-95" title="Sparky Multimodal Voice Coach">
-      <span class="text-2xl text-white">🎙️</span>
-    </button>
+  <!-- Fixed Bottom Navigation Bar (100% Stitch Exact with Elevated Center Orb) -->
+  <nav class="fixed bottom-0 w-full z-50 pb-safe backdrop-blur-xl shadow-[0_1px_8px_rgba(45,30,21,0.04)]" style="background-color: rgba(250, 245, 238, 0.94); border-top: 1px solid #EBD9CA;">
+    <div class="max-w-md mx-auto flex justify-around items-center h-20 px-4">
+      <a onclick="setStudioView('arabic')" class="flex flex-col items-center justify-center min-w-[44px] min-h-[44px] text-[#7A5E4B] hover:text-[#1F1610] cursor-pointer" href="#">
+        <span class="material-symbols-outlined text-[22px]">translate</span>
+        <span class="text-[10px] font-semibold mt-0.5">Languages</span>
+      </a>
+      <a onclick="setStudioView('spanish')" class="flex flex-col items-center justify-center min-w-[44px] min-h-[44px] text-[#C2652A] font-bold cursor-pointer" href="#">
+        <span class="material-symbols-outlined text-[22px]">timeline</span>
+        <span class="text-[10px] font-bold mt-0.5">Immersion</span>
+      </a>
+      
+      <!-- Elevated Center Orb Sparky Action Button (100% Exact from Stitch) -->
+      <a onclick="triggerCenterSparkyOrb()" class="flex flex-col items-center justify-center -translate-y-4 cursor-pointer" href="#">
+        <div class="w-14 h-14 rounded-full bg-[#C2652A] text-white flex items-center justify-center shadow-[0_10px_28px_rgba(194,101,42,0.45)] hover:bg-[#A8521D] transition-transform active:scale-95">
+          <span class="material-symbols-outlined text-[28px]">graphic_eq</span>
+        </div>
+        <span class="text-[10px] font-extrabold text-[#C2652A] mt-1">Sparky</span>
+      </a>
 
-    <button onclick="switchTab('morphology')" id="bnav-morphology" class="p-2 text-center text-[#94A3B8] hover:text-white flex flex-col items-center">
-      <span class="text-lg">🌳</span>
-      <span class="text-[10px] font-medium">Roots</span>
-    </button>
-    <button onclick="switchTab('fsrs_queue')" id="bnav-fsrs_queue" class="p-2 text-center text-[#94A3B8] hover:text-white flex flex-col items-center">
-      <span class="text-lg">🧠</span>
-      <span class="text-[10px] font-medium">Memory</span>
-    </button>
+      <a onclick="window.scrollTo({top: 800, behavior: 'smooth'})" class="flex flex-col items-center justify-center min-w-[44px] min-h-[44px] text-[#7A5E4B] hover:text-[#1F1610] cursor-pointer" href="#">
+        <span class="material-symbols-outlined text-[22px]">layers</span>
+        <span class="text-[10px] font-semibold mt-0.5">SRS Memory</span>
+      </a>
+      <a onclick="openLanguageModal()" class="flex flex-col items-center justify-center min-w-[44px] min-h-[44px] text-[#7A5E4B] hover:text-[#1F1610] cursor-pointer" href="#">
+        <span class="material-symbols-outlined text-[22px]">query_stats</span>
+        <span class="text-[10px] font-semibold mt-0.5">Profile</span>
+      </a>
+    </div>
   </nav>
 
-  <!-- 15-Language Selector Modal -->
-  <div id="lang-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-4">
-    <div class="glass-card max-w-2xl w-full p-6 sm:p-8 rounded-3xl max-h-[85vh] flex flex-col border-[rgba(224,136,80,0.35)]">
-      <div class="flex items-center justify-between mb-4 pb-3 border-b border-[#2A2F45]">
+  <!-- 15-Language Selector Modal (Sahara Cream Theme) -->
+  <div id="lang-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="stitch-card max-w-xl w-full p-5 sm:p-6 rounded-2xl max-h-[85vh] flex flex-col shadow-2xl">
+      <div class="flex items-center justify-between mb-4 pb-3 border-b border-[#EBD9CA]">
         <div>
-          <h3 class="text-xl font-black text-white">Target Language Matrix</h3>
-          <p class="text-xs text-[#94A3B8]">Select from 15 world languages with native dialect studios</p>
+          <h3 class="text-lg font-bold text-[#1F1610]">Target Language Catalog</h3>
+          <p class="text-xs text-[#7A5E4B]">Switch studio registers and dialect mechanics</p>
         </div>
-        <button onclick="closeLanguageModal()" class="w-8 h-8 rounded-xl bg-[#141720] hover:bg-[#1F2430] text-[#94A3B8] hover:text-white flex items-center justify-center font-bold">
+        <button onclick="closeLanguageModal()" class="w-8 h-8 rounded-full bg-[#FAF5EE] text-[#7A5E4B] hover:text-[#1F1610] flex items-center justify-center font-bold border border-[#EBD9CA] cursor-pointer">
           ✕
         </button>
       </div>
-      <div id="lang-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-3 overflow-y-auto pr-1">
-        <!-- Rendered with JS -->
+      <div id="lang-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 overflow-y-auto pr-1">
+        <!-- Rendered with JavaScript -->
       </div>
     </div>
   </div>
 
-  <!-- Scripts -->
+  <!-- Interactive JavaScript Logic -->
   <script>
-    // 15-Language Core Data Model Grounded in Stitch Project 13518708541474104452
-    const LANG_DATA = {
-      ar: {
-        code: 'ar', name: 'Arabic', nativeName: 'العربية', flag: '🇸🇦', dir: 'rtl',
-        dialect: {
-          coachName: 'Sparky Fasih',
-          coachTitle: 'Senior Morpho-Phonetician & Dialectologist',
-          standardName: 'Modern Standard (فصحى)',
-          colloquialName: 'Levantine Shami (شامي)',
-          stdPhrase: 'مَاذَا تُرِيدُ أَنْ تَشْرَبَ الْيَوْمَ؟',
-          colPhrase: 'شو حابب تشرب اليوم يا غالي؟',
-          stdIpa: '/maːðaː turiːdu ʔan taʃraba l-jawm/',
-          colIpa: '/ʃuː ħaːbib tiʃrab el-joːm jaː ɣaːliː/',
-          naturalEn: 'What would you like to drink today, my friend?',
-          divergence: 'Glottal stop shift: [mādhā] → [shū], informal vocative [yā ghālī]',
-          queries: [
-            { q: 'Why drop dual grammatical cases in Shami?', a: 'Levantine colloquial simplifies classical dual endings (-āni / -ayni) to standard plurals, reserving duals strictly for paired nouns (hands, eyes).' },
-            { q: 'How does Qāf shift to Hamza in Damascus?', a: 'Urban Levantine replaces the uvular [q] with a glottal stop [ʔ], reflecting traditional urban linguistic prestige.' },
-            { q: '3 Native Greeting Alternatives', a: '1. Marhabtein (Two welcomes)\n2. Ya hala (Most welcome)\n3. Kifik inta? (How are you?)' }
-          ]
-        },
-        morphology: {
-          systemName: 'MĪZĀN AṢ-ṢARFĪ (مِيزَان الصَّرْف)',
-          rootTitle: 'TRILITERAL ROOT NUCLEUS',
-          rootLetters: 'ك - ت - ب',
-          rootConcept: 'Core Semantic Archetype of "Writing, Inscribing & Documenting"',
-          branches: [
-            { form: 'Form I Noun', wazn: 'فِعَال (Fi‘āl)', word: 'كِتَاب', trans: 'Kitāb', meaning: 'Book / Text', role: 'Noun of Patient', cefr: 'A1', ex: 'هَذَا كِتَابٌ مُفِيدٌ جِدًّا.', exEn: 'This is a very useful book.' },
-            { form: 'Form I Participle', wazn: 'فَاعِل (Fā‘il)', word: 'كَاتِب', trans: 'Kātib', meaning: 'Author / Scribe', role: 'Active Agent', cefr: 'A2', ex: 'الْكَاتِبُ يَعْمَلُ عَلَى رِوَايَتِهِ.', exEn: 'The author works on his novel.' },
-            { form: 'Form I Place', wazn: 'مَفْعَل (Maf‘al)', word: 'مَكْتَب', trans: 'Maktab', meaning: 'Office / Desk', role: 'Spatial Locus', cefr: 'A2', ex: 'أَنَا ذَاهِبٌ إِلَى الْمَكْتَبِ الْآنَ.', exEn: 'I am going to the office now.' },
-            { form: 'Form I Place (Fem)', wazn: 'مَفْعَلَة (Maf‘alah)', word: 'مَكْتَبَة', trans: 'Maktabah', meaning: 'Library', role: 'Collective Place', cefr: 'B1', ex: 'نَلْتَقِي فِي الْمَكْتَبَةِ الْعَامَّةِ.', exEn: 'We meet at the library.' },
-            { form: 'Form VIII Reflexive', wazn: 'اِفْتِعَال (Ifti‘āl)', word: 'اِكْتِتَاب', trans: 'Iktitāb', meaning: 'Subscription', role: 'Mutual Inscription', cefr: 'C1', ex: 'تَمَّ فَتْحُ بَابِ الِاكْتِتَابِ.', exEn: 'Subscription is opened.' }
-          ]
-        },
-        vocalLab: {
-          title: 'MAKHĀRIJ AL-ḤURŪF (مَخَارِج الحُرُوف)',
-          subtitle: 'Anatomical Pharyngeal Articulation Studio',
-          targets: [
-            { symbol: 'ع', name: '‘Ayn', type: 'Voiced Pharyngeal Fricative', zone: 'Middle Throat / Epiglottis', f1: '620 Hz', f2: '1380 Hz', guidance: 'Constrict pharyngeal walls and draw epiglottis backward without oral closure.' },
-            { symbol: 'ح', name: 'Ḥā’', type: 'Voiceless Pharyngeal Fricative', zone: 'Wasaṭ Al-Ḥalq', f1: '540 Hz', f2: '1550 Hz', guidance: 'Warm stream of unvoiced breath directly from middle throat.' },
-            { symbol: 'ص', name: 'Ṣād', type: 'Pharyngealized Fricative', zone: 'Dental + Velar Backing', f1: '780 Hz', f2: '1120 Hz', guidance: 'Tongue blade against alveolar ridge while raising tongue back (Iṭbāq).' },
-            { symbol: 'ق', name: 'Qāf', type: 'Voiceless Uvular Stop', zone: 'Uvula / Extreme Root', f1: '450 Hz', f2: '1240 Hz', guidance: 'Explosive closure between tongue dorsum and uvula.' }
-          ]
-        },
-        fsrs: [
-          { root: 'ك - ت - ب', trans: 'K-T-B', stability: 14.2, retention: 92, due: true },
-          { root: 'ع - ل - م', trans: '‘-L-M', stability: 28.5, retention: 97, due: false },
-          { root: 'ح - ك - م', trans: 'Ḥ-K-M', stability: 3.1, retention: 74, due: true }
-        ],
-        scenario: {
-          loc: 'Al-Madina Old Souq • Damascus / Amman',
-          foreign: 'بِدِّي هَالْكِتَاب إِذَا مُمْكِن، قَدِّيش حَقُّو؟',
-          ipa: '/biddi hal-ktaːb ʔiza mumkin, ʔaddeːʃ ħaqqu/',
-          natural: 'I’d like this book if possible, how much is it?',
-          gloss: [
-            { w: 'بِدِّي', g: '[In my desire]' },
-            { w: 'هَالْكِتَاب', g: '[this-the-book]' },
-            { w: 'إِذَا مُمْكِن', g: '[if possible]' },
-            { w: 'قَدِّيش', g: '[how-much]' },
-            { w: 'حَقُّو', g: '[its-due/price]' }
-          ],
-          pragmatics: 'In Levantine souqs, "biddi" is universally preferred over literary "urīdu". Using "qaddīsh haqqu" rather than "kam thamanuhu" signals native conversational ease.'
-        }
-      },
-
-      es: {
-        code: 'es', name: 'Spanish', nativeName: 'Español', flag: '🇪🇸', dir: 'ltr',
-        dialect: {
-          coachName: 'Sparky Castizo',
-          coachTitle: 'Pragmatic Register & Poly-Dialect Coach',
-          standardName: 'Castilian Madrid (Ceceo)',
-          colloquialName: 'Mexican CDMX (Chilango)',
-          stdPhrase: '¿Me pones un tinto de verano, por fa, que entra de lujo?',
-          colPhrase: '¿Qué onda carnal, te echas una chelita bien muerta?',
-          stdIpa: '/me ˈpones un ˈtinto ðe βeˈɾano poɾ fa ke ˈentɾa ðe ˈluxo/',
-          colIpa: '/ke ˈonda kaɾˈnal te ˈetʃas ˈuna tʃeˈlita bjen ˈmweɾta/',
-          naturalEn: 'Could you pour me a drink? Really hits the spot!',
-          divergence: 'Pragmatic verb shift: [poner] in Madrid vs [echar] in CDMX; tavern culture etiquette',
-          queries: [
-            { q: 'Explain ¿Qué hubo vs ¿Qué onda?', a: '¿Qué onda? is iconic CDMX slang reflecting vibe/wave, while ¿Qué hubo? (Quiúbole) is common across Colombia, Chile, and Northern Mexico.' },
-            { q: 'Subjunctive vs Imperfect Nuance', a: 'Using subjunctive expresses hypothetical desire: "quisiera" softens requests while indicative "quiero" can sound blunt in hospitality.' },
-            { q: 'Tavern Hospitality Etiquette', a: 'In Madrid, "poner" is customary. Bar staff appreciate brief, confident orders rather than elaborate formal requests.' }
-          ]
-        },
-        morphology: {
-          systemName: 'MATRIZ MORFOLÓGICA DE DERIVACIÓN LATINA',
-          rootTitle: 'LATIN VERBAL RADIX',
-          rootLetters: 'S - C - R - I - B',
-          rootConcept: 'Latin Root Archetype *scrībere* ("to engrave, write")',
-          branches: [
-            { form: 'Infinitive Core', wazn: 'Radix + -ir', word: 'Escribir', trans: 'es-kri-βiɾ', meaning: 'To write', role: 'Base Action', cefr: 'A1', ex: 'Me gusta escribir en mi diario.', exEn: 'I like to write in my journal.' },
-            { form: 'Agentive (-tor)', wazn: 'Radix + -tor', word: 'Escritor', trans: 'es-kri-toɾ', meaning: 'Writer / Author', role: 'Creator Agent', cefr: 'A2', ex: 'El escritor firmó su novela.', exEn: 'The writer signed his novel.' },
-            { form: 'Spatial (-torio)', wazn: 'Radix + -torio', word: 'Escritorio', trans: 'es-kri-to-ɾjo', meaning: 'Desk / Office', role: 'Spatial Locus', cefr: 'A2', ex: 'Dejé los libros sobre el escritorio.', exEn: 'I left the books on the desk.' },
-            { form: 'Participial (-tura)', wazn: 'Radix + -tura', word: 'Escritura', trans: 'es-kri-tu-ɾa', meaning: 'Script / Deed', role: 'Abstract Text', cefr: 'B2', ex: 'La escritura cuneiforme es antigua.', exEn: 'Cuneiform script is ancient.' },
-            { form: 'Sub- + -ción', wazn: 'Sub- + Radix + -ción', word: 'Suscripción', trans: 'sus-kɾip-sjon', meaning: 'Subscription', role: 'Formal Endorsement', cefr: 'C1', ex: 'Renové mi suscripción mensual.', exEn: 'I renewed my subscription.' }
-          ]
-        },
-        vocalLab: {
-          title: 'ENTRENADOR DE ARTICULACIÓN FONÉTICA',
-          subtitle: 'Acoustic Resonance & Articulatory Mechanics',
-          targets: [
-            { symbol: 'rr', name: 'Vibrante Múltiple', type: 'Alveolar Trill', zone: 'Upper Alveolar Ridge', f1: '480 Hz', f2: '1650 Hz', guidance: 'Relax tongue tip against ridge allowing aerodynamic Bernoulli trill.' },
-            { symbol: 'c/z', name: 'Ceceo Castizo', type: 'Interdental Fricative', zone: 'Interdental (Teeth Apex)', f1: '650 Hz', f2: '1820 Hz', guidance: 'Apex between incisors without biting, releasing soft friction.' },
-            { symbol: 'j/g', name: 'Jota Velar', type: 'Velar Fricative', zone: 'Velum (Soft Palate)', f1: '520 Hz', f2: '1410 Hz', guidance: 'Back of tongue toward velum, dry friction similar to clearing throat.' }
-          ]
-        },
-        fsrs: [
-          { root: 'Escribir / Scrib-', trans: 'Writing Morpheme', stability: 12.0, retention: 88, due: true },
-          { root: 'Poner / Posit-', trans: 'Placement / Hospitality', stability: 18.4, retention: 94, due: false },
-          { root: 'Haber / Habit-', trans: 'Existential Morpheme', stability: 4.5, retention: 76, due: true }
-        ],
-        scenario: {
-          loc: 'Taberna La Dolores • Huertas, Madrid',
-          foreign: '¿Me pones un tinto de verano, por fa, que entra de lujo?',
-          ipa: '/me ˈpones un ˈtinto ðe βeˈɾano poɾ fa ke ˈentɾa ðe ˈluxo/',
-          natural: 'Could you pour me a tinto de verano, please? It really hits the spot!',
-          gloss: [
-            { w: '¿Me pones', g: '[To-me you-put]' },
-            { w: 'un tinto de verano', g: '[a red-wine of summer]' },
-            { w: 'por fa', g: '[please]' },
-            { w: 'que entra de lujo?', g: '[that enters of luxury?]' }
-          ],
-          pragmatics: 'In Madrid tapas bars, "poner" is customary over "traer". "Entrar de lujo" signals that a cool refreshment hits the spot effortlessly.'
-        }
-      },
-
-      ms: {
-        code: 'ms', name: 'Malay', nativeName: 'Bahasa Melayu', flag: '🇲🇾', dir: 'ltr',
-        dialect: {
-          coachName: 'Sparky Nusantara',
-          coachTitle: 'Austronesian Morpho-Syntax Specialist',
-          standardName: 'Bahasa Melayu Baku (Formal)',
-          colloquialName: 'Bahasa Pasar / Basilect',
-          stdPhrase: 'Bolehkah saya membantu anda menyelesaikan urusan ini?',
-          colPhrase: 'Ada apa-apa nak minta tolong ke, bro?',
-          stdIpa: '/bolehkah saja membantu anda meɲlesajkan urusan ini/',
-          colIpa: '/ada apa apa nak minta toloŋ ke bro/',
-          naturalEn: 'Can I help you get this sorted out, bro?',
-          divergence: 'Affix elision: meN- dropped in speech; particle [ke] and loan [bro]',
-          queries: [
-            { q: 'When is imbuhan meN- omitted?', a: 'In informal spoken Malay, transitive prefixes (menulis → tulis) are routinely dropped without loss of meaning.' },
-            { q: 'Colloquial short forms: nak, dah, tak', a: 'Spoken speech contracts: hendak → nak (want), sudah → dah (already), tidak → tak (not).' },
-            { q: 'Politeness levels across Malaysia', a: 'Use "anda" in formal media, "awak" between peers, "kamu" among intimates, and "bro/kak/bang" in casual street rapport.' }
-          ]
-        },
-        morphology: {
-          systemName: 'SISTEM MORFOLOGI IMBUHAN NUSANTARA',
-          rootTitle: 'KATA DASAR (ROOT STEM)',
-          rootLetters: 'T - U - L - I - S',
-          rootConcept: 'Core Semantic Archetype of "Writing & Inscribing"',
-          branches: [
-            { form: 'Awalan meN- (Active)', wazn: 'meN- + tulis', word: 'Menulis', trans: 'me-nu-lis', meaning: 'To write (Active)', role: 'Subject Action', cefr: 'A1', ex: 'Dia sedang menulis surat.', exEn: 'He is writing a letter.' },
-            { form: 'Awalan peN- (Agent)', wazn: 'peN- + tulis', word: 'Penulis', trans: 'pe-nu-lis', meaning: 'Writer / Author', role: 'Doer Agent', cefr: 'A2', ex: 'Penulis melancarkan novel.', exEn: 'The writer launched a novel.' },
-            { form: 'Akhiran -an (Noun)', wazn: 'tulis + -an', word: 'Tulisan', trans: 'tu-li-san', meaning: 'Handwriting / Script', role: 'Concrete Product', cefr: 'B1', ex: 'Tulisan tangannya kemas.', exEn: 'His handwriting is neat.' },
-            { form: 'Awalan ber- (Stative)', wazn: 'ber- + tulis', word: 'Bertulis', trans: 'ber-tu-lis', meaning: 'In written form', role: 'Stative Quality', cefr: 'B2', ex: 'Perjanjian secara bertulis.', exEn: 'Agreement in writing.' },
-            { form: 'Apitan meN-...-kan', wazn: 'meN- + tulis + -kan', word: 'Menuliskan', trans: 'me-nu-lis-kan', meaning: 'To write down for', role: 'Causative / Benefactive', cefr: 'C1', ex: 'Tuliskan alamat untuk saya.', exEn: 'Write down the address for me.' }
-          ]
-        },
-        vocalLab: {
-          title: 'MAKMAL FONETIK DAN ARTIKULASI SEBUTAN',
-          subtitle: 'Austronesian Acoustic Articulation Lab',
-          targets: [
-            { symbol: '-k', name: 'Hentian Glotis', type: 'Glottal Stop', zone: 'Vocal Cords / Glottis', f1: '380 Hz', f2: '1100 Hz', guidance: 'Tutup pita suara secara mendadak pada akhir suku kata tanpa letupan kras.' },
-            { symbol: 'ng', name: 'Nasal Velar', type: 'Velar Nasal', zone: 'Velum (Lelangit Lembut)', f1: '280 Hz', f2: '2200 Hz', guidance: 'Rapatkan pangkal lidah ke lelangit lembut, alirkan resonansi melalui hidung.' },
-            { symbol: 'ny', name: 'Nasal Palatal', type: 'Palatal Nasal', zone: 'Lelangit Keras', f1: '310 Hz', f2: '2050 Hz', guidance: 'Rapatkan daun lidah ke lelangit keras sambil bersuara melalui hidung.' }
-          ]
-        },
-        fsrs: [
-          { root: 'Tulis', trans: 'Awalan meN- & peN-', stability: 15.0, retention: 91, due: true },
-          { root: 'Bantu', trans: 'Bantuan & Membantu', stability: 32.0, retention: 98, due: false },
-          { root: 'Jual', trans: 'Penjual & Jualan', stability: 5.2, retention: 79, due: true }
-        ],
-        scenario: {
-          loc: 'Kopitiam Pasar Seni • Kuala Lumpur',
-          foreign: 'Boss, kopi o peng satu, kurang manis, bungkus ya!',
-          ipa: '/bɔs kɔpi o pɛŋ satu kuraŋ manis buŋkus ja/',
-          natural: 'Boss, one iced black coffee, less sweet, to go please!',
-          gloss: [
-            { w: 'Boss,', g: '[Friendly honorific]' },
-            { w: 'kopi o peng', g: '[black coffee iced]' },
-            { w: 'satu,', g: '[one]' },
-            { w: 'kurang manis,', g: '[less sweet]' },
-            { w: 'bungkus ya!', g: '[takeaway, particle]' }
-          ],
-          pragmatics: 'In Malaysian kopitiams, "Boss" is the universal friendly address. "Kopi O" is black coffee with sugar; adding "Peng" (Hokkien loan) specifies iced.'
-        }
-      },
-
-      ja: {
-        code: 'ja', name: 'Japanese', nativeName: '日本語', flag: '🇯🇵', dir: 'ltr',
-        dialect: {
-          coachName: 'Sparky Yamato',
-          coachTitle: 'Socio-Linguistics & Keigo Specialist',
-          standardName: 'Tokyo Kanto (Teineigo)',
-          colloquialName: 'Kansai-ben (Osaka Colloquial)',
-          stdPhrase: '本日はどのようなご用件でしょうか？',
-          colPhrase: '今日何しに来たん？手伝おか？',
-          stdIpa: '/hoɴdʒitsu wa dono joː na go joːkeɴ deʃoː ka/',
-          colIpa: '/kjoː nani ɕini kitaɴ tetsudaoka/',
-          naturalEn: 'What brings you here today? Can I help?',
-          divergence: 'Verb ending shift: [-deshou ka] → [-tan? / -oka?], pitch-accent inversion',
-          queries: [
-            { q: 'Kansai copula: ya vs Kanto da', a: 'Kansai-ben regularly substitutes [ya] for standard [da], giving speech a rhythmic, warm cadence.' },
-            { q: 'Keigo 3-tier hierarchy', a: 'Teineigo (polite desu/masu), Sonkeigo (respectful honoring the other), Kenjougo (humble lowering oneself).' },
-            { q: 'Softening sentence particles', a: 'Particles like [ne], [yo], and Kansai [de] soften direct statements to preserve conversational harmony.' }
-          ]
-        },
-        morphology: {
-          systemName: 'KANJI MORPHEME COMPOUND MATRIX (形態素合成)',
-          rootTitle: 'KANJI ROOT RADICAL',
-          rootLetters: '書',
-          rootConcept: 'Ideographic Archetype of "Documenting & Brushing Characters"',
-          branches: [
-            { form: 'Kun-yomi Base', wazn: '書 + く', word: '書く (kaku)', trans: 'kaku', meaning: 'To Write', role: 'Native Action', cefr: 'A1', ex: '手紙を丁寧に書きました。', exEn: 'I wrote the letter politely.' },
-            { form: 'On-yomi Spatial', wazn: '書 + 斎', word: '書斎 (shosai)', trans: 'sho-sai', meaning: 'Study Room', role: 'Spatial Locus', cefr: 'B1', ex: '父は書斎で本を読んでいます。', exEn: 'Father is in his study reading.' },
-            { form: 'Institutional', wazn: '図 + 書 + 館', word: '図書館 (toshokan)', trans: 'to-sho-kan', meaning: 'Public Library', role: 'Repository', cefr: 'A2', ex: '図書館で勉強します。', exEn: 'I will study at the library.' },
-            { form: 'Legal Document', wazn: '契 + 約 + 書', word: '契約書 (keiyakusho)', trans: 'kei-yaku-sho', meaning: 'Legal Contract', role: 'Binding Text', cefr: 'B2', ex: '契約書に署名しました。', exEn: 'I signed the contract.' }
-          ]
-        },
-        vocalLab: {
-          title: 'PHONETIC PITCH-ACCENT TRAINER',
-          subtitle: 'Acoustic Mora & Intonation Lab',
-          targets: [
-            { symbol: 'ん', name: 'Hatsuon (Moraic N)', type: 'Uvular/Moraic Nasal', zone: 'Velar / Nasal Cavity', f1: '320 Hz', f2: '2100 Hz', guidance: 'Adapt resonance based on following consonant: [m], [n], or [ŋ].' },
-            { symbol: 'っ', name: 'Sokuon (Geminate)', type: 'Moraic Glottal Pause', zone: 'Closure Hold', f1: '0 Hz', f2: '0 Hz', guidance: 'Hold the articulatory posture for one full mora before releasing.' }
-          ]
-        },
-        fsrs: [
-          { root: '書 (Sho / Kaku)', trans: 'Writing Compound', stability: 20.0, retention: 94, due: false },
-          { root: '話 (Wa / Hanasu)', trans: 'Speech Morpheme', stability: 11.0, retention: 87, due: true }
-        ],
-        scenario: {
-          loc: 'Izakaya Alley • Dotonbori, Osaka',
-          foreign: 'すんまへん、生中ふたつとたこ焼き焼いてぇな！',
-          ipa: '/summaheɴ nama-tʃuː futatsu to takojaki jaiteː na/',
-          natural: 'Excuse me, two draft beers and an order of takoyaki please!',
-          gloss: [
-            { w: 'すんまへん、', g: '[Excuse me (Kansai)]' },
-            { w: '生中ふたつ', g: '[draft-beer-medium two]' },
-            { w: 'とたこ焼き', g: '[and takoyaki]' },
-            { w: '焼いてぇな！', g: '[grill for us (particle)]' }
-          ],
-          pragmatics: '"Summahen" is the authentic Kansai equivalent of standard "Sumimasen". Sentence final "na" softens requests in convivial izakaya settings.'
-        }
-      }
-    };
-
-    // Generic fallback for other languages
-    const OTHER_LANGS = [
-      { code: 'fr', name: 'French', nativeName: 'Français', flag: '🇫🇷' },
-      { code: 'de', name: 'German', nativeName: 'Deutsch', flag: '🇩🇪' },
-      { code: 'zh', name: 'Chinese', nativeName: '中文 (普通话)', flag: '🇨🇳' },
-      { code: 'ko', name: 'Korean', nativeName: '한국어', flag: '🇰🇷' },
-      { code: 'ru', name: 'Russian', nativeName: 'Русский', flag: '🇷🇺' },
-      { code: 'it', name: 'Italian', nativeName: 'Italiano', flag: '🇮🇹' },
-      { code: 'pt', name: 'Portuguese', nativeName: 'Português', flag: '🇧🇷' },
-      { code: 'hi', name: 'Hindi', nativeName: 'हिन्दी', flag: '🇮🇳' },
-      { code: 'th', name: 'Thai', nativeName: 'ไทย', flag: '🇹🇭' },
-      { code: 'tl', name: 'Tagalog', nativeName: 'Tagalog', flag: '🇵🇭' },
-      { code: 'en', name: 'English', nativeName: 'English', flag: '🇺🇸' }
+    const CATALOG = [
+      { code: 'ar', name: 'Arabic', native: 'العربية', flag: '🇸🇦', studio: 'arabic' },
+      { code: 'es', name: 'Spanish', native: 'Español', flag: '🇪🇸', studio: 'spanish' },
+      { code: 'ms', name: 'Malay', native: 'Bahasa Melayu', flag: '🇲🇾', studio: 'arabic' },
+      { code: 'ja', name: 'Japanese', native: '日本語', flag: '🇯🇵', studio: 'spanish' },
+      { code: 'fr', name: 'French', native: 'Français', flag: '🇫🇷', studio: 'spanish' },
+      { code: 'de', name: 'German', native: 'Deutsch', flag: '🇩🇪', studio: 'spanish' },
+      { code: 'zh', name: 'Mandarin', native: '中文', flag: '🇨🇳', studio: 'arabic' },
+      { code: 'ko', name: 'Korean', native: '한국어', flag: '🇰🇷', studio: 'spanish' },
+      { code: 'ru', name: 'Russian', native: 'Русский', flag: '🇷🇺', studio: 'spanish' },
+      { code: 'it', name: 'Italian', native: 'Italiano', flag: '🇮🇹', studio: 'spanish' },
+      { code: 'pt', name: 'Portuguese', native: 'Português', flag: '🇧🇷', studio: 'spanish' },
+      { code: 'hi', name: 'Hindi', native: 'हिन्दी', flag: '🇮🇳', studio: 'arabic' },
+      { code: 'th', name: 'Thai', native: 'ไทย', flag: '🇹🇭', studio: 'arabic' },
+      { code: 'tl', name: 'Tagalog', native: 'Tagalog', flag: '🇵🇭', studio: 'spanish' },
+      { code: 'en', name: 'English', native: 'English', flag: '🇺🇸', studio: 'spanish' }
     ];
 
-    let currentLang = 'ar';
-    let isColloquial = false;
-    let selectedBranchIdx = 0;
-    let selectedVocalIdx = 0;
-    let activeDecoderMode = 0;
-    let isShadowingActive = false;
+    let currentStudio = 'arabic';
+    let isArMsa = false;
 
-    // Initialize App
     window.addEventListener('DOMContentLoaded', () => {
-      buildLanguageModal();
-      selectLanguage('ar');
+      buildLangModal();
+      setStudioView('arabic');
     });
 
-    function selectLanguage(code) {
-      if (!LANG_DATA[code]) {
-        // Fallback to Spanish or Arabic if code is not full mock
-        code = 'es';
-      }
-      currentLang = code;
-      const data = LANG_DATA[code];
+    function setStudioView(mode) {
+      currentStudio = mode;
+      const screenAr = document.getElementById('screen-arabic');
+      const screenEs = document.getElementById('screen-spanish');
+      const grid = document.getElementById('studio-grid');
 
-      // Update Header
-      document.getElementById('header-flag').textContent = data.flag;
-      document.getElementById('header-lang-name').textContent = data.nativeName;
-      document.getElementById('roadmap-flag').textContent = data.flag;
-      document.getElementById('roadmap-heading').textContent = `Curriculum Roadmap • ${data.name} (${data.nativeName})`;
+      const btnAr = document.getElementById('btn-view-ar');
+      const btnEs = document.getElementById('btn-view-es');
+      const btnDual = document.getElementById('btn-view-dual');
 
-      // Update Dialect Section
-      document.getElementById('coach-banner-name').textContent = data.dialect.coachName;
-      document.getElementById('coach-banner-title').textContent = data.dialect.coachTitle;
-      document.getElementById('dialect-coach-name').textContent = data.dialect.coachName;
-      document.getElementById('dialect-coach-title').textContent = data.dialect.coachTitle;
-      document.getElementById('std-reg-name').textContent = data.dialect.standardName;
-      document.getElementById('col-reg-name').textContent = data.dialect.colloquialName;
-      document.getElementById('card-active-dialect').textContent = `${data.dialect.standardName.split(' ')[0]} ⇄ ${data.dialect.colloquialName.split(' ')[0]}`;
-
-      isColloquial = false;
-      updateDialectPlayer();
-
-      // Update Morphology Section
-      document.getElementById('morph-system-name').textContent = data.morphology.systemName;
-      document.getElementById('morph-root-title').textContent = data.morphology.rootTitle;
-      document.getElementById('morph-root-letters').textContent = data.morphology.rootLetters;
-      document.getElementById('morph-root-concept').textContent = data.morphology.rootConcept;
-      selectedBranchIdx = 0;
-      renderMorphologyBranches();
-
-      // Update Vocal Lab
-      document.getElementById('vocal-lab-title').textContent = data.vocalLab.title;
-      document.getElementById('vocal-lab-subtitle').textContent = data.vocalLab.subtitle;
-      selectedVocalIdx = 0;
-      renderVocalTargets();
-
-      // Update Scenario & Tri-Mode Decoder
-      document.getElementById('scenario-location').textContent = data.scenario.loc;
-      document.getElementById('target-phrase-foreign').textContent = data.scenario.foreign;
-      document.getElementById('target-phrase-ipa').textContent = data.scenario.ipa;
-      document.getElementById('decoder-natural-text').textContent = `“${data.scenario.natural}”`;
-      document.getElementById('decoder-pragmatics-text').textContent = data.scenario.pragmatics;
-      
-      const glossContainer = document.getElementById('decoder-gloss-tokens');
-      glossContainer.innerHTML = '';
-      data.scenario.gloss.forEach(item => {
-        const token = document.createElement('div');
-        token.className = 'px-3 py-1.5 rounded-lg bg-[#141720] border border-[#2A2F45] text-center';
-        token.innerHTML = `
-          <div class="text-xs font-bold text-white">${item.w}</div>
-          <div class="text-[10px] font-mono text-[#E08850]">${item.g}</div>
-        `;
-        glossContainer.appendChild(token);
+      // Reset button styles
+      [btnAr, btnEs, btnDual].forEach(b => {
+        b.className = 'px-4 py-1.5 rounded-full text-xs font-bold text-[#605850] hover:text-[#1F1610] transition-all';
       });
 
-      // Update FSRS Queue
-      renderFsrsQueue();
-
-      // Update Units Roadmap
-      renderCurriculumUnits();
-
-      closeLanguageModal();
-    }
-
-    function toggleDialectRegister(colloquial) {
-      isColloquial = colloquial;
-      const stdBtn = document.getElementById('btn-reg-std');
-      const colBtn = document.getElementById('btn-reg-col');
-
-      if (isColloquial) {
-        colBtn.className = 'py-3 px-4 rounded-xl text-xs sm:text-sm font-bold bg-[#1F2430] border border-[rgba(224,136,80,0.3)] text-white transition text-center';
-        stdBtn.className = 'py-3 px-4 rounded-xl text-xs sm:text-sm font-medium text-[#94A3B8] hover:text-white transition text-center';
-        document.getElementById('dialect-player-reg-badge').textContent = 'COLLOQUIAL STREET REGISTER';
+      if (mode === 'arabic') {
+        screenAr.classList.remove('hidden');
+        screenEs.classList.add('hidden');
+        grid.className = 'grid grid-cols-1 gap-8 w-full max-w-xl mx-auto';
+        btnAr.className = 'px-4 py-1.5 rounded-full text-xs font-bold bg-[#C2652A] text-white transition-all shadow-sm';
+        document.getElementById('hdr-flag').textContent = '🇸🇦';
+        document.getElementById('hdr-lang-title').textContent = 'AR · Arabic';
+      } else if (mode === 'spanish') {
+        screenAr.classList.add('hidden');
+        screenEs.classList.remove('hidden');
+        grid.className = 'grid grid-cols-1 gap-8 w-full max-w-xl mx-auto';
+        btnEs.className = 'px-4 py-1.5 rounded-full text-xs font-bold bg-[#C2652A] text-white transition-all shadow-sm';
+        document.getElementById('hdr-flag').textContent = '🇪🇸';
+        document.getElementById('hdr-lang-title').textContent = 'ES · Castilian';
       } else {
-        stdBtn.className = 'py-3 px-4 rounded-xl text-xs sm:text-sm font-bold bg-[#1F2430] border border-[rgba(224,136,80,0.3)] text-white transition text-center';
-        colBtn.className = 'py-3 px-4 rounded-xl text-xs sm:text-sm font-medium text-[#94A3B8] hover:text-white transition text-center';
-        document.getElementById('dialect-player-reg-badge').textContent = 'FORMAL LITERARY REGISTER';
+        // Dual Side-by-Side Canvas
+        screenAr.classList.remove('hidden');
+        screenEs.classList.remove('hidden');
+        grid.className = 'grid grid-cols-1 lg:grid-cols-2 gap-8 w-full max-w-7xl mx-auto';
+        btnDual.className = 'px-4 py-1.5 rounded-full text-xs font-bold bg-[#C2652A] text-white transition-all shadow-sm';
       }
-      updateDialectPlayer();
-    }
-
-    function updateDialectPlayer() {
-      const data = LANG_DATA[currentLang].dialect;
-      const phrase = isColloquial ? data.colPhrase : data.stdPhrase;
-      const ipa = isColloquial ? data.colIpa : data.stdIpa;
-
-      document.getElementById('dialect-phrase-display').textContent = phrase;
-      document.getElementById('dialect-ipa-display').textContent = ipa;
-      document.getElementById('dialect-en-display').textContent = `“${data.naturalEn}”`;
-      document.getElementById('divergence-callout-text').innerHTML = `<span>ℹ️</span> <span>${data.divergence}</span>`;
-
-      // Render Waveform Bars
-      const waveContainer = document.getElementById('waveform-bars');
-      waveContainer.innerHTML = '';
-      for (let i = 0; i < 32; i++) {
-        const bar = document.createElement('div');
-        const height = 12 + ((i * 7) % 36);
-        const isHighlight = i >= 10 && i <= 18;
-        bar.className = `w-1 rounded-full transition-all duration-300 ${isHighlight ? 'bg-[#E08850]' : 'bg-[#2A2F45]'}`;
-        bar.style.height = `${height}px`;
-        waveContainer.appendChild(bar);
-      }
-
-      // Render Query Chips
-      const chipsContainer = document.getElementById('query-chips-container');
-      chipsContainer.innerHTML = '';
-      data.queries.forEach((qObj, idx) => {
-        const chip = document.createElement('button');
-        chip.className = 'px-3 py-1.5 rounded-xl bg-[#171C26] hover:bg-[#1F2430] border border-[rgba(224,136,80,0.25)] text-xs text-[#94A3B8] hover:text-white transition flex items-center gap-1.5';
-        chip.innerHTML = `<span>💡</span> <span>${qObj.q}</span>`;
-        chip.onclick = () => {
-          const ansBox = document.getElementById('query-answer-box');
-          ansBox.classList.remove('hidden');
-          ansBox.innerHTML = `<span class="text-[#E08850] font-bold">Sparky AI Note:</span> ${qObj.a}`;
-        };
-        chipsContainer.appendChild(chip);
-      });
-      document.getElementById('query-answer-box').classList.add('hidden');
-    }
-
-    function renderMorphologyBranches() {
-      const branches = LANG_DATA[currentLang].morphology.branches;
-      const grid = document.getElementById('morph-branches-grid');
-      grid.innerHTML = '';
-
-      branches.forEach((b, idx) => {
-        const isSelected = idx === selectedBranchIdx;
-        const card = document.createElement('div');
-        card.className = `p-3.5 rounded-2xl cursor-pointer transition border ${isSelected ? 'bg-[#1F2430] border-[#E08850] shadow-md glow-terracotta' : 'bg-[#141720] border-[#2A2F45] hover:border-[rgba(224,136,80,0.3)]'}`;
-        card.onclick = () => {
-          selectedBranchIdx = idx;
-          renderMorphologyBranches();
-        };
-
-        card.innerHTML = `
-          <div class="flex items-center justify-between text-[10px] font-mono mb-2">
-            <span class="text-[#E08850] font-bold truncate max-w-[80px]">${b.form.split(' ')[0]}</span>
-            <span class="px-1.5 rounded bg-emerald-500/20 text-emerald-400 font-bold">${b.cefr}</span>
-          </div>
-          <div class="text-base font-black text-white truncate">${b.word}</div>
-          <div class="text-[11px] text-[#94A3B8] truncate mt-0.5">${b.meaning}</div>
-        `;
-        grid.appendChild(card);
-      });
-
-      // Update Detail Card
-      const activeBranch = branches[selectedBranchIdx];
-      document.getElementById('branch-detail-form').textContent = activeBranch.form;
-      document.getElementById('branch-detail-cefr').textContent = activeBranch.cefr;
-      document.getElementById('branch-detail-word').textContent = activeBranch.word;
-      document.getElementById('branch-detail-trans').textContent = `${activeBranch.trans} • “${activeBranch.meaning}”`;
-      document.getElementById('branch-detail-wazn').textContent = activeBranch.wazn;
-      document.getElementById('branch-detail-role').textContent = activeBranch.role;
-      document.getElementById('branch-detail-example').textContent = activeBranch.ex;
-      document.getElementById('branch-detail-example-en').textContent = `“${activeBranch.exEn}”`;
-    }
-
-    function renderVocalTargets() {
-      const targets = LANG_DATA[currentLang].vocalLab.targets;
-      const bar = document.getElementById('vocal-targets-bar');
-      bar.innerHTML = '';
-
-      targets.forEach((t, idx) => {
-        const isSelected = idx === selectedVocalIdx;
-        const chip = document.createElement('button');
-        chip.className = `px-4 py-2 rounded-xl border text-xs sm:text-sm font-bold transition flex items-center gap-2 ${isSelected ? 'bg-[#1F2430] border-[#E08850] text-white shadow-md glow-terracotta' : 'bg-[#141720] border-[#2A2F45] text-[#94A3B8] hover:text-white'}`;
-        chip.onclick = () => {
-          selectedVocalIdx = idx;
-          renderVocalTargets();
-        };
-        chip.innerHTML = `<span class="text-lg font-black text-white">${t.symbol}</span> <span>${t.name}</span>`;
-        bar.appendChild(chip);
-      });
-
-      const activeT = targets[selectedVocalIdx];
-      document.getElementById('vocal-target-type').textContent = activeT.type;
-      document.getElementById('vocal-symbol-large').textContent = activeT.symbol;
-      document.getElementById('vocal-active-zone').textContent = `ACTIVE ZONE: ${activeT.zone.toUpperCase()}`;
-      document.getElementById('vocal-guidance-text').textContent = activeT.guidance;
-      document.getElementById('vocal-f1-val').textContent = activeT.f1;
-      document.getElementById('vocal-f2-val').textContent = activeT.f2;
-    }
-
-    function renderFsrsQueue() {
-      const items = LANG_DATA[currentLang].fsrs;
-      const list = document.getElementById('fsrs-roots-list');
-      list.innerHTML = '';
-
-      items.forEach(item => {
-        const card = document.createElement('div');
-        card.className = `glass-card p-4 sm:p-5 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${item.due ? 'border-[rgba(224,136,80,0.4)]' : 'border-[#2A2F45]'}`;
-        card.innerHTML = `
-          <div>
-            <div class="flex items-center gap-3">
-              <span class="text-xl font-black text-white tracking-wider">${item.root}</span>
-              <span class="text-xs text-[#94A3B8]">(${item.trans})</span>
-              <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold ${item.due ? 'bg-[#C2652A]/20 text-[#E08850]' : 'bg-emerald-500/20 text-emerald-400'}">
-                ${item.due ? 'Due for Review' : 'Solidified'}
-              </span>
-            </div>
-            <div class="flex items-center gap-4 text-[11px] font-mono text-[#94A3B8] mt-2">
-              <span>Half-life: ${item.stability} Days</span>
-              <span class="${item.retention > 90 ? 'text-emerald-400' : 'text-[#F59E0B]'} font-bold">Retention: ${item.retention}%</span>
-            </div>
-          </div>
-          <button onclick="reviewRoot('${item.root}')" class="px-4 py-2 rounded-xl ${item.due ? 'gradient-terracotta text-white font-extrabold shadow-sm' : 'bg-[#171C26] text-[#94A3B8] border border-[#2A2F45]'} text-xs transition">
-            ${item.due ? 'Sprint Root' : 'Inspect'}
-          </button>
-        `;
-        list.appendChild(card);
-      });
-    }
-
-    function renderCurriculumUnits() {
-      const container = document.getElementById('units-container');
-      container.innerHTML = '';
-
-      const units = [
-        { id: 1, title: 'Unit 1: Socio-Pragmatic Grounding & Greetings', cefr: 'A1-A2', lessons: 8, status: 'IN PROGRESS' },
-        { id: 2, title: 'Unit 2: Morphology Nucleus & Radical Roots', cefr: 'B1', lessons: 12, status: 'NEXT SPRINT' },
-        { id: 3, title: 'Unit 3: Colloquial Street Register Immersion', cefr: 'B2', lessons: 10, status: 'LOCKED' },
-        { id: 4, title: 'Unit 4: Advanced Discourse & Cultural Idioms', cefr: 'C1', lessons: 14, status: 'LOCKED' }
-      ];
-
-      units.forEach(u => {
-        const isCurrent = u.id === 1;
-        const el = document.createElement('div');
-        el.className = `p-4 sm:p-5 rounded-2xl border ${isCurrent ? 'bg-[#171C26] border-[rgba(224,136,80,0.4)] shadow-lg' : 'bg-[#141720]/80 border-[#2A2F45]'}`;
-        el.innerHTML = `
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-3">
-              <span class="w-8 h-8 rounded-xl gradient-terracotta flex items-center justify-center text-xs font-black text-white">${u.id}</span>
-              <div>
-                <h4 class="text-sm font-black text-white">${u.title}</h4>
-                <p class="text-[11px] text-[#94A3B8]">${u.lessons} Interactive Lessons • CEFR ${u.cefr}</p>
-              </div>
-            </div>
-            <span class="text-[11px] font-mono font-bold ${isCurrent ? 'text-emerald-400' : 'text-[#64748B]'}">
-              ${isCurrent ? '● ACTIVE UNIT' : '🔒 LOCKED'}
-            </span>
-          </div>
-        `;
-        container.appendChild(el);
-      });
-    }
-
-    function switchTab(tabId) {
-      // Hide all main sections
-      const sections = ['pathway', 'dialect', 'morphology', 'vocal_lab', 'fsrs_queue'];
-      sections.forEach(s => {
-        const el = document.getElementById(`section-${s}`);
-        if (el) el.classList.add('hidden');
-      });
-
-      // Show requested section
-      const target = document.getElementById(`section-${tabId}`);
-      if (target) target.classList.remove('hidden');
-
-      // Update Desktop Nav styles
-      document.querySelectorAll('.nav-tab').forEach(btn => {
-        btn.classList.remove('bg-[#C2652A]', 'text-white');
-        btn.classList.add('text-[#94A3B8]');
-      });
-      const activeNav = document.getElementById(`nav-${tabId}`);
-      if (activeNav) {
-        activeNav.classList.remove('text-[#94A3B8]');
-        activeNav.classList.add('bg-[#C2652A]', 'text-white');
-      }
-
-      // Update Bottom Bar styles
-      const bNavIds = ['pathway', 'dialect', 'morphology', 'fsrs_queue'];
-      bNavIds.forEach(b => {
-        const bEl = document.getElementById(`bnav-${b}`);
-        if (bEl) {
-          if (b === tabId) {
-            bEl.classList.remove('text-[#94A3B8]');
-            bEl.classList.add('text-[#E08850]');
-          } else {
-            bEl.classList.remove('text-[#E08850]');
-            bEl.classList.add('text-[#94A3B8]');
-          }
-        }
-      });
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    function switchDecoderMode(modeIdx) {
-      activeDecoderMode = modeIdx;
-      for (let i = 0; i < 3; i++) {
-        const btn = document.getElementById(`dec-mode-${i}`);
-        const view = document.getElementById(`decoder-view-${i}`);
-        if (i === modeIdx) {
-          btn.className = 'px-3 py-1 rounded-lg text-xs font-bold bg-[#C2652A] text-white transition';
-          view.classList.remove('hidden');
-        } else {
-          btn.className = 'px-3 py-1 rounded-lg text-xs font-semibold text-[#94A3B8] transition';
-          view.classList.add('hidden');
-        }
+    // Arabic Dialect Toggle
+    function toggleArDialect(isMsa) {
+      isArMsa = isMsa;
+      const btnLevantine = document.getElementById('ar-btn-levantine');
+      const btnMsa = document.getElementById('ar-btn-msa');
+      const cardLevantine = document.getElementById('ar-card-levantine');
+      const cardMsa = document.getElementById('ar-card-msa');
+
+      if (isMsa) {
+        btnMsa.className = 'px-3 py-1 rounded-full text-xs font-bold bg-[#C2652A] text-white transition-all shadow-sm';
+        btnLevantine.className = 'px-3 py-1 rounded-full text-xs font-semibold text-[#605850] hover:text-[#1F1610] transition-all';
+        cardLevantine.classList.add('opacity-60');
+        cardMsa.classList.remove('opacity-80');
+      } else {
+        btnLevantine.className = 'px-3 py-1 rounded-full text-xs font-bold bg-[#C2652A] text-white transition-all shadow-sm';
+        btnMsa.className = 'px-3 py-1 rounded-full text-xs font-semibold text-[#605850] hover:text-[#1F1610] transition-all';
+        cardLevantine.classList.remove('opacity-60');
+        cardMsa.classList.add('opacity-80');
       }
     }
 
-    function triggerCenterSparky() {
-      // Elevated action triggers live dialect bridge session
-      switchTab('dialect');
-      playCurrentDialectAudio();
+    function playArDialectSentence() {
+      const phrase = isArMsa ? 'مَا رَأْيُكَ أَنْ نَشْرَبَ فِنْجَانَ قَهْوَةٍ مَعاً؟' : 'شو رأيك نشرب فنجان قهوة سوا؟';
+      playAudio(phrase, 'ar');
     }
 
-    // Audio Synthesis Web API
-    function playSpeech(text, langCode) {
-      if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = langCode || currentLang;
-        utterance.rate = 0.9;
-        window.speechSynthesis.speak(utterance);
+    // Arabic Vocal Target Switcher
+    function setVocalTarget(target) {
+      const btnAyn = document.getElementById('btn-vocal-ayn');
+      const btnHaa = document.getElementById('btn-vocal-haa');
+      const btnSaad = document.getElementById('btn-vocal-saad');
+      const label = document.getElementById('vocal-focal-label');
+
+      [btnAyn, btnHaa, btnSaad].forEach(b => {
+        b.className = 'flex flex-col items-center justify-center p-3 rounded-xl bg-white border border-[#EBD9CA] text-[#605850] hover:bg-[#FAF5EE] transition-all';
+      });
+
+      if (target === 'ayn') {
+        btnAyn.className = 'flex flex-col items-center justify-center p-3 rounded-xl bg-[#FAF5EE] border-2 border-[#C2652A] text-[#C2652A] shadow-sm transition-all';
+        label.textContent = 'Middle Pharynx (وسط الحلق) · Epiglottis Constriction';
+        playAudio('ع', 'ar');
+      } else if (target === 'haa') {
+        btnHaa.className = 'flex flex-col items-center justify-center p-3 rounded-xl bg-[#FAF5EE] border-2 border-[#C2652A] text-[#C2652A] shadow-sm transition-all';
+        label.textContent = 'Upper Pharynx (أدنى الحلق) · Smooth Breath Friction';
+        playAudio('ح', 'ar');
+      } else {
+        btnSaad.className = 'flex flex-col items-center justify-center p-3 rounded-xl bg-[#FAF5EE] border-2 border-[#C2652A] text-[#C2652A] shadow-sm transition-all';
+        label.textContent = 'Tongue Root + Alveolar Ridge (الحروف المطبقة) · Velarization';
+        playAudio('ص', 'ar');
       }
     }
 
-    function playTargetSentenceAudio() {
-      const phrase = LANG_DATA[currentLang].scenario.foreign;
-      playSpeech(phrase, currentLang);
+    function startMicFeedback() {
+      const btn = document.getElementById('btn-ar-mic');
+      const label = document.getElementById('ar-mic-label');
+      btn.classList.add('bg-[#FBE8D8]', 'border-[#C2652A]');
+      label.textContent = 'Analyzing Pharyngeal Resonance...';
     }
 
-    function playCurrentDialectAudio() {
-      const data = LANG_DATA[currentLang].dialect;
-      const phrase = isColloquial ? data.colPhrase : data.stdPhrase;
-      playSpeech(phrase, currentLang);
-    }
-
-    function playBranchSentenceAudio() {
-      const branch = LANG_DATA[currentLang].morphology.branches[selectedBranchIdx];
-      playSpeech(branch.ex, currentLang);
-    }
-
-    // Shadowing Interaction
-    function startShadowing() {
-      isShadowingActive = true;
-      document.getElementById('shadow-btn-text').textContent = 'LISTENING TO YOUR ACOUSTIC FORMANTS...';
-      document.getElementById('btn-shadow').className = 'w-full py-4 rounded-2xl bg-emerald-600 text-white font-extrabold text-sm shadow-lg glow-teal transition flex items-center justify-center gap-2 select-none cursor-pointer';
-    }
-
-    function stopShadowing() {
-      if (!isShadowingActive) return;
-      isShadowingActive = false;
-      document.getElementById('shadow-btn-text').textContent = 'HOLD TO SHADOW ARTICULATION';
-      document.getElementById('btn-shadow').className = 'w-full py-4 rounded-2xl gradient-terracotta text-white font-extrabold text-sm shadow-lg glow-terracotta transition flex items-center justify-center gap-2 select-none cursor-pointer';
-      
-      const score = 94 + Math.floor(Math.random() * 5);
-      document.getElementById('shadow-score-strip').textContent = `ACOUSTIC CONTOUR MATCH: ${score}% (OPTIMAL RESONANCE)`;
-    }
-
-    function startMorphoSprint() {
-      const btn = document.getElementById('sprint-btn-text');
-      btn.textContent = 'SPRINT COMMENCED: DRILLING 12 ROOTS...';
+    function stopMicFeedback() {
+      const btn = document.getElementById('btn-ar-mic');
+      const label = document.getElementById('ar-mic-label');
+      btn.classList.remove('bg-[#FBE8D8]', 'border-[#C2652A]');
+      label.textContent = 'Excellent Match: 96% Natural';
       setTimeout(() => {
-        btn.textContent = 'SPRINT CONSOLIDATED! +45 XP GAINED';
-        const xpEl = document.getElementById('xp-val');
-        let xp = parseInt(xpEl.textContent.replace(',', '')) || 3420;
-        xpEl.textContent = (xp + 45).toLocaleString();
+        label.textContent = 'Hold to Shadow Pronunciation';
+      }, 2000);
+    }
+
+    function triggerSprint() {
+      const label = document.getElementById('ar-sprint-label');
+      label.textContent = 'Sprint Started: Drilling 12 Roots...';
+      setTimeout(() => {
+        label.textContent = 'Sprint Completed! +120 XP Added';
       }, 1800);
     }
 
-    function reviewRoot(rootName) {
-      switchTab('morphology');
+    // Spanish Tri-Mode Decoder Tabs
+    function setDecoderTab(mode) {
+      const tabs = ['natural', 'literal', 'pragmatic'];
+      tabs.forEach(t => {
+        const btn = document.getElementById(`tab-dec-${t}`);
+        const panel = document.getElementById(`panel-dec-${t}`);
+        if (t === mode) {
+          btn.className = 'flex-1 py-1.5 rounded-full text-xs font-bold text-center text-white bg-[#C2652A] shadow-sm transition-all';
+          panel.classList.remove('hidden');
+        } else {
+          btn.className = 'flex-1 py-1.5 rounded-full text-xs font-semibold text-center text-[#605850] hover:text-[#1F1610] transition-all';
+          panel.classList.add('hidden');
+        }
+      });
+    }
+
+    function showEsQueryAnswer(idx) {
+      const answers = [
+        '¿Qué hubo? (Quiúbole) is ubiquitous across Mexico & Colombia, meaning "What’s been up?". In Spain, Madrid prefer "¿Qué pasa?" or "¿Qué tal?".',
+        'In hospitality, using the imperfect subjunctive ("quisiera") softens demands into polite requests, whereas present indicative ("quiero") sounds demanding.',
+        '1. Entrar de lujo (Goes down great)\n2. Estar de muerte (Tastes incredible)\n3. Tomar una cañita (Grab a quick small beer)'
+      ];
+      const box = document.getElementById('es-query-modal');
+      box.classList.remove('hidden');
+      box.innerHTML = `<strong class="text-[#C2652A]">Sparky Castizo AI:</strong> ${answers[idx]}`;
+    }
+
+    function startEsShadow() {
+      document.getElementById('es-shadow-label').textContent = 'Listening to Madrid Ceceo...';
+      document.getElementById('btn-es-shadow').classList.add('bg-[#A8521D]');
+    }
+
+    function stopEsShadow() {
+      document.getElementById('es-shadow-label').textContent = '96% Pitch Contour Match!';
+      document.getElementById('btn-es-shadow').classList.remove('bg-[#A8521D]');
+      setTimeout(() => {
+        document.getElementById('es-shadow-label').textContent = 'Hold to Shadow (Castilian Dialect)';
+      }, 2000);
+    }
+
+    function launchEsSprint() {
+      document.getElementById('es-sprint-label').textContent = 'Sprint Active: 7 Idioms in Progress...';
+      setTimeout(() => {
+        document.getElementById('es-sprint-label').textContent = '7 Idioms Solidified! +100 XP';
+      }, 1800);
+    }
+
+    function triggerCenterSparkyOrb() {
+      if (currentStudio === 'arabic') {
+        playArDialectSentence();
+      } else {
+        playAudio('¿Me pones un tinto de verano, por fa?', 'es');
+      }
+    }
+
+    // Audio Playback
+    function playAudio(text, lang) {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = lang === 'ar' ? 'ar-SA' : (lang === 'es' ? 'es-ES' : 'en-US');
+        utter.rate = 0.9;
+        window.speechSynthesis.speak(utter);
+      }
     }
 
     // Language Modal
@@ -1330,27 +1126,26 @@
       document.getElementById('lang-modal').classList.add('hidden');
     }
 
-    function buildLanguageModal() {
+    function buildLangModal() {
       const grid = document.getElementById('lang-grid');
       grid.innerHTML = '';
-
-      const all = [
-        ...Object.values(LANG_DATA),
-        ...OTHER_LANGS
-      ];
-
-      all.forEach(l => {
-        const item = document.createElement('button');
-        item.className = 'p-3 rounded-2xl bg-[#141720] hover:bg-[#1F2430] border border-[#2A2F45] hover:border-[#E08850] text-left transition flex items-center gap-3 cursor-pointer';
-        item.onclick = () => selectLanguage(l.code);
-        item.innerHTML = `
-          <span class="text-2xl">${l.flag}</span>
-          <div>
-            <div class="text-xs font-bold text-white">${l.nativeName}</div>
-            <div class="text-[10px] text-[#94A3B8]">${l.name}</div>
+      CATALOG.forEach(item => {
+        const btn = document.createElement('button');
+        btn.className = 'p-3 rounded-xl bg-white hover:bg-[#FAF5EE] border border-[#EBD9CA] text-left transition-all flex items-center gap-2.5 shadow-sm cursor-pointer';
+        btn.onclick = () => {
+          setStudioView(item.studio);
+          document.getElementById('hdr-flag').textContent = item.flag;
+          document.getElementById('hdr-lang-title').textContent = `${item.code.toUpperCase()} · ${item.name}`;
+          closeLanguageModal();
+        };
+        btn.innerHTML = `
+          <span class="text-2xl">${item.flag}</span>
+          <div class="min-w-0">
+            <div class="text-xs font-bold text-[#1F1610] truncate">${item.native}</div>
+            <div class="text-[10px] text-[#7A5E4B] truncate">${item.name}</div>
           </div>
         `;
-        grid.appendChild(item);
+        grid.appendChild(btn);
       });
     }
   </script>
