@@ -46,16 +46,20 @@
     .pb-safe { padding-bottom: env(safe-area-inset-bottom, 16px); }
     .pt-safe { padding-top: env(safe-area-inset-top, 0px); }
 
+    .glass-card {
+      background: rgba(255, 255, 255, 0.85) !important;
+      backdrop-filter: blur(20px) !important;
+      -webkit-backdrop-filter: blur(20px) !important;
+      border: 1px solid rgba(235, 217, 202, 0.9) !important;
+      border-radius: 18px;
+      box-shadow: 0 4px 24px rgba(45, 30, 21, 0.04), 0 1px 3px rgba(45, 30, 21, 0.02);
+    }
+
     .stitch-card {
       background-color: #FFFFFF !important;
       border: 1px solid #EBD9CA !important;
-      border-radius: 16px;
+      border-radius: 18px;
       box-shadow: 0 1px 6px rgba(45, 30, 21, 0.04);
-    }
-
-    .stitch-subtle-box {
-      background-color: #F2ECE4 !important;
-      border: 1px solid #EBD9CA !important;
     }
 
     .btn-terracotta {
@@ -120,46 +124,46 @@
   <!-- Main Multi-Language Studio Canvas -->
   <main class="flex-1 w-full max-w-4xl mx-auto px-4 sm:px-6 pt-24 pb-32">
     
-    <!-- CARD 1: DIALECT BRIDGE ENGINE BANNER (100% User Visual) -->
-    <div class="p-6 rounded-2xl mb-4 text-white shadow-md relative overflow-hidden" style="background: linear-gradient(135deg, #2D1E15 0%, #1F1610 100%); border: 1px solid rgba(224, 136, 80, 0.3);">
+    <!-- CARD 1: DIALECT BRIDGE ENGINE BANNER (Light Glassmorphic Design) -->
+    <div class="glass-card p-6 mb-4 transition-all relative overflow-hidden">
       <div class="flex items-center justify-between mb-3">
-        <div class="flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-wider text-[#FFB690]">
+        <div class="flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-wider text-[#C2652A]">
           <span class="text-xs">✦</span> DIALECT BRIDGE ENGINE
         </div>
-        <span class="px-3 py-1 rounded-full text-[11px] font-bold bg-[#140D09]/80 text-[#EAA67A] border border-[#E08850]/30 flex items-center gap-1.5 shadow-sm">
-          <span class="w-1.5 h-1.5 rounded-full bg-[#E08850] animate-pulse"></span>
+        <span class="px-3 py-1 rounded-full text-[11px] font-bold bg-[#FAF5EE] text-[#C2652A] border border-[#EBD9CA] flex items-center gap-1.5 shadow-xs">
+          <span class="w-1.5 h-1.5 rounded-full bg-[#C2652A] animate-pulse"></span>
           <span id="hero-dialect-pill">MSA ⇄ Shami (Levantine)</span>
         </span>
       </div>
       <div class="flex items-baseline justify-between gap-2 flex-wrap">
-        <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white" id="hero-dialect-lang">Arabic · العربية</h2>
-        <span class="text-lg sm:text-xl font-bold text-[#EAA67A]" id="hero-dialect-script-tag">الجذور واللهجات</span>
+        <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#1F1610]" id="hero-dialect-lang">Arabic · العربية</h2>
+        <span class="text-lg sm:text-xl font-bold text-[#C2652A]" id="hero-dialect-script-tag">الجذور واللهجات</span>
       </div>
-      <p class="text-xs sm:text-sm text-[#DDC1B3] mt-1.5" id="hero-dialect-desc">Modern Standard (فصحى) & Levantine Ammiya morphology matrix</p>
+      <p class="text-xs sm:text-sm text-[#7A5E4B] mt-1.5" id="hero-dialect-desc">Modern Standard (فصحى) & Levantine Ammiya morphology matrix</p>
     </div>
 
-    <!-- CARD 2: SPARKY COACH HERO CARD (100% User Visual) -->
-    <div class="p-5 rounded-2xl mb-6 text-white shadow-md flex items-start gap-4 relative overflow-hidden" style="background: linear-gradient(135deg, #2D1E15 0%, #1F1610 100%); border: 1px solid rgba(224, 136, 80, 0.3);">
-      <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-[#140D09] border border-[#E08850]/40 flex items-center justify-center relative flex-shrink-0 shadow-inner">
-        <!-- 8-point geometric star SVG -->
-        <svg class="w-9 h-9 text-[#E08850]" viewBox="0 0 100 100">
-          <polygon points="50,5 63,37 95,50 63,63 50,95 37,63 5,50 37,37" fill="none" stroke="#E08850" stroke-width="6"/>
-          <circle cx="50" cy="50" r="12" fill="#E08850"/>
+    <!-- CARD 2: SPARKY COACH HERO CARD (Light Glassmorphic Design) -->
+    <div class="glass-card p-5 mb-8 flex items-start gap-4 transition-all relative overflow-hidden">
+      <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-[#FAF5EE] border border-[#EBD9CA] flex items-center justify-center relative flex-shrink-0 shadow-inner">
+        <!-- 8-point geometric star SVG in Terracotta -->
+        <svg class="w-9 h-9 text-[#C2652A]" viewBox="0 0 100 100">
+          <polygon points="50,5 63,37 95,50 63,63 50,95 37,63 5,50 37,37" fill="none" stroke="#C2652A" stroke-width="6"/>
+          <circle cx="50" cy="50" r="12" fill="#C2652A"/>
         </svg>
-        <span class="absolute -bottom-1 -right-1 px-1.5 py-0.2 rounded-full text-[9px] font-extrabold bg-[#C2652A] text-white">AI</span>
+        <span class="absolute -bottom-1 -right-1 px-1.5 py-0.2 rounded-full text-[9px] font-extrabold bg-[#C2652A] text-white shadow-xs">AI</span>
       </div>
       <div class="flex-1 min-w-0">
         <div class="flex items-center justify-between mb-1">
-          <h3 class="text-base sm:text-lg font-bold text-white truncate" id="hero-coach-name">Sparky Fasih (سباركي الفصيح)</h3>
-          <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#140D09] text-[#EAA67A] border border-[#E08850]/30" id="hero-coach-scope">Form I-X</span>
+          <h3 class="text-base sm:text-lg font-bold text-[#1F1610] truncate" id="hero-coach-name">Sparky Fasih (سباركي الفصيح)</h3>
+          <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#FAF5EE] text-[#C2652A] border border-[#EBD9CA]" id="hero-coach-scope">Form I-X</span>
         </div>
-        <p class="text-xs text-[#DDC1B3] leading-relaxed mb-3" id="hero-coach-desc">Master of Triliteral Root Systems (الجذور الثلاثية) & real-time MSA-to-Ammiya socio-linguistic shifts.</p>
+        <p class="text-xs text-[#7A5E4B] leading-relaxed mb-3" id="hero-coach-desc">Master of Triliteral Root Systems (الجذور الثلاثية) & real-time MSA-to-Ammiya socio-linguistic shifts.</p>
         <div class="flex flex-wrap items-center gap-2">
-          <span class="px-3 py-1 rounded-full text-[10px] font-bold bg-[#140D09] text-[#EAA67A] border border-[#E08850]/30 flex items-center gap-1.5">
-            <span class="material-symbols-outlined text-[13px] text-[#E08850]">radar</span>
+          <span class="px-3 py-1 rounded-full text-[10px] font-bold bg-[#FAF5EE] text-[#C2652A] border border-[#EBD9CA] flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[13px] text-[#C2652A]">radar</span>
             <span>Syntax Flow: Active</span>
           </span>
-          <span class="px-3 py-1 rounded-full text-[10px] font-bold bg-[#140D09] text-[#EAA67A] border border-[#E08850]/30 flex items-center gap-1.5">
+          <span class="px-3 py-1 rounded-full text-[10px] font-bold bg-[#FAF5EE] text-[#1F1610] border border-[#EBD9CA] flex items-center gap-1.5">
             <span id="hero-coach-root-pill">Root: ك - ت - ب</span>
           </span>
         </div>
@@ -167,7 +171,7 @@
     </div>
 
     <!-- Section 1: Detailed Dialect Register Cards -->
-    <div class="stitch-card p-6 rounded-2xl mb-8">
+    <div class="stitch-card p-6 mb-8">
       <div class="flex items-center justify-between mb-4 pb-3 border-b border-[#EBD9CA]">
         <div class="flex items-center gap-2">
           <span class="material-symbols-outlined text-[#C2652A] text-[22px]">compare_arrows</span>
@@ -248,7 +252,7 @@
     </div>
 
     <!-- Section 2: Scientific Morphology Tree (Mīzān As-Sarfi) -->
-    <div class="stitch-card p-6 rounded-2xl mb-8">
+    <div class="stitch-card p-6 mb-8">
       <div class="flex items-center justify-between mb-4 pb-3 border-b border-[#EBD9CA]">
         <div class="flex items-center gap-2">
           <span class="material-symbols-outlined text-[#C2652A] text-[22px]">account_tree</span>
@@ -274,7 +278,7 @@
     </div>
 
     <!-- Section 3: Krashen i+1 Socio-Pragmatic Street Dialogue -->
-    <div class="stitch-card p-6 rounded-2xl mb-8">
+    <div class="stitch-card p-6 mb-8">
       <div class="flex items-center justify-between mb-4 pb-3 border-b border-[#EBD9CA]">
         <div class="flex items-center gap-2">
           <span class="material-symbols-outlined text-[#C2652A] text-[22px]">storefront</span>
@@ -322,7 +326,7 @@
     </div>
 
     <!-- Section 4: Anatomical Vocal Articulation & Pitch Lab -->
-    <div class="stitch-card p-6 rounded-2xl mb-8">
+    <div class="stitch-card p-6 mb-8">
       <div class="flex items-center justify-between mb-4 pb-3 border-b border-[#EBD9CA]">
         <div class="flex items-center gap-2">
           <span class="material-symbols-outlined text-[#C2652A] text-[22px]">record_voice_over</span>
@@ -358,7 +362,7 @@
     </div>
 
     <!-- Section 5: Active FSRS Spaced Repetition (SRS) Flashcard Engine -->
-    <div class="stitch-card p-6 rounded-2xl mb-8">
+    <div class="stitch-card p-6 mb-8">
       <div class="flex items-center justify-between mb-4 pb-3 border-b border-[#EBD9CA]">
         <div class="flex items-center gap-2">
           <span class="material-symbols-outlined text-[#C2652A] text-[22px]">layers</span>
@@ -547,12 +551,21 @@
       localStorage.setItem('spark_active_lang', code);
       const data = LINGO_DATABASE[code];
 
-      // Update HTML text direction & font
-      document.documentElement.dir = data.dir;
-      if (data.dir === 'rtl') {
-        document.body.classList.add('font-arabic');
+      // Font family mapping
+      if (data.code === 'ar') {
+        document.body.className = 'bg-[#FAF5EE] text-[#1F1610] flex flex-col min-h-screen selection:bg-[#C2652A] selection:text-white font-arabic';
+      } else if (data.code === 'ja') {
+        document.body.className = 'bg-[#FAF5EE] text-[#1F1610] flex flex-col min-h-screen selection:bg-[#C2652A] selection:text-white font-jp';
+      } else if (data.code === 'zh') {
+        document.body.className = 'bg-[#FAF5EE] text-[#1F1610] flex flex-col min-h-screen selection:bg-[#C2652A] selection:text-white font-zh';
+      } else if (data.code === 'ko') {
+        document.body.className = 'bg-[#FAF5EE] text-[#1F1610] flex flex-col min-h-screen selection:bg-[#C2652A] selection:text-white font-ko';
+      } else if (data.code === 'th') {
+        document.body.className = 'bg-[#FAF5EE] text-[#1F1610] flex flex-col min-h-screen selection:bg-[#C2652A] selection:text-white font-thai';
+      } else if (data.code === 'hi') {
+        document.body.className = 'bg-[#FAF5EE] text-[#1F1610] flex flex-col min-h-screen selection:bg-[#C2652A] selection:text-white font-devanagari';
       } else {
-        document.body.classList.remove('font-arabic');
+        document.body.className = 'bg-[#FAF5EE] text-[#1F1610] flex flex-col min-h-screen selection:bg-[#C2652A] selection:text-white';
       }
 
       // Header Updates
@@ -560,13 +573,13 @@
       document.getElementById('hdr-lang-title').textContent = `${data.code.toUpperCase()} · ${data.name}`;
       document.getElementById('hdr-coach-pill').textContent = `Sparky ${data.tutorName} AI`;
 
-      // HERO CARD 1: DIALECT BRIDGE ENGINE BANNER (100% User Visual Update)
+      // HERO CARD 1: DIALECT BRIDGE ENGINE BANNER (Light Glassmorphic)
       document.getElementById('hero-dialect-pill').textContent = data.heroDialectPill || `${data.standardName} ⇄ ${data.colloquialName}`;
       document.getElementById('hero-dialect-lang').textContent = data.heroDialectLang || `${data.name} · ${data.nativeName}`;
       document.getElementById('hero-dialect-script-tag').textContent = data.heroDialectScriptTag || 'Dialects & Roots';
       document.getElementById('hero-dialect-desc').textContent = data.heroDialectDesc || `${data.standardName} & ${data.colloquialName} morphology matrix`;
 
-      // HERO CARD 2: SPARKY COACH HERO CARD (100% User Visual Update)
+      // HERO CARD 2: SPARKY COACH HERO CARD (Light Glassmorphic)
       document.getElementById('hero-coach-name').textContent = data.heroCoachName || `Sparky ${data.name}`;
       document.getElementById('hero-coach-scope').textContent = data.heroCoachScope || 'Form I-X';
       document.getElementById('hero-coach-desc').textContent = data.heroCoachDesc || `Master of ${data.name} morphology & real-time dialect shifts.`;
