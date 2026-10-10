@@ -21,6 +21,12 @@ import 'sparky_chat_session.dart';
 import 'widgets/flight_path_bento_header.dart';
 import 'widgets/boss_drills_view.dart';
 import 'widgets/immersion_view.dart';
+import 'widgets/dialect_bridge_view.dart';
+import 'widgets/morphology_tree_view.dart';
+import 'widgets/vocal_articulation_view.dart';
+import 'widgets/fsrs_queue_view.dart';
+import 'widgets/tri_mode_decoder_widget.dart';
+import '../../core/design/components.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -637,6 +643,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                     activeLang,
                                   );
                                   final Widget activeView = switch (_activeNavTab) {
+                                    'dialect' || 'dialect_bridge' => DialectBridgeView(
+                                      languageCode: activeLang,
+                                      onStartLiveSession: () {
+                                        _openAITutor(context, activeLang);
+                                      },
+                                    ),
+                                    'morphology' || 'morphology_tree' => MorphologyTreeView(
+                                      languageCode: activeLang,
+                                    ),
+                                    'articulation' || 'vocal_lab' => VocalArticulationView(
+                                      languageCode: activeLang,
+                                    ),
+                                    'fsrs' || 'memory' => FsrsQueueView(
+                                      languageCode: activeLang,
+                                      onStartSprint: () {
+                                        _openAITutor(context, activeLang);
+                                      },
+                                    ),
                                     'scenarios' || 'boss_drills' => BossDrillsView(
                                       languageCode: activeLang,
                                       onStartScenario: (title) {
@@ -750,6 +774,52 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   },
                   orElse: () => null,
                 ),
+      bottomNavigationBar: user == null
+          ? null
+          : ref.watch(userProfileProvider(user.id)).maybeWhen(
+              data: (profile) {
+                if (profile == null || profile.targetLanguages.isEmpty) {
+                  return null;
+                }
+                final requestedLanguage = LanguageCatalog.tryCanonicalCode(
+                  GoRouterState.of(context).pathParameters['langCode'],
+                );
+                final activeLang = profile.targetLanguages.contains(requestedLanguage)
+                    ? requestedLanguage!
+                    : (profile.activeLanguage ?? profile.targetLanguages.first);
+
+                final activeIndex = switch (_activeNavTab) {
+                  'dialect' || 'dialect_bridge' => 1,
+                  'morphology' || 'morphology_tree' || 'articulation' || 'vocal_lab' => 2,
+                  'fsrs' || 'memory' => 3,
+                  _ => 0,
+                };
+
+                return LingoPulseBottomNavBar(
+                  activeIndex: activeIndex,
+                  onTabSelected: (idx) {
+                    setState(() {
+                      switch (idx) {
+                        case 0:
+                          _activeNavTab = 'pathway';
+                          break;
+                        case 1:
+                          _activeNavTab = 'dialect';
+                          break;
+                        case 2:
+                          _activeNavTab = 'morphology';
+                          break;
+                        case 3:
+                          _activeNavTab = 'fsrs';
+                          break;
+                      }
+                    });
+                  },
+                  onSparkyTapped: () => _openAITutor(context, activeLang),
+                );
+              },
+              orElse: () => null,
+            ),
     );
   }
 

@@ -101,39 +101,51 @@ abstract final class SparkStatus {
   static const Color info = Color(0xFF6366F1);
 }
 
-/// Stitch Design System — LingoCraft Obsidian palette & specular tokens.
+/// Stitch Design System — LingoPulse AI Obsidian & Terracotta palette & specular tokens.
 abstract final class StitchTokens {
-  // Foundation Surfaces (OLED Deep Obsidian Architecture)
-  static const Color canvasBase = Color(0xFF090A0F);
-  static const Color surfaceLowest = Color(0xFF0B0E18);
-  static const Color surfaceLow = Color(0xFF12141F);
-  static const Color surfaceDefault = Color(0xFF1D1F2A);
-  static const Color surfaceHigh = Color(0xFF272935);
-  static const Color surfaceHighest = Color(0xFF323440);
+  // Foundation Surfaces (OLED Deep Obsidian Architecture - LingoPulse Studio)
+  static const Color canvasBase = Color(0xFF10131A);
+  static const Color surfaceLowest = Color(0xFF141720);
+  static const Color surfaceLow = Color(0xFF171C26);
+  static const Color surfaceDefault = Color(0xFF1F2430);
+  static const Color surfaceHigh = Color(0xFF272D3B);
+  static const Color surfaceHighest = Color(0xFF333A4C);
   static const Color borderHairline = Color(0xFF2A2F45);
   static const Color borderSubtle = Color(0x402A2F45);
+  static const Color borderAmberHairline = Color(0x33E08850);
+  static const Color borderAmberSubtle = Color(0x1AE08850);
 
-  // Semantic & Performance Accents
-  static const Color primaryIndigo = Color(0xFF6366F1);
-  static const Color primaryViolet = Color(0xFF8B5CF6);
-  static const Color masteryEmerald = Color(0xFF10B981);
-  static const Color kineticAmber = Color(0xFFF59E0B);
+  // LingoPulse AI Terracotta & Cultural Dialect Accents
+  static const Color primaryTerracotta = Color(0xFFC2652A);
+  static const Color primaryEmber = Color(0xFFE08850);
+  static const Color terracottaDark = Color(0xFF944919);
+  static const Color terracottaWarm = Color(0xFFEAA67A);
+  static const Color accentTeal = Color(0xFF207868);
+  static const Color accentEmerald = Color(0xFF10B981);
+  static const Color accentAmber = Color(0xFFF59E0B);
   static const Color diagnosticRose = Color(0xFFF43F5E);
+
+  // Compatibility Accents
+  static const Color primaryIndigo = Color(0xFFC2652A); // Mapped to LingoPulse Terracotta
+  static const Color primaryViolet = Color(0xFFE08850);
+  static const Color masteryEmerald = Color(0xFF207868);
+  static const Color kineticAmber = Color(0xFFF59E0B);
 
   // Text Contrast Tiers
   static const Color textPrimary = Color(0xFFF8FAFC);
   static const Color textSecondary = Color(0xFF94A3B8);
-  static const Color textTertiary = Color(0xFF475569);
+  static const Color textTertiary = Color(0xFF64748B);
+  static const Color textMuted = Color(0xFF475569);
 
   // Gradients
   static const LinearGradient primaryGradient = LinearGradient(
-    colors: [primaryIndigo, primaryViolet],
+    colors: [primaryTerracotta, primaryEmber],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
   static const LinearGradient accentGlow = LinearGradient(
-    colors: [Color(0x336366F1), Colors.transparent],
+    colors: [Color(0x33E08850), Colors.transparent],
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
   );
@@ -141,7 +153,7 @@ abstract final class StitchTokens {
   // Specular Edge & Halos
   static const List<BoxShadow> activeVoiceGlow = [
     BoxShadow(
-      color: Color(0x406366F1),
+      color: Color(0x40E08850),
       blurRadius: 24,
       spreadRadius: 2,
     ),
@@ -149,7 +161,7 @@ abstract final class StitchTokens {
 
   static const List<BoxShadow> masteryGlow = [
     BoxShadow(
-      color: Color(0x3310B981),
+      color: Color(0x33207868),
       blurRadius: 20,
     ),
   ];

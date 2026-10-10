@@ -317,22 +317,30 @@ class StitchTopBar extends ConsumerWidget {
               ),
             ),
 
-            // Optional Sub-header Tabs (Pathway / Boss Drills / Immersion)
+            // Optional Sub-header Tabs (Flight Path / Dialect / Morphology / Vocal Lab / FSRS)
             if (showSubTabs) ...[
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
                 child: Container(
-                  padding: const EdgeInsets.all(4),
+                  height: 42,
                   decoration: BoxDecoration(
                     color: SparkTheme.cardBg(context),
                     borderRadius: BorderRadius.circular(14),
                     border: Border.all(color: SparkTheme.border(context)),
                   ),
-                  child: Row(
+                  child: ListView(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.all(4),
                     children: [
                       _buildSubTab(context, 'Flight Path', Icons.route_rounded, 'pathway'),
-                      _buildSubTab(context, 'Oral Scenarios', Icons.record_voice_over_rounded, 'scenarios'),
-                      _buildSubTab(context, 'Voice Studio', Icons.graphic_eq_rounded, 'voice_studio'),
+                      const SizedBox(width: 4),
+                      _buildSubTab(context, 'Dialect Bridge', Icons.swap_horiz_rounded, 'dialect'),
+                      const SizedBox(width: 4),
+                      _buildSubTab(context, 'Morphology', Icons.account_tree_rounded, 'morphology'),
+                      const SizedBox(width: 4),
+                      _buildSubTab(context, 'Vocal Lab', Icons.record_voice_over_rounded, 'articulation'),
+                      const SizedBox(width: 4),
+                      _buildSubTab(context, 'FSRS Memory', Icons.layers_rounded, 'fsrs'),
                     ],
                   ),
                 ),
@@ -346,47 +354,47 @@ class StitchTopBar extends ConsumerWidget {
 
   Widget _buildSubTab(BuildContext context, String label, IconData icon, String tabId) {
     final isSelected = activeSubTab == tabId;
-    return Expanded(
-      child: GestureDetector(
-        onTap: () => onSubTabSelected?.call(tabId),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(vertical: 7),
-          decoration: BoxDecoration(
+    return GestureDetector(
+      onTap: () => onSubTabSelected?.call(tabId),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? const Color(0xFFC2652A).withValues(alpha: 0.2)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
             color: isSelected
-                ? SparkLingoTheme.electricCyan.withValues(alpha: 0.15)
+                ? const Color(0xFFE08850)
                 : Colors.transparent,
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(
+            width: isSelected ? 1.0 : 0.0,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              size: 14,
               color: isSelected
-                  ? SparkLingoTheme.electricCyan.withValues(alpha: 0.4)
-                  : Colors.transparent,
+                  ? const Color(0xFFE08850)
+                  : SparkTheme.subtext(context),
             ),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                icon,
-                size: 14,
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
                 color: isSelected
-                    ? SparkLingoTheme.electricCyan
+                    ? Colors.white
                     : SparkTheme.subtext(context),
+                fontFamily: 'Plus Jakarta Sans',
               ),
-              const SizedBox(width: 5),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                  color: isSelected
-                      ? SparkLingoTheme.electricCyan
-                      : SparkTheme.subtext(context),
-                  fontFamily: 'Plus Jakarta Sans',
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

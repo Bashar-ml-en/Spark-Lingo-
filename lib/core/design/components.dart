@@ -667,3 +667,223 @@ class StitchGlassCard extends StatelessWidget {
     );
   }
 }
+
+/// LingoPulse AI — Register / Dialect Selector Pill
+class StitchDialectPill extends StatelessWidget {
+  final String label;
+  final String? sublabel;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const StitchDialectPill({
+    super.key,
+    required this.label,
+    this.sublabel,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? StitchTokens.primaryTerracotta.withValues(alpha: 0.2)
+              : StitchTokens.surfaceLow,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: isSelected
+                ? StitchTokens.primaryEmber
+                : StitchTokens.borderHairline,
+            width: isSelected ? 1.5 : 1.0,
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: StitchTokens.primaryTerracotta.withValues(alpha: 0.25),
+                    blurRadius: 10,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : null,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 7,
+              height: 7,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: isSelected
+                    ? StitchTokens.primaryEmber
+                    : StitchTokens.textTertiary,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                    color: isSelected ? Colors.white : StitchTokens.textSecondary,
+                    fontFamily: 'Plus Jakarta Sans',
+                  ),
+                ),
+                if (sublabel != null)
+                  Text(
+                    sublabel!,
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: isSelected
+                          ? StitchTokens.primaryEmber
+                          : StitchTokens.textMuted,
+                      fontFamily: 'Plus Jakarta Sans',
+                    ),
+                  ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// LingoPulse AI — Ergonomic Floating Glass Bottom Navigation Bar
+class LingoPulseBottomNavBar extends StatelessWidget {
+  final int activeIndex;
+  final ValueChanged<int> onTabSelected;
+  final VoidCallback onSparkyTapped;
+
+  const LingoPulseBottomNavBar({
+    super.key,
+    required this.activeIndex,
+    required this.onTabSelected,
+    required this.onSparkyTapped,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: StitchTokens.surfaceLowest.withValues(alpha: 0.94),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: StitchTokens.borderAmberHairline,
+          width: 1,
+        ),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x66000000),
+            blurRadius: 24,
+            offset: Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _buildNavItem(
+            index: 0,
+            icon: Icons.alt_route_rounded,
+            label: 'Curriculum',
+          ),
+          _buildNavItem(
+            index: 1,
+            icon: Icons.swap_horiz_rounded,
+            label: 'Dialect',
+          ),
+          // Elevated Center Sparky Action Orb
+          GestureDetector(
+            onTap: onSparkyTapped,
+            child: Container(
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: StitchTokens.primaryGradient,
+                boxShadow: [
+                  BoxShadow(
+                    color: StitchTokens.primaryTerracotta.withValues(alpha: 0.5),
+                    blurRadius: 18,
+                    spreadRadius: 2,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: 0.35),
+                  width: 1.5,
+                ),
+              ),
+              child: const Icon(
+                Icons.graphic_eq_rounded,
+                color: Colors.white,
+                size: 26,
+              ),
+            ),
+          ),
+          _buildNavItem(
+            index: 2,
+            icon: Icons.account_tree_rounded,
+            label: 'Morphology',
+          ),
+          _buildNavItem(
+            index: 3,
+            icon: Icons.layers_rounded,
+            label: 'FSRS Queue',
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNavItem({
+    required int index,
+    required IconData icon,
+    required String label,
+  }) {
+    final isSelected = activeIndex == index;
+    final color = isSelected
+        ? StitchTokens.primaryEmber
+        : StitchTokens.textSecondary;
+
+    return GestureDetector(
+      onTap: () => onTabSelected(index),
+      behavior: HitTestBehavior.opaque,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 22,
+              color: color,
+            ),
+            const SizedBox(height: 3),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
+                color: color,
+                fontFamily: 'Plus Jakarta Sans',
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
