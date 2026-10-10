@@ -12,6 +12,8 @@ class FlightPathBentoHeader extends StatelessWidget {
   final double completionRate; // 0.0 to 1.0
   final VoidCallback onContinueLearning;
   final VoidCallback onAnalyticsTap;
+  final int? retentionRate;
+  final String? cefrLevel;
 
   const FlightPathBentoHeader({
     super.key,
@@ -20,6 +22,8 @@ class FlightPathBentoHeader extends StatelessWidget {
     required this.completionRate,
     required this.onContinueLearning,
     required this.onAnalyticsTap,
+    this.retentionRate,
+    this.cefrLevel,
   });
 
   String _leagueName(int xp) {
@@ -41,6 +45,14 @@ class FlightPathBentoHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final percentInt = (completionRate * 100).clamp(0, 100).toInt();
+    final effectiveRetention = retentionRate ?? 94;
+    final effectiveLevel = cefrLevel ?? switch (currentUnit?.orderIndex ?? 0) {
+      0 || 1 => 'A1',
+      2 || 3 => 'A2',
+      4 || 5 => 'B1',
+      6 || 7 => 'B2',
+      _ => 'C1',
+    };
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -112,7 +124,7 @@ class FlightPathBentoHeader extends StatelessWidget {
                       children: [
                         Row(
                           children: [
-                            const StitchCefrBadge(level: 'B1', compact: true),
+                            StitchCefrBadge(level: effectiveLevel, compact: true),
                             const SizedBox(width: 8),
                             Text(
                               currentUnit != null
@@ -298,9 +310,9 @@ class FlightPathBentoHeader extends StatelessWidget {
                             letterSpacing: 0.8,
                           ),
                         ),
-                        const Text(
-                          '94% SM-2 Recall',
-                          style: TextStyle(
+                        Text(
+                          '$effectiveRetention% SM-2 Recall',
+                          style: const TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w800,
                             color: StitchTokens.textPrimary,

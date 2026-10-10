@@ -33,32 +33,38 @@ class StitchTopBar extends ConsumerWidget {
   });
 
   static String flagEmoji(String? code) {
-    if (code == null) return '🇪🇸';
+    if (code == null) return '🇲🇾';
     switch (code.toLowerCase()) {
+      case 'ms':
+        return '🇲🇾';
+      case 'en':
+        return '🇺🇸';
       case 'es':
         return '🇪🇸';
-      case 'ru':
-        return '🇷🇺';
       case 'fr':
         return '🇫🇷';
       case 'de':
         return '🇩🇪';
-      case 'zh':
-        return '🇨🇳';
-      case 'ar':
-        return '🇸🇦';
-      case 'hi':
-        return '🇮🇳';
-      case 'ja':
-        return '🇯🇵';
-      case 'ko':
-        return '🇰🇷';
       case 'it':
         return '🇮🇹';
       case 'pt':
         return '🇧🇷';
-      case 'en':
-        return '🇺🇸';
+      case 'zh':
+        return '🇨🇳';
+      case 'ja':
+        return '🇯🇵';
+      case 'ko':
+        return '🇰🇷';
+      case 'ru':
+        return '🇷🇺';
+      case 'ar':
+        return '🇸🇦';
+      case 'hi':
+        return '🇮🇳';
+      case 'th':
+        return '🇹🇭';
+      case 'tl':
+        return '🇵🇭';
       default:
         return '🌐';
     }
@@ -324,9 +330,9 @@ class StitchTopBar extends ConsumerWidget {
                   ),
                   child: Row(
                     children: [
-                      _buildSubTab(context, 'Pathway', Icons.route_rounded, 'pathway'),
-                      _buildSubTab(context, 'Boss Drills', Icons.military_tech_rounded, 'boss_drills'),
-                      _buildSubTab(context, 'Immersion', Icons.headphones_rounded, 'immersion'),
+                      _buildSubTab(context, 'Flight Path', Icons.route_rounded, 'pathway'),
+                      _buildSubTab(context, 'Oral Scenarios', Icons.record_voice_over_rounded, 'scenarios'),
+                      _buildSubTab(context, 'Voice Studio', Icons.graphic_eq_rounded, 'voice_studio'),
                     ],
                   ),
                 ),

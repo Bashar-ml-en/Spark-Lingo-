@@ -27,10 +27,10 @@ if [ -d "legal" ]; then
   cp -r legal/* build/web/legal/ 2>/dev/null || true
 fi
 
-# Copy curriculum and brand assets
 if [ -d "assets" ]; then
   echo "==> [Spark Lingo Flutter Shim] Copying application assets..."
-  cp -r assets build/web/assets 2>/dev/null || true
+  mkdir -p build/web/assets
+  cp -r assets/* build/web/assets/ 2>/dev/null || true
 fi
 
 # Copy web manifest and icons

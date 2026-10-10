@@ -637,13 +637,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                     activeLang,
                                   );
                                   final Widget activeView = switch (_activeNavTab) {
-                                    'boss_drills' => BossDrillsView(
+                                    'scenarios' || 'boss_drills' => BossDrillsView(
                                       languageCode: activeLang,
                                       onStartScenario: (title) {
                                         _openAITutor(context, activeLang);
                                       },
                                     ),
-                                    'immersion' => ImmersionView(
+                                    'voice_studio' || 'immersion' => ImmersionView(
                                       languageCode: activeLang,
                                       onStartLiveSession: () {
                                         _openAITutor(context, activeLang);
